@@ -1,0 +1,13 @@
+package google;
+
+message Message {
+
+	required uint32 event_type = 1 ;
+
+	required uint32 data_type = 2 [default = 1];
+	
+	optional uint32 error_code = 3;
+
+	required string data = 4;
+
+}
