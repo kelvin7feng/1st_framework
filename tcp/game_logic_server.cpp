@@ -164,10 +164,8 @@ void GameLogicServer::OnNewConnection(uv_stream_t *server, int status)
                           GameLogicServer::GetInstance()->OnMsgRecv(stream, nread, buf);
                       });
         
-        uv_stream_t* key = (uv_stream_t*)new_session.connection.get();
-        
-        session_map_t& open_sessions = GetSessionMap();
-        open_sessions.insert({key, new_session});
+        m_pGatewayClient = (uv_stream_t*)new_session.connection.get();
+        AddSession(new_session);
         
     }
     else {
@@ -196,6 +194,19 @@ void GameLogicServer::OnWrite(uv_write_t *req, int status){
     {
         cout << "OnWrite" << endl;
     }
+}
+
+void GameLogicServer::SendDataToGateway(const char *pBuffer, unsigned int uSize)
+{
+    char* pvBuffer = NULL;
+    pvBuffer = (char*)malloc(uSize);
+    memcpy(pvBuffer, pBuffer, uSize);
+    uv_buf_t pUvBuf = uv_buf_init(pvBuffer, uSize);
+    uv_write(&m_write_req, m_pGatewayClient, &pUvBuf, 1,
+             [](uv_write_t *pReq, int nStatus)
+             {
+                 GameLogicServer::GetInstance()->OnSendData(pReq, nStatus);
+             });
 }
 
 void GameLogicServer::SendData(uv_stream_t* client, const char* pBuffer, unsigned int uSize){
@@ -255,17 +266,13 @@ bool GameLogicServer::_ProcessNetData(const char* pData, size_t uRead)
             if(!(bRet && pBuffer))
                 goto Exit0;
             
-            void* pDataBuffer = pBuffer->GetData();
-            unsigned int uEventType = m_pRecvPacket->GetEventType(pDataBuffer);
-            unsigned int uHandlerId = *(unsigned int*)((char*)pBuffer + sizeof(unsigned int));
+            char* pDataBuffer = (char*)pBuffer->GetData();
+            unsigned int uEventType = *(unsigned int*)(pDataBuffer);
+            unsigned int uHandlerId = *(unsigned int*)(pDataBuffer + sizeof(unsigned int)*2);
             Message msg;
-            if(msg.ParseFromArray((char*)pDataBuffer + sizeof(unsigned int) * 2, pBuffer->GetSize()))
-            {
-                string szParam = msg.data();
-                
-                lua_engine.CallLua(uEventType, szParam);
-            }
-            
+            msg.ParseFromArray((char*)pDataBuffer + sizeof(unsigned int) * 3, pBuffer->GetSize());
+            lua_engine.CallLua(uEventType, uHandlerId, msg.data().c_str());
+        
             m_pRecvPacket->Reset();
         }
         pData += uWrite;

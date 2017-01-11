@@ -12,15 +12,6 @@
 #include "db_buffer.h"
 #include "db_client_manager.hpp"
 
-/*static int TestCallCpp(lua_State* lua_state);
-static int PushRedisSet(lua_State* lua_state);
-static int PushRedisGet(lua_State* lua_state);
-static int PushRedisDel(lua_State* lua_state);
-static int PushRedisHSet(lua_State* lua_state);
-static int PushRedisHGet(lua_State* lua_state);
-static int PushRedisHDel(lua_State* lua_state);
-static int PushRedisExpire(lua_State* lua_state);*/
-
 static int PushRedisSet(lua_State* lua_state)
 {
     int nRetCode = 0;

@@ -10,6 +10,7 @@
 #include "lua_player.h"
 #include "lua_engine.hpp"
 #include "lua_redis.hpp"
+#include "lua_net.hpp"
 
 using namespace std;
 
@@ -68,7 +69,7 @@ void LuaEngine::stackDump(lua_State* L){
 }
 
 //调用脚本处理
-int LuaEngine::CallLua(unsigned int uEventType, const std::string& szPrarm)
+int LuaEngine::CallLua(unsigned int uEventType, unsigned int uHandlerId, const char* pParam)
 {
     //清空虚拟栈
     lua_settop(m_lua_state, 0);
@@ -78,10 +79,11 @@ int LuaEngine::CallLua(unsigned int uEventType, const std::string& szPrarm)
 
     //把请求的参数push到栈里
     lua_pushnumber(m_lua_state, uEventType);
-    lua_pushstring(m_lua_state, szPrarm.c_str());
+    lua_pushnumber(m_lua_state, uHandlerId);
+    lua_pushstring(m_lua_state, pParam);
     
     //函数调用参数：虚拟机句柄,函数参数个数,函数返回值个数,调用错误码
-    int ret = lua_pcall(m_lua_state, 2, 1, 0);
+    int ret = lua_pcall(m_lua_state, 3, 1, 0);
     
     //调用出错
     if(ret)
@@ -157,6 +159,7 @@ int LuaEngine::InitState(int server_type)
     }
     
     LuaRegisterRedis(m_lua_state);
+    LuaRegisterNet(m_lua_state);
     tolua_player_open(m_lua_state);
     string szScriptPath = server_path[server_type];
     int nStatus = luaL_dofile(m_lua_state, szScriptPath.c_str());

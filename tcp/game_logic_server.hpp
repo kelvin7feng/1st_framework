@@ -22,7 +22,7 @@
 #include <uv.h>
 
 #include "google.pb.h"
-
+#include "krequest_def.h"
 #include "lua_engine.hpp"
 #include "tcp_client.hpp"
 #include "tcp_base_server.hpp"
@@ -72,8 +72,13 @@ public:
     //发送函数
     void SendData(uv_stream_t* client, const char* pBuffer, unsigned int uSize);
     
+    //发送函数
+    void SendDataToGateway(const char* pBuffer, unsigned int uSize);
+    
     //发送函数的回调
     void OnSendData(uv_write_t *pReq, int nStatus);
+    
+    uv_stream_t* m_pGatewayClient;
     
     uv_write_t m_write_req;
     

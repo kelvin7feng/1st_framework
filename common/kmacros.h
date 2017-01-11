@@ -20,8 +20,12 @@
 #include <unistd.h>
 #endif
 
-#define KD_PACKAGE_HEADER_SIZE sizeof(unsigned int) * 3
+#define KD_PACKAGE_HEADER_EVENT_TYPE_START sizeof(unsigned int)
+#define KD_PACKAGE_HEADER_ERROR_CODE_START sizeof(unsigned int) * 2
+#define KD_PACKAGE_HEADER_HANDLER_ID_START sizeof(unsigned int) * 3
+#define KD_PACKAGE_HEADER_SIZE sizeof(unsigned int) * 4
 #define KD_PACKAGE_LEN_SIZE sizeof(unsigned int)
+#define KD_PACKAGE_HEADER_FIELD_SIZE sizeof(unsigned int)
 #define KD_INVALID_PACKET_LEN (unsigned int)-1
 
 #if defined(CHECK_MEMERY_LEAK) & defined(WIN32) & (defined(DEBUG) | defined(_DEBUG))

@@ -13,6 +13,7 @@ require("common.table")
 require("common.type")
 require("common.redis")
 
+require("manager.net_manager")
 require("manager.user_manager")
 
 require("module.protocol")

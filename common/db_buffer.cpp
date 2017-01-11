@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include "kmacros.h"
 #include "db_buffer.h"
 #include "krequest_def.h"
 
@@ -56,6 +57,21 @@ long KG_Buffer::Release()
 {
     return 0;
 }
+
+void* Net_CreateBuffer(unsigned int uEventType, unsigned int uErrorCode, unsigned int uHandlerId, const char* pParam, unsigned int uParamSize)
+{
+    unsigned int uBufferSize = KD_PACKAGE_HEADER_SIZE + uParamSize;
+    void* pBuffer = malloc(uBufferSize);
+    
+    memcpy(pBuffer, &uBufferSize, KD_PACKAGE_HEADER_FIELD_SIZE);
+    memcpy((char*)pBuffer + KD_PACKAGE_HEADER_EVENT_TYPE_START, &uEventType, KD_PACKAGE_HEADER_FIELD_SIZE);
+    memcpy((char*)pBuffer + KD_PACKAGE_HEADER_ERROR_CODE_START, &uErrorCode, KD_PACKAGE_HEADER_FIELD_SIZE);
+    memcpy((char*)pBuffer + KD_PACKAGE_HEADER_HANDLER_ID_START, &uHandlerId, KD_PACKAGE_HEADER_FIELD_SIZE);
+    memcpy((char*)pBuffer + KD_PACKAGE_HEADER_SIZE, pParam, uParamSize);
+    
+    return pBuffer;
+}
+
 
 void DB_SetBufferHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uEventType)
 {

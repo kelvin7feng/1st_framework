@@ -52,9 +52,16 @@ public:
     
     //客户端关闭后的回调
     void OnConnectionClose(uv_handle_t* handle);
-
+    
+    //转发到客户端
+    void TransferToClient(unsigned int uHandlerId, const char* pBuffer, unsigned int uSize);
+    
+    //转发到客户端的回调
+    void OnTransferToClient(uv_write_t *req, int status);
+    
 protected:
     bool _ProcessNetData(const char* pData, size_t uSize);
+    
 private:
     //增加句柄的id到网络包里
     void AddHanderIdToPacket(unsigned int nHandlerId, void* pBuffer, unsigned int uSize);

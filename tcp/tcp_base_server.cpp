@@ -228,6 +228,19 @@ session_map_t& TCPBaseServer::GetSessionMap()
     return open_sessions;
 }
 
+uv_stream_t* TCPBaseServer::GetHandlerById(unsigned int uHandlerId)
+{
+    uv_stream_t* pClientHandler = NULL;
+    id_map_to_handler_t& mapIdToHandler = GetIdToHandlerMap();
+    auto handler = mapIdToHandler.find(uHandlerId);
+    if(handler != mapIdToHandler.end())
+    {
+        pClientHandler = handler->second;
+    }
+    
+    return pClientHandler;
+}
+
 unsigned int TCPBaseServer::GetHandlerIdByHandler(uv_stream_t* pKey)
 {
     unsigned int uHandlerId = 0;

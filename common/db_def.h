@@ -108,6 +108,14 @@ struct KDB_KEY_VALUE
     const char* pValue;
 };
 
+struct NET_PACKET_HEADER
+{
+    unsigned int uPacketLength;
+    unsigned int uEventType;
+    unsigned int uErrorCode;
+    unsigned int uHandlerId;
+};
+
 #pragma pack(pop)
 
 #endif /* db_def_h */

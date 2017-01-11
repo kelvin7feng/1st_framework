@@ -95,6 +95,8 @@ void GatewayClient::OnMsgRecv(uv_stream_t* pServer, ssize_t nread, const uv_buf_
     }
     
     //通过Gateway回传给对应的客户端
+    unsigned int uHandlerId = *(unsigned int*)((char*)(buf->base) + KD_PACKAGE_HEADER_HANDLER_ID_START);
+    GatewayServer::GetInstance()->TransferToClient(uHandlerId, buf->base, (unsigned int)nread);
     
     free(buf->base);
 }

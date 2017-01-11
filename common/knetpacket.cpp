@@ -69,7 +69,7 @@ unsigned int KNetPackage::GetEventType(void *pBuffer) const
 
 unsigned int KNetPackage::GetHandlerId(void *pBuffer) const
 {
-    unsigned int uHandlerId = *(unsigned int*)((char*)pBuffer + sizeof(unsigned int));
+    unsigned int uHandlerId = *(unsigned int*)((char*)pBuffer + sizeof(unsigned int) * 2);
     return uHandlerId;
 }
 

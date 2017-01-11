@@ -72,6 +72,8 @@ public:
     
     unsigned int GetHandlerIdByHandler(uv_stream_t* pKey);
     
+    uv_stream_t* GetHandlerById(unsigned int uHandlerId);
+    
     virtual id_map_to_handler_t& GetIdToHandlerMap();
     
     virtual handler_map_to_id_t& GetHandlerToIdMap();

@@ -22,6 +22,8 @@ public:
     virtual void* GetReserveData() = 0;
 };
 
+void* Net_CreateBuffer(unsigned int uEventType, unsigned int uErrorCode, unsigned int uHandlerId, const char* pParam, unsigned int uParamSize);
+
 void DB_SetBufferHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uEventType);
 
 void DB_SetCommonHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uEventType);

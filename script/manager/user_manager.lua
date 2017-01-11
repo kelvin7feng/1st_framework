@@ -9,6 +9,18 @@ function UserManager:IncrementGlobalUserId()
 	self.m_nGlobalUserId = self.m_nGlobalUserId + 1;
 end
 
+function UserManager:GetUser(nUserId)
+	return self.m_tbUser[tostring(nUserId)] or nil;
+end
+
+function UserManager:CacheUser(nUserId, tbUserInfo)
+	if IsString(tbUserInfo) then
+		tbUserInfo = json.decode(tbUserInfo);
+	end
+
+	self.m_tbUser[tostring(nUserId)] = tbUserInfo;
+end
+
 function UserManager:GetInitUser(tbParam)
 	local tbUserInfo = DATABASE_TABLE_FIELD[DATABASE_TABLE.ACCCUNT].USER_INFO;
 	tbUserInfo.UserId = self.m_nGlobalUserId;
@@ -18,9 +30,11 @@ function UserManager:GetInitUser(tbParam)
 	return tbUserInfo;
 end
 
-function UserManager:Register(tbParam)
+function UserManager:Register(nHandlerId, tbParam)
 	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
 	local strIp = nil;
+	local nUserId = nil
+	local tbUserInfo = nil
 	local strDeviceId = nil;
 
 	if not IsTable(tbParam) then
@@ -50,15 +64,24 @@ function UserManager:Register(tbParam)
 	end
 
 	--to do:检查是否有注册过
-	local tbUserInfo = self:GetInitUser(tbParam);
-	local nUserId = tbUserInfo.UserId;
-
-	G_AccountRedis:SetValue(nUserId, EVENT_TYPE.SYSTEM.REGISTER, nUserId, tbUserInfo);
+	tbUserInfo = self:GetInitUser(tbParam);
+	nUserId = tbUserInfo.UserId;
+	self:RegisterProcess(nUserId, nHandlerId, tbUserInfo)
 
 	nErrorCode = ERROR_CODE.SYSTEM.OK;
 --::Exit0::
 
-	return nErrorCode
+	return nErrorCode, nUserId
+end
+
+function UserManager:RegisterProcess(nUserId, nHandlerId, tbUserInfo)
+	self:IncrementGlobalUserId()
+	self:CacheUser(nUserId, tbUserInfo)
+	LOG_INFO("nHandlerId:" .. nHandlerId);
+	LOG_INFO("Cache User:" .. json.encode(tbUserInfo));
+	LOG_INFO("User tb:" .. json.encode(self.m_tbUser));
+	G_NetInfoManager:SetHandlerId(nUserId, nHandlerId)
+	G_AccountRedis:SetValue(nUserId, EVENT_TYPE.SYSTEM.REGISTER, nUserId, tbUserInfo);
 end
 
 G_UserManager = UserManager:new()

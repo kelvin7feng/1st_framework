@@ -37,7 +37,7 @@ public:
     void Close();
     lua_State* GetLuaState();
     int InitState(int server_type);
-    int CallLua(unsigned int uEventType, const std::string& request);
+    int CallLua(unsigned int uEventType, unsigned int uHandlerId, const char* pParam);
     int RedisCallLua(const unsigned int uUserId, const unsigned int uEventType, const std::string& request);
     
 private:

@@ -98,6 +98,20 @@ void GatewayServer::RemoveClient(uv_stream_t* client)
                  {
                      GatewayServer::GetInstance()->OnConnectionClose(handle);
                  });
+        
+        handler_map_to_id_t& mapHandlerToId = GetHandlerToIdMap();
+        auto handlerToIdPos = mapHandlerToId.find(client);
+        if(handlerToIdPos != mapHandlerToId.end())
+        {
+            mapHandlerToId.erase(client);
+            unsigned int uSessionId = handlerToIdPos->second;
+            id_map_to_handler_t& mapIdToHandler = GetIdToHandlerMap();
+            auto idToHandlerPos = mapIdToHandler.find(uSessionId);
+            if(idToHandlerPos != mapIdToHandler.end())
+            {
+                mapIdToHandler.erase(uSessionId);
+            }
+        }
     }
 }
 
@@ -139,16 +153,52 @@ void GatewayServer::OnNewConnection(uv_stream_t *server, int status)
 
 void GatewayServer::AddHanderIdToPacket(unsigned int nHandlerId, void* pBuffer, unsigned int uSize)
 {
-    unsigned int uHandlerIdStart = sizeof(unsigned int) * 2;//第一个是长度，第二个是事件，第三个是句柄Id,size为unsigned int
-    if(uSize < uHandlerIdStart + sizeof(unsigned int))
+    if(uSize < KD_PACKAGE_HEADER_SIZE)
     {
         cout << "packer is error!!!!";
     }
     cout << "handler id:" << nHandlerId << endl;
-    memcpy((char*)pBuffer + uHandlerIdStart, &nHandlerId, sizeof(unsigned int));
+    memcpy((char*)pBuffer + KD_PACKAGE_HEADER_HANDLER_ID_START, &nHandlerId, sizeof(unsigned int));
 }
 
 bool GatewayServer::_ProcessNetData(const char* pData, size_t uSize)
 {
     return false;
+}
+
+//转发到服务端的回调
+void GatewayServer::OnTransferToClient(uv_write_t *req, int status){
+    
+    if (status < 0) {
+        cout << "TCP Client write error: " << uv_strerror(status) << endl;
+        return;
+    }
+    
+    if (status == 0) {
+        cout << "transfer to server succeed!" << endl;
+    }
+}
+
+void GatewayServer::TransferToClient(unsigned int uHandlerId, const char* pBuffer, unsigned int uSize)
+{
+    uv_stream_t* pClientHandler = GetHandlerById(uHandlerId);
+    
+    char* pvBuffer = NULL;
+    pvBuffer = (char*)malloc(uSize);
+    memcpy(pvBuffer, pBuffer, uSize);
+    
+    uv_write_t* pWriteReq = NULL;
+    pWriteReq = new uv_write_t;
+    pWriteReq->data = pvBuffer;
+    
+    uv_buf_t buf = uv_buf_init(pvBuffer, uSize);
+    int ret = uv_write(pWriteReq, pClientHandler, &buf, 1,
+                       [](uv_write_t *req, int status)
+                       {
+                           GatewayServer::GetInstance()->OnTransferToClient(req, status);
+                       });
+    
+    if(ret != 0) {
+        SAFE_DELETE(pWriteReq);
+    }
 }
