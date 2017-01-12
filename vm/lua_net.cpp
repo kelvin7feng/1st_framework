@@ -9,36 +9,38 @@
 #include "kmacros.h"
 #include "db_buffer.h"
 #include "lua_net.hpp"
+#include "net_buffer.hpp"
 #include "game_logic_server.hpp"
 #include <iostream>
 
-static int SendToGameway(lua_State* lua_state)
+static int SendToGateway(lua_State* lua_state)
 {
     int nRetCode = 0;
     int nParam = lua_gettop(lua_state);
-    if(nParam != 5)
+    if(nParam != 6)
     {
-        std::cout << "count of param is not equal to 5..." << std::endl;
+        std::cout << "count of param is not equal to 6..." << std::endl;
         return 0;
     }
     
+    unsigned short uSequenceId = lua_tonumber(lua_state, nParam - 5);
     unsigned int uEventType = lua_tonumber(lua_state, nParam - 4);
     unsigned int uErrorCode = lua_tonumber(lua_state, nParam - 3);
     unsigned int uHandlerId = lua_tonumber(lua_state, nParam - 2);
     unsigned int uParamSize = lua_tonumber(lua_state, nParam - 1);
     std::string szParam = lua_tostring(lua_state, nParam);
     
-    unsigned int uNetPacketSize = KD_PACKAGE_HEADER_SIZE + uParamSize;
-    void* pNetPackage = Net_CreateBuffer(uEventType, uErrorCode, uHandlerId, szParam.c_str(), uParamSize);
+    unsigned short uServerId = 0;
+    unsigned int uNetPacketSize = 0;
+    void* pNetPackage = CreateNetBuffer(uEventType, uErrorCode, uHandlerId, uServerId, uSequenceId, szParam.c_str(), uParamSize, &uNetPacketSize);
     GameLogicServer::GetInstance()->SendDataToGateway((char*)pNetPackage, uNetPacketSize);
     
-    delete[] (char*)pNetPackage;
     return nRetCode;
 }
 
 static const luaL_reg sLuaNetFunction[] =
 {
-    {"SendToGameway", SendToGameway},
+    {"SendToGateway", SendToGateway},
     {NULL, NULL}
 };
 

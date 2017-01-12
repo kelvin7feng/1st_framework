@@ -136,7 +136,7 @@ void TCPBaseServer::OnConnectionClose(uv_handle_t* handle)
 
 void TCPBaseServer::SendData(const char* pBuffer, unsigned int uSize){
     
-    char* pvBuffer = NULL;
+    /*char* pvBuffer = NULL;
     unsigned int uPacketLen = KD_PACKAGE_LEN_SIZE + uSize;
     pvBuffer = (char*)malloc(uPacketLen);
     memset(pvBuffer, 0, uPacketLen);
@@ -153,7 +153,7 @@ void TCPBaseServer::SendData(const char* pBuffer, unsigned int uSize){
              [](uv_write_t *pReq, int nStatus)
              {
                  TCPBaseServer::GetInstance()->OnSendData(pReq, nStatus);
-             });
+             });*/
 }
 
 void TCPBaseServer::OnSendData(uv_write_t *pReq, int nStatus){

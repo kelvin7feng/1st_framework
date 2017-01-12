@@ -32,7 +32,7 @@ end
 
 --检查是否为正确错误码
 function IsOkCode(t)
-	return t == ErrorCode.Common.OK
+	return t == ERROR_CODE.SYSTEM.OK
 end
 
 --类型转换

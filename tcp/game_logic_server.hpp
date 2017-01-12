@@ -60,17 +60,11 @@ public:
     //数据处理的回调
     void OnDBResponse(KRESOOND_COMMON* pCommonResponse);
     
-    //测试吞吐量
-    void test_throughput(uint64_t repeat);
-    
     //释放客户端句柄
     void RemoveClient(uv_stream_t* client);
     
     //客户端关闭后的回调
     void OnConnectionClose(uv_handle_t* handle);
-    
-    //发送函数
-    void SendData(uv_stream_t* client, const char* pBuffer, unsigned int uSize);
     
     //发送函数
     void SendDataToGateway(const char* pBuffer, unsigned int uSize);

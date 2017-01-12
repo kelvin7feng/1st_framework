@@ -11,6 +11,7 @@
 #include "kmacros.h"
 #include "document.h"
 #include "file_util.h"
+#include "net_buffer.hpp"
 #include "db_client_manager.hpp"
 #include "game_logic_server.hpp"
 
@@ -87,12 +88,6 @@ int GameLogicServer::Init(uv_loop_t* loop)
     return 1;
 }
 
-void GameLogicServer::test_throughput(uint64_t repeat)
-{
-    cout << "cost: " << repeat << ", total request:" << totol_request
-            <<", avg:" << totol_request/repeat << endl;
-}
-
 void GameLogicServer::OnMsgRecv(uv_stream_t* client, ssize_t nread, const uv_buf_t *buf)
 {
     session_map_t& open_sessions = GetSessionMap();
@@ -109,8 +104,6 @@ void GameLogicServer::OnMsgRecv(uv_stream_t* client, ssize_t nread, const uv_buf
             _ProcessNetData(buf->base, nread);
         }
         
-        //string szTest = "test";
-        //SendData(client, szTest.c_str(), (unsigned int)szTest.length());
         free(buf->base);
         
     }
@@ -207,24 +200,8 @@ void GameLogicServer::SendDataToGateway(const char *pBuffer, unsigned int uSize)
              {
                  GameLogicServer::GetInstance()->OnSendData(pReq, nStatus);
              });
-}
-
-void GameLogicServer::SendData(uv_stream_t* client, const char* pBuffer, unsigned int uSize){
     
-    char* pvBuffer = NULL;
-    unsigned int uPacketLen = KD_PACKAGE_LEN_SIZE + uSize;
-    pvBuffer = (char*)malloc(uPacketLen);
-    memset(pvBuffer, 0, uPacketLen);
-    
-    memcpy(pvBuffer, &uPacketLen, KD_PACKAGE_LEN_SIZE);
-    memcpy(pvBuffer + KD_PACKAGE_LEN_SIZE, pBuffer, uSize);
-    
-    uv_buf_t pUvBuf = uv_buf_init(pvBuffer, uPacketLen);
-    uv_write(&m_write_req, client, &pUvBuf, 1,
-             [](uv_write_t *pReq, int nStatus)
-             {
-                 GameLogicServer::GetInstance()->OnSendData(pReq, nStatus);
-             });
+    delete[] pBuffer;
 }
 
 void GameLogicServer::OnSendData(uv_write_t *pReq, int nStatus){
@@ -267,12 +244,18 @@ bool GameLogicServer::_ProcessNetData(const char* pData, size_t uRead)
                 goto Exit0;
             
             char* pDataBuffer = (char*)pBuffer->GetData();
+            
             unsigned int uEventType = *(unsigned int*)(pDataBuffer);
-            unsigned int uHandlerId = *(unsigned int*)(pDataBuffer + sizeof(unsigned int)*2);
+            unsigned int uErrorCode = *(unsigned int*)(pDataBuffer + KD_PACKAGE_UINT_SIZE);
+            unsigned int uHandlerId = *(unsigned int*)(pDataBuffer + KD_PACKAGE_UINT_SIZE*2);
+            unsigned short uServerId = *(unsigned short*)(pDataBuffer + KD_PACKAGE_UINT_SIZE*3);
+            unsigned short uSequenceId = *(unsigned short*)(pDataBuffer + KD_PACKAGE_UINT_SIZE*3 + KD_PACKAGE_USHORT_SIZE);
             Message msg;
-            msg.ParseFromArray((char*)pDataBuffer + sizeof(unsigned int) * 3, pBuffer->GetSize());
-            lua_engine.CallLua(uEventType, uHandlerId, msg.data().c_str());
-        
+            if(msg.ParseFromArray(pDataBuffer + KD_PACKAGE_HEADER_SIZE - KD_PACKAGE_UINT_SIZE, pBuffer->GetSize()))
+            {
+                lua_engine.CallLua(uHandlerId, uEventType, uSequenceId, msg.data().c_str());
+            }
+            lua_engine.CallLua(uHandlerId, uEventType, uSequenceId, msg.data().c_str());
             m_pRecvPacket->Reset();
         }
         pData += uWrite;

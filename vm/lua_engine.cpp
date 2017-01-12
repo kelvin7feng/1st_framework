@@ -69,7 +69,7 @@ void LuaEngine::stackDump(lua_State* L){
 }
 
 //调用脚本处理
-int LuaEngine::CallLua(unsigned int uEventType, unsigned int uHandlerId, const char* pParam)
+int LuaEngine::CallLua(unsigned int uHandlerId, unsigned int uEventType, unsigned short uSequenceId, const char* pParam)
 {
     //清空虚拟栈
     lua_settop(m_lua_state, 0);
@@ -78,12 +78,13 @@ int LuaEngine::CallLua(unsigned int uEventType, unsigned int uHandlerId, const c
     lua_getglobal(m_lua_state, "OnClientRequest");
 
     //把请求的参数push到栈里
-    lua_pushnumber(m_lua_state, uEventType);
     lua_pushnumber(m_lua_state, uHandlerId);
+    lua_pushnumber(m_lua_state, uEventType);
+    lua_pushnumber(m_lua_state, uSequenceId);
     lua_pushstring(m_lua_state, pParam);
     
     //函数调用参数：虚拟机句柄,函数参数个数,函数返回值个数,调用错误码
-    int ret = lua_pcall(m_lua_state, 3, 1, 0);
+    int ret = lua_pcall(m_lua_state, 4, 1, 0);
     
     //调用出错
     if(ret)

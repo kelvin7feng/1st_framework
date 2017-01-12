@@ -57,6 +57,9 @@
 		B624ABA21E260A64000D7C84 /* lua_net.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B624ABA01E260A64000D7C84 /* lua_net.cpp */; };
 		B624ABA31E260A64000D7C84 /* lua_net.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B624ABA01E260A64000D7C84 /* lua_net.cpp */; };
 		B624ABA41E260A64000D7C84 /* lua_net.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B624ABA01E260A64000D7C84 /* lua_net.cpp */; };
+		B624ABAB1E27598C000D7C84 /* net_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B624ABA91E27598C000D7C84 /* net_buffer.cpp */; };
+		B624ABAC1E27598C000D7C84 /* net_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B624ABA91E27598C000D7C84 /* net_buffer.cpp */; };
+		B624ABAD1E27598C000D7C84 /* net_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B624ABA91E27598C000D7C84 /* net_buffer.cpp */; };
 		B628D5811DEE734E00D4C87C /* liblua.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B62BF8131DE982730080C6A2 /* liblua.a */; };
 		B62BF7821DE81A740080C6A2 /* file_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B62BF77F1DE81A0F0080C6A2 /* file_util.cpp */; };
 		B62BF7831DE81A740080C6A2 /* file_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B62BF77F1DE81A0F0080C6A2 /* file_util.cpp */; };
@@ -160,6 +163,8 @@
 		B6091DBE1DAD15BE00ABF7D0 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		B624ABA01E260A64000D7C84 /* lua_net.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lua_net.cpp; path = vm/lua_net.cpp; sourceTree = "<group>"; };
 		B624ABA11E260A64000D7C84 /* lua_net.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lua_net.hpp; path = vm/lua_net.hpp; sourceTree = "<group>"; };
+		B624ABA91E27598C000D7C84 /* net_buffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = net_buffer.cpp; path = common/net_buffer.cpp; sourceTree = "<group>"; };
+		B624ABAA1E27598C000D7C84 /* net_buffer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = net_buffer.hpp; path = common/net_buffer.hpp; sourceTree = "<group>"; };
 		B62BF77F1DE81A0F0080C6A2 /* file_util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file_util.cpp; path = util/file_util.cpp; sourceTree = "<group>"; };
 		B62BF7801DE81A0F0080C6A2 /* file_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = file_util.h; path = util/file_util.h; sourceTree = "<group>"; };
 		B62BF8121DE982730080C6A2 /* libhiredis.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhiredis.a; path = third_party/lib/libhiredis.a; sourceTree = "<group>"; };
@@ -219,6 +224,8 @@
 		B60182631E1D3A410086BC92 /* common */ = {
 			isa = PBXGroup;
 			children = (
+				B624ABA91E27598C000D7C84 /* net_buffer.cpp */,
+				B624ABAA1E27598C000D7C84 /* net_buffer.hpp */,
 				B60182911E22221F0086BC92 /* knetpacket.cpp */,
 				B60182921E22221F0086BC92 /* knetpacket.h */,
 				B60182641E1D3A570086BC92 /* db_buffer.cpp */,
@@ -492,6 +499,7 @@
 				B60182931E22221F0086BC92 /* knetpacket.cpp in Sources */,
 				B6091CD21DABD1C000ABF7D0 /* gateway_server.cpp in Sources */,
 				B667A8BC1DEED7D100E1B497 /* lua_engine.cpp in Sources */,
+				B624ABAB1E27598C000D7C84 /* net_buffer.cpp in Sources */,
 				B6091CD31DABD1C000ABF7D0 /* tcp_base_server.cpp in Sources */,
 				B624ABA21E260A64000D7C84 /* lua_net.cpp in Sources */,
 				B62BF7821DE81A740080C6A2 /* file_util.cpp in Sources */,
@@ -521,6 +529,7 @@
 				B667A8B61DEED75400E1B497 /* lua_player.cpp in Sources */,
 				B62BF7831DE81A740080C6A2 /* file_util.cpp in Sources */,
 				B601827B1E1D3A7D0086BC92 /* db_buffer.cpp in Sources */,
+				B624ABAC1E27598C000D7C84 /* net_buffer.cpp in Sources */,
 				B60182941E22221F0086BC92 /* knetpacket.cpp in Sources */,
 				B6091D2E1DABE00600ABF7D0 /* tcp_client.cpp in Sources */,
 				B601828F1E1F6D4C0086BC92 /* lua_redis.cpp in Sources */,
@@ -549,6 +558,7 @@
 				B667A8B71DEED75500E1B497 /* lua_player.cpp in Sources */,
 				B62BF7841DE81A750080C6A2 /* file_util.cpp in Sources */,
 				B601827C1E1D3A7E0086BC92 /* db_buffer.cpp in Sources */,
+				B624ABAD1E27598C000D7C84 /* net_buffer.cpp in Sources */,
 				B60182951E22221F0086BC92 /* knetpacket.cpp in Sources */,
 				B6091DB01DAD147300ABF7D0 /* tcp_client.cpp in Sources */,
 				B60182901E1F6D4C0086BC92 /* lua_redis.cpp in Sources */,

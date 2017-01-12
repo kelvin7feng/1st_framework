@@ -1,4 +1,5 @@
 #include "kmacros.h"
+#include "net_buffer.hpp"
 #include "knetpacket.h"
 #include "google.pb.h"
 
@@ -165,10 +166,10 @@ bool KNetPackage::CheckNetPacket(const char* pData, unsigned int uSize)
 {
     bool bResult = false;
     Message msg;
-    if(msg.ParseFromArray(pData + KD_PACKAGE_HEADER_SIZE, uSize))
-    {
-        bResult = true;
-    }
+    //if(msg.ParseFromArray(pData + KD_PACKAGE_HEADER_SIZE, uSize))
+    //{
+    //  bResult = true;
+    //}
     //测试
     bResult = true;
     return bResult;

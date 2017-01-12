@@ -7,6 +7,7 @@
 //
 
 #include "kmacros.h"
+#include "net_buffer.hpp"
 #include "gateway_client.hpp"
 #include "gateway_server.hpp"
 
@@ -95,9 +96,13 @@ void GatewayClient::OnMsgRecv(uv_stream_t* pServer, ssize_t nread, const uv_buf_
     }
     
     //通过Gateway回传给对应的客户端
-    unsigned int uHandlerId = *(unsigned int*)((char*)(buf->base) + KD_PACKAGE_HEADER_HANDLER_ID_START);
-    GatewayServer::GetInstance()->TransferToClient(uHandlerId, buf->base, (unsigned int)nread);
-    
+    unsigned int uHandlerId = GetHandlerId((char*)buf->base);
+    if(uHandlerId > 0)
+    {
+        GatewayServer::GetInstance()->TransferToClient(uHandlerId, buf->base, (unsigned int)nread);
+    } else {
+        cout << "!!!!" << endl;
+    }
     free(buf->base);
 }
 
@@ -120,9 +125,8 @@ void GatewayClient::TransferToLogicServer(const char* pBuffer, ssize_t nRead){
                            GatewayClient::GetInstance()->OnTransferToLogicServer(req, status);
                        });
     
-    if(ret != 0) {
-        SAFE_DELETE(pWriteReq);
-    }
+    
+    SAFE_DELETE(pWriteReq);
 }
 
 //转发到服务端的回调

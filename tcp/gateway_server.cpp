@@ -7,6 +7,7 @@
 //
 
 #include "kmacros.h"
+#include "net_buffer.hpp"
 #include "gateway_client.hpp"
 #include "gateway_server.hpp"
 
@@ -73,6 +74,7 @@ void GatewayServer::OnMsgRecv(uv_stream_t *client, ssize_t nread, const uv_buf_t
             {
                 unsigned int nHandlerId = GetHandlerIdByHandler(client);
                 AddHanderIdToPacket(nHandlerId, buf->base, (int)nread);
+                
                 GatewayClient* pGamewayClientToLogic = GatewayClient::GetInstance();
                 pGamewayClientToLogic->TransferToLogicServer(buf->base, (int)nread);
             }
@@ -153,12 +155,8 @@ void GatewayServer::OnNewConnection(uv_stream_t *server, int status)
 
 void GatewayServer::AddHanderIdToPacket(unsigned int nHandlerId, void* pBuffer, unsigned int uSize)
 {
-    if(uSize < KD_PACKAGE_HEADER_SIZE)
-    {
-        cout << "packer is error!!!!";
-    }
     cout << "handler id:" << nHandlerId << endl;
-    memcpy((char*)pBuffer + KD_PACKAGE_HEADER_HANDLER_ID_START, &nHandlerId, sizeof(unsigned int));
+    AddHanderIdToBuffer(nHandlerId, pBuffer, uSize);
 }
 
 bool GatewayServer::_ProcessNetData(const char* pData, size_t uSize)
@@ -166,7 +164,7 @@ bool GatewayServer::_ProcessNetData(const char* pData, size_t uSize)
     return false;
 }
 
-//转发到服务端的回调
+//转发到客户端的回调
 void GatewayServer::OnTransferToClient(uv_write_t *req, int status){
     
     if (status < 0) {
@@ -175,7 +173,7 @@ void GatewayServer::OnTransferToClient(uv_write_t *req, int status){
     }
     
     if (status == 0) {
-        cout << "transfer to server succeed!" << endl;
+        cout << "Transfer to client succeed!" << endl;
     }
 }
 
@@ -187,18 +185,25 @@ void GatewayServer::TransferToClient(unsigned int uHandlerId, const char* pBuffe
     pvBuffer = (char*)malloc(uSize);
     memcpy(pvBuffer, pBuffer, uSize);
     
+    /*
+    cout << "buffer size:" << GetBufferSize((char*)pvBuffer) << endl;
+    cout << "event type:" << GetEventType((char*)pvBuffer) << endl;
+    cout << "error code:" << GetErrorCode((char*)pvBuffer) << endl;
+    cout << "handler id:" << GetHandlerId((char*)pvBuffer) << endl;
+    cout << "server id:" << GetServerId((char*)pvBuffer) << endl;
+    cout << "sequence id:" << GetSequenceId((char*)pvBuffer) << endl;
+    */
+    
     uv_write_t* pWriteReq = NULL;
     pWriteReq = new uv_write_t;
     pWriteReq->data = pvBuffer;
     
     uv_buf_t buf = uv_buf_init(pvBuffer, uSize);
-    int ret = uv_write(pWriteReq, pClientHandler, &buf, 1,
+    int nRet = uv_write(pWriteReq, pClientHandler, &buf, 1,
                        [](uv_write_t *req, int status)
                        {
                            GatewayServer::GetInstance()->OnTransferToClient(req, status);
                        });
-    
-    if(ret != 0) {
+    if(nRet!=0)
         SAFE_DELETE(pWriteReq);
-    }
 }
