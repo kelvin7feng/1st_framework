@@ -57,27 +57,21 @@ int GatewayServer::Init(uv_loop_t* loop, const char* ip, int port)
     return ret;
 }
 
-void GatewayServer::OnMsgRecv(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
+void GatewayServer::OnMsgRecv(uv_stream_t *client, ssize_t uRead, const uv_buf_t *buf) {
     
     session_map_t& open_sessions = GetSessionMap();
     auto connection_pos = open_sessions.find(client);
     if (connection_pos != open_sessions.end())
     {
-        if (nread == UV_EOF)
+        if (uRead == UV_EOF)
         {
             cout << "Client Disconnected" << endl;
             RemoveClient(client);
         }
-        else if (nread > 0)
+        else if (uRead > 0)
         {
-            if(m_pRecvPacket->CheckNetPacket(buf->base, (int)nread))
-            {
-                unsigned int nHandlerId = GetHandlerIdByHandler(client);
-                AddHanderIdToPacket(nHandlerId, buf->base, (int)nread);
-                
-                GatewayClient* pGamewayClientToLogic = GatewayClient::GetInstance();
-                pGamewayClientToLogic->TransferToLogicServer(buf->base, (int)nread);
-            }
+            unsigned int nHandlerId = GetHandlerIdByHandler(client);
+            _ProcessNetData(nHandlerId, buf->base, uRead);
         }
         
         free(buf->base);
@@ -159,11 +153,6 @@ void GatewayServer::AddHanderIdToPacket(unsigned int nHandlerId, void* pBuffer, 
     AddHanderIdToBuffer(nHandlerId, pBuffer, uSize);
 }
 
-bool GatewayServer::_ProcessNetData(const char* pData, size_t uSize)
-{
-    return false;
-}
-
 //转发到客户端的回调
 void GatewayServer::OnTransferToClient(uv_write_t *req, int status){
     
@@ -173,30 +162,22 @@ void GatewayServer::OnTransferToClient(uv_write_t *req, int status){
     }
     
     if (status == 0) {
-        cout << "Transfer to client succeed!" << endl;
+        cout << "transfer to client succeed!\r\n" << endl;
     }
+    
+    SAFE_DELETE(req);
 }
 
 void GatewayServer::TransferToClient(unsigned int uHandlerId, const char* pBuffer, unsigned int uSize)
 {
+    cout << "gateway send data to client..." << endl;
     uv_stream_t* pClientHandler = GetHandlerById(uHandlerId);
     
     char* pvBuffer = NULL;
     pvBuffer = (char*)malloc(uSize);
     memcpy(pvBuffer, pBuffer, uSize);
     
-    /*
-    cout << "buffer size:" << GetBufferSize((char*)pvBuffer) << endl;
-    cout << "event type:" << GetEventType((char*)pvBuffer) << endl;
-    cout << "error code:" << GetErrorCode((char*)pvBuffer) << endl;
-    cout << "handler id:" << GetHandlerId((char*)pvBuffer) << endl;
-    cout << "server id:" << GetServerId((char*)pvBuffer) << endl;
-    cout << "sequence id:" << GetSequenceId((char*)pvBuffer) << endl;
-    */
-    
-    uv_write_t* pWriteReq = NULL;
-    pWriteReq = new uv_write_t;
-    pWriteReq->data = pvBuffer;
+    uv_write_t* pWriteReq = new uv_write_t;
     
     uv_buf_t buf = uv_buf_init(pvBuffer, uSize);
     int nRet = uv_write(pWriteReq, pClientHandler, &buf, 1,
@@ -204,6 +185,55 @@ void GatewayServer::TransferToClient(unsigned int uHandlerId, const char* pBuffe
                        {
                            GatewayServer::GetInstance()->OnTransferToClient(req, status);
                        });
-    if(nRet!=0)
+    if(nRet != 0)
+    {
+        cout << "transfer to client failed;" << endl;
         SAFE_DELETE(pWriteReq);
+    }
+    
+    SAFE_FREE(pvBuffer);
+}
+
+bool GatewayServer::_ProcessNetData(unsigned int uHandlerId, const char* pData, size_t uRead)
+{
+    bool bResult = false;
+    unsigned int uWrite = 0;
+    if(!(pData && uRead > 0))
+        goto Exit0;
+    do
+    {
+        _ASSERT(m_pRecvPacket);
+        if(!(m_pRecvPacket->Write(pData, (unsigned int)uRead, &uWrite)))
+            goto Exit0;
+        if (m_pRecvPacket->IsValid())
+        {
+            IKG_Buffer* pBuffer = NULL;
+            bool bRet = m_pRecvPacket->GetData(&pBuffer);
+            if(!(bRet && pBuffer))
+                goto Exit0;
+            
+            char* pDataBuffer = (char*)pBuffer->GetData();
+            unsigned int uDataBufferSize = pBuffer->GetSize();
+            if(m_pRecvPacket->CheckNetPacket(pDataBuffer, uDataBufferSize))
+            {
+                AddHanderIdToPacket(uHandlerId, pDataBuffer, uDataBufferSize);
+                GatewayClient* pGamewayClientToLogic = GatewayClient::GetInstance();
+                pGamewayClientToLogic->TransferToLogicServer(pDataBuffer, uDataBufferSize);
+                cout << "protobuf is legal..." << endl;
+            } else {
+                cout << "protobuf is illegal..." << endl;
+            }
+            
+            SAFE_DELETE(pBuffer);
+            m_pRecvPacket->Reset();
+        }
+        pData += uWrite;
+        uRead -= uWrite;
+        if (uRead > 0)
+            continue;
+        break;
+    } while (true);
+    bResult = true;
+Exit0:
+    return bResult;
 }

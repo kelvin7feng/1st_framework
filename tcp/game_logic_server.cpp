@@ -166,42 +166,28 @@ void GameLogicServer::OnNewConnection(uv_stream_t *server, int status)
     }
 }
 
-void GameLogicServer::Write(uv_stream_t* client, string message){
-    int len = (int)message.length();
-    
-    char buffer[100];
-    uv_buf_t buf = uv_buf_init(buffer, sizeof(buffer));
-    
-    buf.len = len;
-    buf.base = (char*)message.c_str();
-    
-    uv_write(&m_write_req, client, &buf, 1,
-             [](uv_write_t *req, int status)
-             {
-                 GameLogicServer::GetInstance()->OnWrite(req, status);
-             });
-}
-
-void GameLogicServer::OnWrite(uv_write_t *req, int status){
-    if(status == 0)
-    {
-        cout << "OnWrite" << endl;
-    }
-}
-
 void GameLogicServer::SendDataToGateway(const char *pBuffer, unsigned int uSize)
 {
     char* pvBuffer = NULL;
     pvBuffer = (char*)malloc(uSize);
     memcpy(pvBuffer, pBuffer, uSize);
     uv_buf_t pUvBuf = uv_buf_init(pvBuffer, uSize);
-    uv_write(&m_write_req, m_pGatewayClient, &pUvBuf, 1,
+    
+    uv_write_t* pWriteReq = new uv_write_t;
+    
+    int nRet = uv_write(pWriteReq, m_pGatewayClient, &pUvBuf, 1,
              [](uv_write_t *pReq, int nStatus)
              {
                  GameLogicServer::GetInstance()->OnSendData(pReq, nStatus);
              });
+    cout << "send data to gateway..." << nRet << endl;
     
-    delete[] pBuffer;
+    if(nRet != 0)
+    {
+        SAFE_DELETE(pWriteReq);
+    }
+    
+    SAFE_FREE(pvBuffer);
 }
 
 void GameLogicServer::OnSendData(uv_write_t *pReq, int nStatus){
@@ -212,8 +198,10 @@ void GameLogicServer::OnSendData(uv_write_t *pReq, int nStatus){
     }
     
     if (nStatus == 0) {
-        cout << "send to client succeed!" << endl;
+        //cout << "send to client succeed!" << endl;
     }
+    
+    SAFE_DELETE(pReq);
 }
 
 void GameLogicServer::OnDBResponse(KRESOOND_COMMON* pCommonResponse)
@@ -245,17 +233,22 @@ bool GameLogicServer::_ProcessNetData(const char* pData, size_t uRead)
             
             char* pDataBuffer = (char*)pBuffer->GetData();
             
-            unsigned int uEventType = *(unsigned int*)(pDataBuffer);
-            unsigned int uErrorCode = *(unsigned int*)(pDataBuffer + KD_PACKAGE_UINT_SIZE);
-            unsigned int uHandlerId = *(unsigned int*)(pDataBuffer + KD_PACKAGE_UINT_SIZE*2);
-            unsigned short uServerId = *(unsigned short*)(pDataBuffer + KD_PACKAGE_UINT_SIZE*3);
-            unsigned short uSequenceId = *(unsigned short*)(pDataBuffer + KD_PACKAGE_UINT_SIZE*3 + KD_PACKAGE_USHORT_SIZE);
+            unsigned int uEventType = GetEventType(pDataBuffer);
+            unsigned int uHandlerId = GetHandlerId(pDataBuffer);
+            unsigned int uSequenceId = GetSequenceId(pDataBuffer);
+            
+            char* pNetBodyBuffer = NULL;
+            unsigned int uNetBodySize = 0;
+            GetNetPackageBody(pDataBuffer, pBuffer->GetSize(), &pNetBodyBuffer, &uNetBodySize);
+            
             Message msg;
-            if(msg.ParseFromArray(pDataBuffer + KD_PACKAGE_HEADER_SIZE - KD_PACKAGE_UINT_SIZE, pBuffer->GetSize()))
+            bool bIsOk = msg.ParseFromArray(pNetBodyBuffer, uNetBodySize);
+            if(bIsOk)
             {
                 lua_engine.CallLua(uHandlerId, uEventType, uSequenceId, msg.data().c_str());
             }
-            lua_engine.CallLua(uHandlerId, uEventType, uSequenceId, msg.data().c_str());
+            
+            SAFE_DELETE(pBuffer);
             m_pRecvPacket->Reset();
         }
         pData += uWrite;

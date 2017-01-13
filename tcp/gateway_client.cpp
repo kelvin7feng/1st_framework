@@ -92,17 +92,16 @@ void GatewayClient::OnMsgRecv(uv_stream_t* pServer, ssize_t nread, const uv_buf_
     }
     else if (nread > 0)
     {
-        std::string str = buf->base;
+        //通过Gateway回传给对应的客户端
+        unsigned int uHandlerId = GetHandlerId((char*)buf->base);
+        if(uHandlerId > 0)
+        {
+            GatewayServer::GetInstance()->TransferToClient(uHandlerId, buf->base, (unsigned int)nread);
+        } else {
+            cout << "handler is not exist..." << endl;
+        }
     }
     
-    //通过Gateway回传给对应的客户端
-    unsigned int uHandlerId = GetHandlerId((char*)buf->base);
-    if(uHandlerId > 0)
-    {
-        GatewayServer::GetInstance()->TransferToClient(uHandlerId, buf->base, (unsigned int)nread);
-    } else {
-        cout << "!!!!" << endl;
-    }
     free(buf->base);
 }
 
@@ -111,33 +110,36 @@ void GatewayClient::TransferToLogicServer(const char* pBuffer, ssize_t nRead){
     
     char* pvBuffer = NULL;
     pvBuffer = (char*)malloc(nRead);
-    memset(pvBuffer, 0, nRead);
     memcpy(pvBuffer, pBuffer, nRead);
     
-    uv_write_t* pWriteReq = NULL;
-    pWriteReq = new uv_write_t;
-    pWriteReq->data = pvBuffer;
+    uv_write_t* pWriteReq = new uv_write_t;
     
     uv_buf_t buf = uv_buf_init(pvBuffer, (unsigned int)nRead);
-    int ret = uv_write(pWriteReq, (uv_stream_t*)&m_client, &buf, 1,
+    int nRet = uv_write(pWriteReq, (uv_stream_t*)&m_client, &buf, 1,
                        [](uv_write_t *req, int status)
                        {
                            GatewayClient::GetInstance()->OnTransferToLogicServer(req, status);
                        });
+    if(nRet != 0)
+    {
+        cout << "transfer to logic server failed.." << endl;
+        SAFE_DELETE(pWriteReq);
+    }
     
-    
-    SAFE_DELETE(pWriteReq);
+    SAFE_FREE(pvBuffer);
 }
 
 //转发到服务端的回调
-void GatewayClient::OnTransferToLogicServer(uv_write_t *req, int status){
+void GatewayClient::OnTransferToLogicServer(uv_write_t *pReq, int nStatus){
     
-    if (status < 0) {
-        cout << "TCP Client write error: " << uv_strerror(status) << endl;
+    if (nStatus < 0) {
+        cout << "TCP Client write error: " << uv_strerror(nStatus) << endl;
         return;
     }
     
-    if (status == 0) {
+    if (nStatus == 0) {
         cout << "transfer to server succeed!" << endl;
     }
+    
+    SAFE_DELETE(pReq);
 }

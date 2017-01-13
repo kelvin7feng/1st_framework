@@ -14,11 +14,8 @@ using namespace google;
 
 bool CheckProtobuf(const char* pBuffer, unsigned int uSize)
 {
-    //测试
-    bool bIsOk = true;
     Message msg;
-    msg.ParseFromArray(pBuffer + KD_PACKAGE_HEADER_SIZE - KD_PACKAGE_HEADER_SIZE, uSize);
-    return bIsOk;
+    return msg.ParseFromArray(pBuffer, uSize);
 }
 
 unsigned int GetBufferSize(const char* pBuffer)

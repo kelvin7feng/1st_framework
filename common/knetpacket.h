@@ -12,7 +12,7 @@ public:
     virtual unsigned int GetHandlerId(void* pBuffer) const = 0;
 	virtual bool IsValid() const = 0;
 	virtual bool Reset() = 0;
-    virtual bool CheckNetPacket(const char* pData, unsigned int uSize) = 0;
+    virtual bool CheckNetPacket(char* pData, unsigned int uSize) = 0;
 	//************************************
 	// Method:    Write
 	// FullName:  IKNetPackage::Write

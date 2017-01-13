@@ -60,7 +60,8 @@ public:
     void OnTransferToClient(uv_write_t *req, int status);
     
 protected:
-    bool _ProcessNetData(const char* pData, size_t uSize);
+    
+    bool _ProcessNetData(unsigned int nHandlerId, const char* pData, size_t uSize);
     
 private:
     //增加句柄的id到网络包里

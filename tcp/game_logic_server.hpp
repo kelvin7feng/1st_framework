@@ -51,12 +51,6 @@ public:
     //接收数据
     void OnMsgRecv(uv_stream_t* client, ssize_t nread, const uv_buf_t *buf);
     
-    //回写数据
-    void Write(uv_stream_t* client, string msg);
-    
-    //回写数据的回调
-    void OnWrite(uv_write_t* req, int status);
-    
     //数据处理的回调
     void OnDBResponse(KRESOOND_COMMON* pCommonResponse);
     

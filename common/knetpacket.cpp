@@ -18,7 +18,7 @@ public:
 	virtual bool Write(const char* pData, unsigned int uDataLen, unsigned int* puWrite);
 	virtual bool IsValid() const { return m_uRecvOffset == m_uPacketLen; }
 	virtual bool Reset();
-    virtual bool CheckNetPacket(const char* pData, unsigned int uSize);
+    virtual bool CheckNetPacket(char* pData, unsigned int uSize);
 private:
 	bool _InitPackage(unsigned int uPackageSize);
 	bool _WriteData(const char* pData, unsigned int uSize);
@@ -82,14 +82,10 @@ bool KNetPackage::Write(const char* pData, unsigned int uDataLen, unsigned int* 
 	unsigned int uPackageLen = 0;
 	unsigned int uMaxWriteLen = 0;
 	unsigned int uCurWriteLen = 0;
-	//KG_PROCESS_SUCCESS(m_uPacketLen == m_uRecvOffset);
     if(m_uPacketLen == m_uRecvOffset)
         goto Exit1;
-	//KGLOG_PROCESS_ERROR(puWrite);
 	*puWrite = 0;
-	//KGLOG_PROCESS_ERROR(pData);
-	//KG_PROCESS_SUCCESS(uDataLen == 0);
-    
+	
     //如果没有接够头的长度，需要先把长度读取出来
 	if (m_uRecvOffset < KD_PACKAGE_LEN_SIZE)
 	{
@@ -100,13 +96,10 @@ bool KNetPackage::Write(const char* pData, unsigned int uDataLen, unsigned int* 
 			if (m_uRecvOffset == KD_PACKAGE_LEN_SIZE)
 			{
 				bRet = _InitPackage(*(unsigned int*)m_szRemain);
-				//KGLOG_PROCESS_ERROR(bRet);
 			}
-			//KG_PROCESS_SUCCESS(uCurWriteLen == uDataLen);
             if(uCurWriteLen == uDataLen)
                 goto Exit1;
 		}
-		//KG_PROCESS_SUCCESS(uCurWriteLen == uDataLen);
         if(uCurWriteLen == uDataLen)
             goto Exit1;
 	}
@@ -114,7 +107,6 @@ bool KNetPackage::Write(const char* pData, unsigned int uDataLen, unsigned int* 
 	{
 		uMaxWriteLen = uDataLen - uCurWriteLen;
 		uMaxWriteLen = uMaxWriteLen < (m_uPacketLen - m_uRecvOffset) ? uMaxWriteLen : (m_uPacketLen - m_uRecvOffset);
-		//KGLOG_PROCESS_ERROR(_WriteData(pData, uMaxWriteLen));
         if(!_WriteData(pData, uMaxWriteLen))
             goto Exit1;
 		uCurWriteLen += uMaxWriteLen;
@@ -137,11 +129,13 @@ bool KNetPackage::Reset()
 bool KNetPackage::_InitPackage(unsigned int uPacketSize)
 {
 	bool bResult = false;
-	//KGLOG_PROCESS_ERROR(m_pBuffer == NULL);
+    //KGLOG_PROCESS_ERROR(m_pBuffer == NULL);
 	//KGLOG_PROCESS_ERROR(uPacketSize > KD_PACKAGE_LEN_SIZE);
 	//KGLOG_PROCESS_ERROR(KD_INVALID_PACKET_LEN != uPacketSize);
 	m_uPacketLen = uPacketSize;
-	m_pBuffer = DB_MemoryCreateBuffer(uPacketSize - KD_PACKAGE_LEN_SIZE);
+	//m_pBuffer = DB_MemoryCreateBuffer(uPacketSize - KD_PACKAGE_LEN_SIZE);
+    m_pBuffer = DB_MemoryCreateBuffer(uPacketSize);
+    memcpy(m_pBuffer->GetData(), &uPacketSize, sizeof(unsigned int));
 	//KGLOG_PROCESS_ERROR(m_pBuffer);
 	bResult = true;
 Exit0:
@@ -155,22 +149,21 @@ bool KNetPackage::_WriteData(const char* pData, unsigned int uSize)
 	//KGLOG_PROCESS_ERROR(uSize > 0);
 	//KGLOG_PROCESS_ERROR(m_uRecvOffset + uSize <= m_uPacketLen);
 	//KGLOG_PROCESS_ERROR(m_pBuffer);
-	memcpy((char *)m_pBuffer->GetData() + (m_uRecvOffset - KD_PACKAGE_LEN_SIZE), pData, uSize);
+	//memcpy((char *)m_pBuffer->GetData() + (m_uRecvOffset - KD_PACKAGE_LEN_SIZE), pData, uSize);
+    memcpy((char *)m_pBuffer->GetData() + m_uRecvOffset, pData, uSize);
 	m_uRecvOffset += uSize;
 	bResult = true;
 Exit0:
 	return bResult;
 }
 
-bool KNetPackage::CheckNetPacket(const char* pData, unsigned int uSize)
+bool KNetPackage::CheckNetPacket(char* pData, unsigned int uSize)
 {
-    bool bResult = false;
+    char* pBodyBuffer = NULL;
+    unsigned int uNetBodySize = 0;
+    GetNetPackageBody(pData, uSize, &pBodyBuffer, &uNetBodySize);
+    
     Message msg;
-    //if(msg.ParseFromArray(pData + KD_PACKAGE_HEADER_SIZE, uSize))
-    //{
-    //  bResult = true;
-    //}
-    //测试
-    bResult = true;
-    return bResult;
+    bool bIsOk = msg.ParseFromArray(pBodyBuffer, uNetBodySize);
+    return bIsOk;
 }
