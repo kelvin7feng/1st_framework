@@ -7,6 +7,7 @@
 //
 
 #include "map"
+#include "kmacros.h"
 #include "lua_player.h"
 #include "lua_engine.hpp"
 #include "lua_redis.hpp"
@@ -72,11 +73,11 @@ void LuaEngine::stackDump(lua_State* L){
 int LuaEngine::CallLua(unsigned int uHandlerId, unsigned int uEventType, unsigned short uSequenceId, const char* pParam)
 {
     //清空虚拟栈
-    lua_settop(m_lua_state, 0);
+    int nTop = lua_gettop(m_lua_state);
     
     //把OnClientRequest函数push到栈里
     lua_getglobal(m_lua_state, "OnClientRequest");
-
+    
     //把请求的参数push到栈里
     lua_pushnumber(m_lua_state, uHandlerId);
     lua_pushnumber(m_lua_state, uEventType);
@@ -105,16 +106,16 @@ int LuaEngine::CallLua(unsigned int uHandlerId, unsigned int uEventType, unsigne
         //返回值类型错误
     }
     
-    lua_settop(m_lua_state, 0);
+    lua_settop(m_lua_state, nTop);
     
     return 0;
 }
 
-
 //调用脚本处理
 int LuaEngine::RedisCallLua(const unsigned int uUserId, const unsigned int uEventType, const std::string& request)
 {
-    lua_settop(m_lua_state, 0);
+    int nTop = lua_gettop(m_lua_state);
+    
     lua_getglobal(m_lua_state, "OnRedisRespone");
     lua_pushnumber(m_lua_state, uUserId);
     lua_pushnumber(m_lua_state, uEventType);
@@ -141,7 +142,7 @@ int LuaEngine::RedisCallLua(const unsigned int uUserId, const unsigned int uEven
         //返回值类型错误
     }
     
-    lua_settop(m_lua_state, 0);
+    lua_settop(m_lua_state, nTop);
     
     return 0;
 }
@@ -178,6 +179,7 @@ int LuaEngine::InitState(int server_type)
         exit(1);
     }
     
+    lua_settop(m_lua_state, 0);
     return nResult;
 }
 

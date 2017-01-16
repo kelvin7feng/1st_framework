@@ -39,11 +39,13 @@ public:
     int InitState(int server_type);
     int CallLua(unsigned int uHandlerId, unsigned int uEventType, unsigned short uSequenceId, const char* pParam);
     int RedisCallLua(const unsigned int uUserId, const unsigned int uEventType, const std::string& request);
-    
+
 private:
+    
     void stackDump(lua_State* L);
     
     lua_State* m_lua_state;
+    
     map<int, string> server_path;
 };
 

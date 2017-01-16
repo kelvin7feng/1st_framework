@@ -58,7 +58,7 @@ end
 --打印堆栈
 function DEBUG_TRACE_BACE(strMessage, nRecursion)
 	
-	local strError = debug.traceback(strMessage, nRecursion)
+	local strError = debug.traceback(strMessage, nRecursion or 3)
 	LOG_ERROR(strError)		
 end
 
@@ -129,4 +129,9 @@ function LOG_TABLE(value, sub, count, NotFirst, name, ttt)
 	else
 		print("error print" .. type(value))
 	end
+end
+
+function __TRACKBACK__(errmsg)
+    DEBUG_TRACE_BACE(errmsg);
+    return false;
 end

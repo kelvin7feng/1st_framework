@@ -32,14 +32,17 @@ function OnClientRequest(nHandlerId, nEventType, nSequenceId, strJson)
 	if nEventType == EVENT_TYPE.SYSTEM.LOGIN then
 		return OnClientLogin(nHandlerId, nEventType, nSequenceId, tbParam);			
 	end
-
+	
 	local nErrorCode = ERROR_CODE.SYSTEM.OK;
 	local tbTest = {};
 	tbTest.msg = "event " .. nEventType .. " is null function...";
 	tbTest = json.encode(tbTest);
 	nSequenceId = G_NetManager:PopRequestFromSquence(nHandlerId);
 	G_NetManager:SendToGateway(nSequenceId, nEventType, nErrorCode, nHandlerId, string.len(tbTest), tbTest);
-    return 0;
+	--
+
+	return 0;
+    --return xpcall(function() G_UserManager:HelloDebug() end, __TRACKBACK__);
 end
 
 function OnClientRegister(nHandlerId, nEventType, nSequenceId, tbParam)

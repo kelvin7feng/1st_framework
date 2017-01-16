@@ -70,17 +70,18 @@ void GatewayServer::OnMsgRecv(uv_stream_t *client, ssize_t uRead, const uv_buf_t
         }
         else if (uRead > 0)
         {
-            unsigned int nHandlerId = GetHandlerIdByHandler(client);
-            _ProcessNetData(nHandlerId, buf->base, uRead);
+            TCPSession session = connection_pos->second;
+            session.ProcessNetData(buf->base, uRead);
         }
-        
-        free(buf->base);
     }
+    
     else
     {
         uv_read_stop(client);
         cout << "Unrecognized client. Disconnecting." << endl;;
     }
+    
+    free(buf->base);
 }
 
 void GatewayServer::RemoveClient(uv_stream_t* client)
@@ -147,12 +148,6 @@ void GatewayServer::OnNewConnection(uv_stream_t *server, int status)
     }
 }
 
-void GatewayServer::AddHanderIdToPacket(unsigned int nHandlerId, void* pBuffer, unsigned int uSize)
-{
-    cout << "handler id:" << nHandlerId << endl;
-    AddHanderIdToBuffer(nHandlerId, pBuffer, uSize);
-}
-
 //转发到客户端的回调
 void GatewayServer::OnTransferToClient(uv_write_t *req, int status){
     
@@ -192,48 +187,4 @@ void GatewayServer::TransferToClient(unsigned int uHandlerId, const char* pBuffe
     }
     
     SAFE_FREE(pvBuffer);
-}
-
-bool GatewayServer::_ProcessNetData(unsigned int uHandlerId, const char* pData, size_t uRead)
-{
-    bool bResult = false;
-    unsigned int uWrite = 0;
-    if(!(pData && uRead > 0))
-        goto Exit0;
-    do
-    {
-        _ASSERT(m_pRecvPacket);
-        if(!(m_pRecvPacket->Write(pData, (unsigned int)uRead, &uWrite)))
-            goto Exit0;
-        if (m_pRecvPacket->IsValid())
-        {
-            IKG_Buffer* pBuffer = NULL;
-            bool bRet = m_pRecvPacket->GetData(&pBuffer);
-            if(!(bRet && pBuffer))
-                goto Exit0;
-            
-            char* pDataBuffer = (char*)pBuffer->GetData();
-            unsigned int uDataBufferSize = pBuffer->GetSize();
-            if(m_pRecvPacket->CheckNetPacket(pDataBuffer, uDataBufferSize))
-            {
-                AddHanderIdToPacket(uHandlerId, pDataBuffer, uDataBufferSize);
-                GatewayClient* pGamewayClientToLogic = GatewayClient::GetInstance();
-                pGamewayClientToLogic->TransferToLogicServer(pDataBuffer, uDataBufferSize);
-                cout << "protobuf is legal..." << endl;
-            } else {
-                cout << "protobuf is illegal..." << endl;
-            }
-            
-            SAFE_DELETE(pBuffer);
-            m_pRecvPacket->Reset();
-        }
-        pData += uWrite;
-        uRead -= uWrite;
-        if (uRead > 0)
-            continue;
-        break;
-    } while (true);
-    bResult = true;
-Exit0:
-    return bResult;
 }

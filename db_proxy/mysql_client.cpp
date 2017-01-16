@@ -75,18 +75,20 @@ bool KMysqlClient::Init(int nDBType)
     
     m_uBuffLen = 1024 * 50;
     m_pSQLBuff = new char[m_uBuffLen];
-    KConnectInfo connectInfo = *new KConnectInfo();
-    connectInfo.nPort = port;
-    memcpy(connectInfo.szHost, sz_ip.c_str(), sz_ip.length());
-    memcpy(connectInfo.szUser, sz_user.c_str(), sz_user.length());
-    memcpy(connectInfo.szPwd, sz_password.c_str(), sz_password.length());
+    KConnectInfo* connectInfo = new KConnectInfo();
+    connectInfo->nPort = port;
+    memcpy(connectInfo->szHost, sz_ip.c_str(), sz_ip.length());
+    memcpy(connectInfo->szUser, sz_user.c_str(), sz_user.length());
+    memcpy(connectInfo->szPwd, sz_password.c_str(), sz_password.length());
     std::vector<KConnectInfo> vecInfo;
-    vecInfo.push_back(connectInfo);
+    vecInfo.push_back(*connectInfo);
     
     if(vecInfo.size() == 0)
     {
         _ASSERT(false);
     }
+    
+    SAFE_DELETE(connectInfo);
     return KDBClient::Init(false, sz_scheme.c_str(), vecInfo);;
 }
 
@@ -322,6 +324,7 @@ IKG_Buffer* KMysqlClient::OnRequestQuery(IKG_Buffer* pBuffer)
 bool KMysqlClient::OnResponsed(IKG_Buffer* pBuffer)
 {
     //g_pDBClientMgr->ProcessRespond(pBuffer);
+    SAFE_DELETE(pBuffer);
     return true;
 }
 

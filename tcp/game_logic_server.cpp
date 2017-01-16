@@ -125,6 +125,7 @@ void GameLogicServer::RemoveClient(uv_stream_t* client)
                  {
                      GameLogicServer::GetInstance()->OnConnectionClose(handle);
                  });
+        
     }
 }
 
@@ -198,7 +199,7 @@ void GameLogicServer::OnSendData(uv_write_t *pReq, int nStatus){
     }
     
     if (nStatus == 0) {
-        //cout << "send to client succeed!" << endl;
+        cout << "send to client succeed!" << endl;
     }
     
     SAFE_DELETE(pReq);
@@ -211,6 +212,8 @@ void GameLogicServer::OnDBResponse(KRESOOND_COMMON* pCommonResponse)
     char* szData = new char[nDataLen];
     memcpy(szData, pCommonResponse->data, (size_t)nDataLen);
     lua_engine.RedisCallLua(pCommonResponse->uUserId, pCommonResponse->uEventType, szData);
+    
+    delete[] szData;
 }
 
 bool GameLogicServer::_ProcessNetData(const char* pData, size_t uRead)

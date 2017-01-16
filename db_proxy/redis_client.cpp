@@ -146,17 +146,19 @@ bool KRedisClient::Init(int nDBType)
     string szIp = server_config["ip"].GetString();
     int nPort = server_config["port"].GetInt();
     
-    KConnectInfo connectInfo = *new KConnectInfo();
-    connectInfo.nPort = nPort;
-    memcpy(connectInfo.szHost, szIp.c_str(), szIp.length());
+    KConnectInfo* connectInfo = new KConnectInfo();
+    connectInfo->nPort = nPort;
+    memcpy(connectInfo->szHost, szIp.c_str(), szIp.length());
     std::vector<KConnectInfo> vecInfo;
-    vecInfo.push_back(connectInfo);
+    vecInfo.push_back(*connectInfo);
     
     if(vecInfo.size() == 0)
     {
         _ASSERT(false);
     }
-    return KDBClient::Init(false, "", vecInfo);;
+    
+    SAFE_DELETE(connectInfo);
+    return KDBClient::Init(false, "", vecInfo);
 }
 
 bool KRedisClient::UnInit()
@@ -316,6 +318,9 @@ bool KRedisClient::OnResponsed(IKG_Buffer* pBuffer)
     std::cout << "onResponse....event type:" << pResond->uEventType << std::endl;
     GameLogicServer* pInstance = GameLogicServer::GetInstance();
     pInstance->OnDBResponse(pResond);
+    
+    SAFE_DELETE(pBuffer);
+    
     return true;
 }
 
@@ -536,7 +541,6 @@ bool KRedisClient::OnRequestHSet(int nIndex, const KREQUEST_HSET* pRequestHSet)
         KREQUEST_HSET* pRequest = (KREQUEST_HSET*)pBuffer->GetData();
         memcpy(pRequest, pRequestHSet, pBuffer->GetSize());
         g_pDBClientMgr->PushMysqlRequest(nIndex + 1, pBuffer);
-        //更新pReply
     }
     
     pCommonBuffer = GenCommonRespond(pRequestHSet->lId, pRequestHSet->byType, pReply);
@@ -601,14 +605,11 @@ bool KRedisClient::OnRequestDel(int nIndex, const KREQUEST_DEL* pRequestDel)
     //同步到数据库里
     if(pReply!=NULL)
     {
-        if(pReply != NULL)
-        {
-            size_t nSize = sizeof(KREQUEST_DEL) + uDelKeyLen;
-            IKG_Buffer* pBuffer = DB_MemoryCreateBuffer((int)nSize);
-            KREQUEST_DEL* pRequest = (KREQUEST_DEL*)pBuffer->GetData();
-            memcpy(pRequest, pRequestDel, pBuffer->GetSize());
-            g_pDBClientMgr->PushMysqlRequest(nIndex + 1, pBuffer);
-        }
+        size_t nSize = sizeof(KREQUEST_DEL) + uDelKeyLen;
+        IKG_Buffer* pBuffer = DB_MemoryCreateBuffer((int)nSize);
+        KREQUEST_DEL* pRequest = (KREQUEST_DEL*)pBuffer->GetData();
+        memcpy(pRequest, pRequestDel, pBuffer->GetSize());
+        g_pDBClientMgr->PushMysqlRequest(nIndex + 1, pBuffer);
     }
     
     bResult = true;

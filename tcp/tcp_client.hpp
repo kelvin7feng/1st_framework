@@ -16,6 +16,8 @@
 #include <unistd.h>
 #include <iostream>
 
+#include "knetpacket.h"
+
 using namespace std;
 
 class TCPClient{
@@ -56,6 +58,8 @@ public:
     
 protected:
     
+    virtual bool _ProcessNetData(const char* pData, size_t uSize);
+    
     int m_port;
     
     const char* m_ip;
@@ -69,6 +73,9 @@ protected:
     uv_connect_t m_connect_req;
     
     uv_write_t m_write_req;
+    
+    IKNetPacket* m_pRecvPacket;
+
 };
 
 #endif /* tcp_client_hpp */

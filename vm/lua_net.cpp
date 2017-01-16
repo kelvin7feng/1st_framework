@@ -27,7 +27,7 @@ static int SendToGateway(lua_State* lua_state)
     unsigned int uEventType = lua_tonumber(lua_state, nParam - 4);
     unsigned int uErrorCode = lua_tonumber(lua_state, nParam - 3);
     unsigned int uHandlerId = lua_tonumber(lua_state, nParam - 2);
-    unsigned int uParamSize = lua_tonumber(lua_state, nParam - 1);
+    //unsigned int uParamSize = lua_tonumber(lua_state, nParam - 1);
     std::string szParam = lua_tostring(lua_state, nParam);
     
     Message msg;
@@ -39,6 +39,8 @@ static int SendToGateway(lua_State* lua_state)
     unsigned int uNetPacketSize = 0;
     void* pNetPackage = CreateNetBuffer(uEventType, uErrorCode, uHandlerId, uServerId, uSequenceId, szNetBody.c_str(), (unsigned int)szNetBody.length(), &uNetPacketSize);
     GameLogicServer::GetInstance()->SendDataToGateway((char*)pNetPackage, uNetPacketSize);
+    
+    SAFE_FREE(pNetPackage);
     
     return nRetCode;
 }

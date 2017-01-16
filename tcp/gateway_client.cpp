@@ -92,14 +92,7 @@ void GatewayClient::OnMsgRecv(uv_stream_t* pServer, ssize_t nread, const uv_buf_
     }
     else if (nread > 0)
     {
-        //通过Gateway回传给对应的客户端
-        unsigned int uHandlerId = GetHandlerId((char*)buf->base);
-        if(uHandlerId > 0)
-        {
-            GatewayServer::GetInstance()->TransferToClient(uHandlerId, buf->base, (unsigned int)nread);
-        } else {
-            cout << "handler is not exist..." << endl;
-        }
+        _ProcessNetData(buf->base, (unsigned int)nread);
     }
     
     free(buf->base);
@@ -142,4 +135,46 @@ void GatewayClient::OnTransferToLogicServer(uv_write_t *pReq, int nStatus){
     }
     
     SAFE_DELETE(pReq);
+}
+
+bool GatewayClient::_ProcessNetData(const char* pData, size_t uRead)
+{
+    bool bResult = false;
+    unsigned int uWrite = 0;
+    if(!(pData && uRead > 0))
+        goto Exit0;
+    do
+    {
+        _ASSERT(m_pRecvPacket);
+        if(!(m_pRecvPacket->Write(pData, (unsigned int)uRead, &uWrite)))
+            goto Exit0;
+        if (m_pRecvPacket->IsValid())
+        {
+            IKG_Buffer* pBuffer = NULL;
+            bool bRet = m_pRecvPacket->GetData(&pBuffer);
+            if(!(bRet && pBuffer))
+                goto Exit0;
+            
+            char* pDataBuffer = (char*)pBuffer->GetData();
+            unsigned int uBufferSize = pBuffer->GetSize();
+            unsigned int uHandlerId = GetHandlerId(pDataBuffer);
+            if(uHandlerId > 0)
+            {
+                GatewayServer::GetInstance()->TransferToClient(uHandlerId, pDataBuffer, uBufferSize);
+            } else {
+                cout << "handler is not exist..." << endl;
+            }
+            
+            SAFE_DELETE(pBuffer);
+            m_pRecvPacket->Reset();
+        }
+        pData += uWrite;
+        uRead -= uWrite;
+        if (uRead > 0)
+            continue;
+        break;
+    } while (true);
+    bResult = true;
+Exit0:
+    return bResult;
 }

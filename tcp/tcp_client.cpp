@@ -12,6 +12,8 @@
 TCPClient::TCPClient()
 {
     m_port = 0;
+    
+    m_pRecvPacket = KG_CreateCommonPackage();
 }
 
 TCPClient* TCPClient::GetInstance()
@@ -134,6 +136,12 @@ void TCPClient::Write(const string& message){
     if(ret == 0) {
         //send to server succeed
     }
+}
+
+
+bool TCPClient::_ProcessNetData(const char* pData, size_t uSize)
+{
+    return false;
 }
 
 TCPClient::~TCPClient(){

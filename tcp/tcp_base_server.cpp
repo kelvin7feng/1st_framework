@@ -266,16 +266,20 @@ handler_map_to_id_t& TCPBaseServer::GetHandlerToIdMap()
 
 void TCPBaseServer::AddSession(TCPSession session)
 {
+    m_nSessionId ++;
+    session.SetHandlerId(m_nSessionId);
+    
     uv_stream_t* key = (uv_stream_t*)session.connection.get();
     session_map_t& open_sessions = GetSessionMap();
     open_sessions.insert({key, session});
-    m_nSessionId ++;
     
     id_map_to_handler_t& mapIdToHandler = GetIdToHandlerMap();
     mapIdToHandler.insert({m_nSessionId, key});
     
     handler_map_to_id_t& mapHandlerToId = GetHandlerToIdMap();
     mapHandlerToId.insert({key, m_nSessionId});
+    
+    cout << "Saved Session..." << endl;
 }
 
 

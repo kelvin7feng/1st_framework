@@ -37,6 +37,10 @@ public:
     
     //转发到服务端的回调
     void OnTransferToLogicServer(uv_write_t *req, int status);
+    
+private:
+    
+    bool _ProcessNetData(const char* pData, size_t uSize);
 };
 
 #endif /* gateway_client_hpp */

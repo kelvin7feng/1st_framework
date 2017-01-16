@@ -10,13 +10,12 @@
 #define tcp_session_hpp
 
 #include <stdio.h>
-#pragma once
-
-#include <uv.h>
-
 #include <map>
 #include <queue>
 #include <memory>
+#include <uv.h>
+
+#include "knetpacket.h"
 
 class TCPSession
 {
@@ -25,9 +24,21 @@ public:
     TCPSession();
     ~TCPSession();
     
+    unsigned int GetHandlerId();
+    
+    void SetHandlerId(unsigned int uHandlerId);
+    
+    bool ProcessNetData(const char* pData, size_t uSize);
+    
     std::shared_ptr<uv_tcp_t> connection;
     std::shared_ptr<uv_timer_t> activity_timer;
     
+private:
+    
+    unsigned int m_uHandlerId;
+    
+    IKNetPacket* m_pRecvPacket;
+
 };
 
 #endif /* tcp_session_hpp */
