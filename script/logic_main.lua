@@ -13,6 +13,7 @@ require("common.table")
 require("common.type")
 require("common.redis")
 
+require("manager.event_manager")
 require("manager.net_manager")
 require("manager.user_manager")
 

@@ -127,7 +127,9 @@ IKG_Buffer* KDBClientMgr::RequestMySQLQuery(int nDBType, IKG_Buffer* pBuffer)
         exit(1);
     
     pPackBuffer = m_vecMysqlClients[nDBType - 1]->OnRequestQuery(pBuffer);
-    //KRESOOND_COMMON* pResponse = (KRESOOND_COMMON*)pPackBuffer->GetData();
+    KRESOOND_COMMON* pResponse = (KRESOOND_COMMON*)pPackBuffer->GetData();
+    std::cout << "mysql onResponse....event type:" << pResponse->uEventType << std::endl;
+    std::cout << "mysql onResponse....data len:" << pResponse->nDataLen << std::endl;
     
     return pPackBuffer;
 }

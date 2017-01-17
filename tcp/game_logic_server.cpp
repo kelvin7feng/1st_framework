@@ -209,6 +209,8 @@ void GameLogicServer::OnDBResponse(KRESOOND_COMMON* pCommonResponse)
 {
     //调用lua处理回调
     int nDataLen = pCommonResponse->nDataLen;
+    if(nDataLen < 0)
+        nDataLen = 0;
     char* szData = new char[nDataLen];
     memcpy(szData, pCommonResponse->data, (size_t)nDataLen);
     lua_engine.RedisCallLua(pCommonResponse->uUserId, pCommonResponse->uEventType, szData);

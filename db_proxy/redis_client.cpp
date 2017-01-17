@@ -315,7 +315,8 @@ bool KRedisClient::OnRequest(IKG_Buffer* pBuffer)
 bool KRedisClient::OnResponsed(IKG_Buffer* pBuffer)
 {
     KRESOOND_COMMON* pResond = (KRESOOND_COMMON*)pBuffer->GetData();
-    std::cout << "onResponse....event type:" << pResond->uEventType << std::endl;
+    std::cout << "redis onResponse....event type:" << pResond->uEventType << std::endl;
+    std::cout << "redis onResponse....data len:" << pResond->nDataLen << std::endl;
     GameLogicServer* pInstance = GameLogicServer::GetInstance();
     pInstance->OnDBResponse(pResond);
     
@@ -419,7 +420,6 @@ IKG_Buffer* KRedisClient::GenCommonRespond(long long lId, unsigned char byType, 
         pResond->byRequestType = byType;
         pResond->nRetType = pReply->type;
         pResond->nParam = 0;
-        pResond->nDataLen =0;
         pResond->nDataLen = (int)pReply->len;
         memcpy(pResond->data, pReply->str, pReply->len);
         pResond->data[pReply->len] = '\0';
@@ -478,21 +478,23 @@ bool KRedisClient::OnRequestGet(int nIndex, const KREQUEST_GET* pRequestGet)
     pReply = RedisCommand(nIndex, "get %b", pRequestGet->data, uGetKeyLen);
     
     //从数据库中读取出来
-    if (pReply->type == REDIS_REPLY_NIL && !pRequestGet->bAllowRedisNil)
+    
+    //同步的时候有bug
+    /*if (pReply->type == REDIS_REPLY_NIL && !pRequestGet->bAllowRedisNil)
     {
         size_t nSize = sizeof(KREQUEST_GET) + uGetKeyLen;
         IKG_Buffer* pBuffer = DB_MemoryCreateBuffer((int)nSize);
         KREQUEST_GET* pRequest = (KREQUEST_GET*)pBuffer->GetData();
+        DB_SetBufferHead(pBuffer, pRequestGet->uUserId, pRequestGet->uEventType);
         memcpy(pRequest, pRequestGet, pBuffer->GetSize());
         pPacketBuffer = g_pDBClientMgr->RequestMySQLQuery(nIndex + 1, pBuffer);
         DB_SetCommonHead(pPacketBuffer, pRequestGet->uUserId, pRequestGet->uEventType);
         PushRespond(pPacketBuffer);
-    }
+    }*/
     
     pCommonBuffer = GenCommonRespond(pRequestGet->lId, pRequestGet->byType, pReply);
     DB_SetCommonHead(pCommonBuffer, pRequestGet->uUserId, pRequestGet->uEventType);
     PushRespond(pCommonBuffer);
-    
     bResult = true;
     
 Exit0:
@@ -501,8 +503,8 @@ Exit0:
         freeReplyObject(pReply);
     }
     
-    SAFE_RELEASE(pPacketBuffer);
-    SAFE_RELEASE(pCommonBuffer);
+    //SAFE_RELEASE(pPacketBuffer);
+    //SAFE_RELEASE(pCommonBuffer);
     return bResult;
 }
 

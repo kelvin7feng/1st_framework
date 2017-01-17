@@ -194,7 +194,7 @@ void KDBClient::DBThreadActivate()
         if(!pPackage)
             break;
         
-        std::cout<< "dealing request..." << std::endl;
+        std::cout<< "dealing db request..." << std::endl;
         OnRequest(pPackage);
     }
     
@@ -221,7 +221,7 @@ bool KDBClient::PushRequest(IKG_Buffer *pBuffer)
     m_RequestQueue.push_back(pBuffer);
     pthread_mutex_unlock(&m_mutex);
     
-    std::cout << "push request......." << m_RequestQueue.size() << std::endl;
+    //std::cout << "push request......." << m_RequestQueue.size() << std::endl;
 Exit0:
     bResult = true;
     
@@ -236,7 +236,7 @@ IKG_Buffer* KDBClient::PopRequest()
     
     if (!m_RequestQueue.empty())
     {
-        std::cout << "request size:" << m_RequestQueue.size() << std::endl;
+        //std::cout << "request size:" << m_RequestQueue.size() << std::endl;
         piBuffer = m_RequestQueue.front();
         m_RequestQueue.pop_front();
     }
@@ -274,7 +274,7 @@ IKG_Buffer* KDBClient::PopRespond()
     
     if (!m_RespondQueue.empty())
     {
-        std::cout << "response size:" << m_RespondQueue.size() << std::endl;
+        //std::cout << "response size:" << m_RespondQueue.size() << std::endl;
         piBuffer = m_RespondQueue.front();
         m_RespondQueue.pop_front();
     }

@@ -42,7 +42,7 @@ static int PushRedisGet(lua_State* lua_state)
     int nParam = lua_gettop(lua_state);
     if(nParam != 4)
     {
-        std::cout << "count of param is not equal to 2..." << std::endl;
+        std::cout << "count of param is not equal to 4..." << std::endl;
         return 0;
     }
     
