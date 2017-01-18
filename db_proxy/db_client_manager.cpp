@@ -112,7 +112,7 @@ bool KDBClientMgr::PushMysqlRequest(int nDBType, IKG_Buffer* pBuffer)
     //if(m_vecMysqlClients[nDBType - 1]->IsEnabled())
         //exit(1);
     
-    std::cout << "push mysql request......." << std::endl;
+    //std::cout << "push mysql request......." << std::endl;
     m_vecMysqlClients[nDBType - 1]->PushRequest(pBuffer);
     bResult = true;
 Exit0:

@@ -180,6 +180,8 @@
 		B667A8B31DEED75100E1B497 /* player.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = player.h; path = class/player.h; sourceTree = "<group>"; };
 		B667A8BA1DEED7D100E1B497 /* lua_engine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lua_engine.cpp; path = vm/lua_engine.cpp; sourceTree = "<group>"; };
 		B667A8BB1DEED7D100E1B497 /* lua_engine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lua_engine.hpp; path = vm/lua_engine.hpp; sourceTree = "<group>"; };
+		B68F7D6E1E2F5E9A009153B7 /* config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = config.json; path = logic/config.json; sourceTree = "<group>"; };
+		B68F7D6F1E2F5EC0009153B7 /* config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = config.json; path = gateway/config.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -346,6 +348,7 @@
 		B6091D371DABE02A00ABF7D0 /* gateway */ = {
 			isa = PBXGroup;
 			children = (
+				B68F7D6F1E2F5EC0009153B7 /* config.json */,
 				B6091DBC1DAD15AE00ABF7D0 /* main.cpp */,
 			);
 			name = gateway;
@@ -354,6 +357,7 @@
 		B6091DB91DAD148200ABF7D0 /* logic */ = {
 			isa = PBXGroup;
 			children = (
+				B68F7D6E1E2F5E9A009153B7 /* config.json */,
 				B6091DBA1DAD14A100ABF7D0 /* main.cpp */,
 			);
 			name = logic;

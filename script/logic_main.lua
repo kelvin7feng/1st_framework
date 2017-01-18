@@ -1,25 +1,14 @@
 
-lua_path = "./../script/?.lua;"
-package.path = lua_path .. "common/?.lua;" .. package.path
+lua_path = "./../script"
+package.path = lua_path .."/?.lua;".. package.path
 
-require("defination.event_def")
-require("defination.database_def")
-require("defination.error_code_def")
-
-require("common.class")
-require("common.log")
-require("common.json")
-require("common.table")
-require("common.type")
-require("common.redis")
-
-require("manager.event_manager")
-require("manager.net_manager")
-require("manager.user_manager")
+require("defination.load")
+require("common.load")
+require("manager.load")
 
 require("module.protocol")
+require("module.logic_protocol")
 
---local player = Player:new();
---player:Run();
+G_GlobalConfigManager:Init();
 
 LOG_INFO("load logic script succeed...")

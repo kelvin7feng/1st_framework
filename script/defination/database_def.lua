@@ -47,3 +47,15 @@ DATABASE_TABLE_FIELD =
 		}
 	}
 }
+
+-- 全局配置字段
+DATABASE_TABLE_GLOBAL_FIELD = 
+{
+	USER_ID								= "UserGlobalId",
+}
+
+-- 全局配置默认值
+DATABASE_TABLE_GLOBAL_DEFALUT = 
+{
+	[DATABASE_TABLE_GLOBAL_FIELD.USER_ID] = 100001,
+}

@@ -24,7 +24,7 @@ using namespace rapidjson;
 int main() {
     string sz_config;
     FileUtil* file_util = FileUtil::GetInstance();
-    bool is_ok = file_util->ReadFile("gateway.json", sz_config);
+    bool is_ok = file_util->ReadFile("config.json", sz_config);
     if(!is_ok)
     {
         cout << "read config failed." << endl;

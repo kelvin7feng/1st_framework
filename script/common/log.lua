@@ -14,6 +14,8 @@ LOG_HEADER = {
 	[LOG_TYPE.INFO]  = "INFO"
 }
 
+DEBUG_SWITCH = false
+
 --打印函数
 local function LOG_DEBUG_CORE(nLevel, ...)
 

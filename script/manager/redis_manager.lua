@@ -44,6 +44,7 @@ function RedisInterface:DeleteValue(nUserId, nEventType, strKey)
 	CRedis.PushRedisGet(nUserId, nEventType, self:GetRedisTableName(), strKey);
 end
 
+G_GlobalRedis = RedisInterface:new(DATABASE_TABLE.GLOBAL)
 G_AccountRedis = RedisInterface:new(DATABASE_TABLE.ACCCUNT)
 G_RegisterRedis = RedisInterface:new(DATABASE_TABLE.REGISTER)
 G_GameDataRedis = RedisInterface:new(DATABASE_TABLE.GAME_DATA)

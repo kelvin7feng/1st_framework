@@ -2,21 +2,16 @@ UserManager = class()
 
 function UserManager:ctor()
 	self.m_tbUser = {};
-	self.m_nGlobalUserId = 100001;
 	G_EventManager:Register(EVENT_NAME.OnRegister, self.OnRegister, self)
 end
 
 function UserManager:OnRegister(tbParam)
-	LOG_INFO("User OnRegister Event...")
-end
-
-function UserManager:IncrementGlobalUserId()
-	self.m_nGlobalUserId = self.m_nGlobalUserId + 1;
+	LOG_DEBUG("User OnRegister Event...")
 end
 
 function UserManager:GetUser(nUserId)
-	LOG_INFO("User id:" .. nUserId)
-	LOG_INFO("self.m_tbUser:" .. json.encode(self.m_tbUser));
+	LOG_DEBUG("User id:" .. nUserId)
+	LOG_DEBUG("self.m_tbUser:" .. json.encode(self.m_tbUser));
 	if not self.m_tbUser[tostring(nUserId)] then
 		return nil
 	end
@@ -25,7 +20,7 @@ function UserManager:GetUser(nUserId)
 end
 
 function UserManager:GetUserGameData(nUserId)
-	LOG_INFO("User id:" .. nUserId)
+	LOG_DEBUG("User id:" .. nUserId)
 	if not self.m_tbUser[tostring(nUserId)] then
 		return nil
 	end
@@ -59,7 +54,7 @@ end
 
 function UserManager:GetInitUser(tbParam)
 	local tbUserInfo = DATABASE_TABLE_FIELD[DATABASE_TABLE.ACCCUNT].USER_INFO;
-	tbUserInfo.UserId = self.m_nGlobalUserId;
+	tbUserInfo.UserId = G_GlobalConfigManager:GetUserGlobalId();
 	tbUserInfo.DeviceId = tbParam.device_id;
 	tbUserInfo.RegisterIp = self.ip;
 	
@@ -112,6 +107,25 @@ function UserManager:Register(nHandlerId, tbParam)
 	return nErrorCode
 end
 
+function UserManager:EnterGame(nUserId)
+
+	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
+	if not IsNumber(nUserId) then
+		nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
+		return nErrorCode;
+	end
+
+	local tbGameData = G_UserManager:GetUserGameData(nUserId);
+	LOG_DEBUG("tbGameData:" .. json.encode(tbGameData))
+	if not tbGameData or nUserId ~= tbGameData.UserId then
+		nErrorCode = ERROR_CODE.SYSTEM.USER_NO_REGISTER;
+		return nErrorCode;
+	end
+
+	nErrorCode = ERROR_CODE.SYSTEM.OK;
+	return nErrorCode, tbGameData;
+end
+
 function UserManager:Login(nUserId)
 
 	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
@@ -121,14 +135,20 @@ function UserManager:Login(nUserId)
 	end
 
 	local tbGameData = G_UserManager:GetUserGameData(nUserId);
-	LOG_INFO("tbGameData:" .. json.encode(tbGameData))
+	LOG_DEBUG("tbGameData:" .. json.encode(tbGameData))
 	if not tbGameData or nUserId ~= tbGameData.UserId then
 		nErrorCode = ERROR_CODE.SYSTEM.USER_NO_REGISTER;
 		return nErrorCode;
 	end
 
+	local tbRetInfo = {}
+	tbRetInfo.user_id = nUserId;
+	tbRetInfo.token = "xxxxxx";
+	tbRetInfo.logic_gateway_ip = LOGIC_GATEWAY_IP;
+	tbRetInfo.logic_gateway_port = LOGIC_GATEWAY_PORT;
+
 	nErrorCode = ERROR_CODE.SYSTEM.OK;
-	return nErrorCode, tbGameData;
+	return nErrorCode, tbRetInfo;
 end
 
 function UserManager:CheckRegisterParam(tbParam)
@@ -161,7 +181,7 @@ end
 function UserManager:CheckRegisterInfo(tbParam)
 	local nErrorCode = self:CheckRegisterParam(tbParam);
 	if IsOkCode(tbParam) then
-		LOG_INFO("CheckRegisterInfo is Ok...")
+		LOG_DEBUG("CheckRegisterInfo is Ok...")
 	end
 	return nErrorCode;
 end
@@ -198,7 +218,7 @@ function UserManager:CheckUserInfo(nHandlerId, tbParam)
 end
 
 function UserManager:RegisterProcess(nUserId, nHandlerId, tbUserInfo, tbGameData)
-	self:IncrementGlobalUserId()
+	G_GlobalConfigManager:IncrementGlobalUserId()
 	self:CacheUser(nUserId, tbUserInfo, tbGameData);
 	G_NetManager:SetHandlerId(nUserId, nHandlerId);
 	G_RegisterRedis:SetValue(0, 0, tbUserInfo.DeviceId, nUserId);

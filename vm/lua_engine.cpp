@@ -17,8 +17,8 @@ using namespace std;
 
 LuaEngine::LuaEngine()
 {
-    server_path[SERVER_TYPE::LOGIC] = "./../script/logic_main.lua";
     server_path[SERVER_TYPE::LOGIN] = "./../script/login_main.lua";
+    server_path[SERVER_TYPE::LOGIC] = "./../script/logic_main.lua";
 }
 
 LuaEngine::~LuaEngine()

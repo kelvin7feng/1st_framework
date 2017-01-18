@@ -11,7 +11,7 @@ function NetManager:PushRequestToSquence(nHandlerId, nSequenceId, tbParam)
 	end
 
 	table.insert(self.m_tbRequestSquence[tostring(nHandlerId)], {nSequenceId, tbParam});
-	LOG_INFO("set m_tbRequestSquence:" .. json.encode(self.m_tbRequestSquence));
+	LOG_DEBUG("set m_tbRequestSquence:" .. json.encode(self.m_tbRequestSquence));
 end
 
 function NetManager:PopRequestFromSquence(nHandlerId)

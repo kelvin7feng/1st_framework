@@ -1,9 +1,14 @@
 
-lua_path = "./../script/?.lua;"
-package.path = lua_path .. "common/?.lua;" .. package.path
+lua_path = "./../script"
+package.path = lua_path .."/?.lua;".. package.path
 
-require("common.class")
-require("common.log")
-require("common.json")
+require("defination.load")
+require("common.load")
+require("manager.load")
 
 require("module.protocol")
+require("module.login_protocol")
+
+G_GlobalConfigManager:Init();
+
+LOG_INFO("load login script succeed...")

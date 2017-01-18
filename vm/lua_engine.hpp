@@ -28,8 +28,9 @@ class LuaEngine {
     
 public:
     enum SERVER_TYPE {
-        LOGIC = 1,
-        LOGIN = 2
+        LOGIN = 1,
+        LOGIC = 2
+        
     };
     
     LuaEngine();

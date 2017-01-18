@@ -194,7 +194,7 @@ void KDBClient::DBThreadActivate()
         if(!pPackage)
             break;
         
-        std::cout<< "dealing db request..." << std::endl;
+        //std::cout<< "dealing db request..." << std::endl;
         OnRequest(pPackage);
     }
     

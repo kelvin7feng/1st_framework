@@ -315,8 +315,8 @@ bool KRedisClient::OnRequest(IKG_Buffer* pBuffer)
 bool KRedisClient::OnResponsed(IKG_Buffer* pBuffer)
 {
     KRESOOND_COMMON* pResond = (KRESOOND_COMMON*)pBuffer->GetData();
-    std::cout << "redis onResponse....event type:" << pResond->uEventType << std::endl;
-    std::cout << "redis onResponse....data len:" << pResond->nDataLen << std::endl;
+    //std::cout << "redis onResponse....event type:" << pResond->uEventType << std::endl;
+    //std::cout << "redis onResponse....data len:" << pResond->nDataLen << std::endl;
     GameLogicServer* pInstance = GameLogicServer::GetInstance();
     pInstance->OnDBResponse(pResond);
     

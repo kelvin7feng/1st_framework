@@ -1,11 +1,9 @@
-package.path = luaPath.."/common/?.lua;"..package.path
+package.path = lua_path.."/common/?.lua;"..package.path
 
-require("Class")
-require("Json")
-require("Log")
-require("Public")
-require("Redis")
-require("Rpc")
-require("Type")
-require("Math")
-require("Table")
+require("class")
+require("json")
+require("log")
+require("math")
+require("public")
+require("table")
+require("type")

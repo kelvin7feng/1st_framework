@@ -23,7 +23,7 @@ static void OnUVTimer(uv_timer_t *handle) {
 
 GameLogicServer::GameLogicServer()
 {
-    lua_engine.InitState(LuaEngine::SERVER_TYPE::LOGIC);
+    
 }
 
 GameLogicServer::~GameLogicServer()
@@ -84,6 +84,9 @@ int GameLogicServer::Init(uv_loop_t* loop)
     //数据管理定时器
     uv_timer_init(loop, &m_db_timer_req);
     uv_timer_start(&m_db_timer_req, OnUVTimer, 0, 100);
+    
+    int nLogicServerType = json_doc["logic_server_type"].GetInt();
+    lua_engine.InitState(nLogicServerType);
     
     return 1;
 }
@@ -181,7 +184,8 @@ void GameLogicServer::SendDataToGateway(const char *pBuffer, unsigned int uSize)
              {
                  GameLogicServer::GetInstance()->OnSendData(pReq, nStatus);
              });
-    cout << "send data to gateway..." << nRet << endl;
+    
+    cout << "send data to gateway, uv write error code:" << nRet << endl;
     
     if(nRet != 0)
     {
