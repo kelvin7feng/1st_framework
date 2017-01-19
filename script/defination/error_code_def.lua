@@ -2,10 +2,10 @@ ERROR_CODE = {}
 
 ERROR_CODE.SYSTEM   = 
 {
-	UNKNOWN_ERROR				=  99999,
 	OK							=  0,
-	PARAMTER_ERROR  			=  1,
-	USER_DATA_NIL   			=  2,
-	USER_NO_REGISTER   			=  3,
-	USER_REGISTERING   			=  4
+	UNKNOWN_ERROR				=  1,
+	PARAMTER_ERROR  			=  2,
+	USER_DATA_NIL   			=  3,
+	USER_NO_REGISTER   			=  4,
+	USER_REGISTERING   			=  5
 }

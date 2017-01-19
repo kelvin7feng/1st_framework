@@ -90,13 +90,13 @@ void TCPBaseServer::OnNewConnection(uv_stream_t *server, int status)
         return;
     }
     
-    TCPSession new_session;
-    new_session.connection = std::make_shared<uv_tcp_t>();
+    TCPSession* new_session = new TCPSession;
+    new_session->connection = std::make_shared<uv_tcp_t>();
     
-    uv_tcp_init(GetLoop(), new_session.connection.get());
-    if (uv_accept(server, (uv_stream_t*)new_session.connection.get()) == 0) {
+    uv_tcp_init(GetLoop(), new_session->connection.get());
+    if (uv_accept(server, (uv_stream_t*)new_session->connection.get()) == 0) {
         
-        uv_read_start((uv_stream_t*)new_session.connection.get(),
+        uv_read_start((uv_stream_t*)new_session->connection.get(),
                       [](uv_handle_t* stream, size_t nread, uv_buf_t *buf)
                       {
                           TCPBaseServer::GetInstance()->AllocBuffer(stream, nread, buf);
@@ -106,12 +106,12 @@ void TCPBaseServer::OnNewConnection(uv_stream_t *server, int status)
                           TCPBaseServer::GetInstance()->OnMsgRecv(stream, nread, buf);
                       });
         
-        uv_stream_t* key = (uv_stream_t*)new_session.connection.get();
+        uv_stream_t* key = (uv_stream_t*)new_session->connection.get();
         open_sessions.insert({key, new_session});
         
     }
     else {
-        uv_close((uv_handle_t*)new_session.connection.get(), NULL);
+        uv_close((uv_handle_t*)new_session->connection.get(), NULL);
     }
 }
 
@@ -120,7 +120,7 @@ void TCPBaseServer::RemoveClient(uv_stream_t* client)
     auto connection_pos = open_sessions.find(client);
     if (connection_pos != open_sessions.end())
     {
-        uv_close((uv_handle_t*)connection_pos->second.connection.get(),
+        uv_close((uv_handle_t*)connection_pos->second->connection.get(),
                  [] (uv_handle_t* handle)
                  {
                      TCPBaseServer::GetInstance()->OnConnectionClose(handle);
@@ -264,12 +264,12 @@ handler_map_to_id_t& TCPBaseServer::GetHandlerToIdMap()
     return m_hander_to_id_map;
 }
 
-void TCPBaseServer::AddSession(TCPSession session)
+void TCPBaseServer::AddSession(TCPSession* session)
 {
     m_nSessionId ++;
-    session.SetHandlerId(m_nSessionId);
+    session->SetHandlerId(m_nSessionId);
     
-    uv_stream_t* key = (uv_stream_t*)session.connection.get();
+    uv_stream_t* key = (uv_stream_t*)session->connection.get();
     session_map_t& open_sessions = GetSessionMap();
     open_sessions.insert({key, session});
     

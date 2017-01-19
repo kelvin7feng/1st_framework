@@ -18,7 +18,8 @@ TCPSession::TCPSession()
 
 TCPSession::~TCPSession()
 {
-    
+    //SAFE_FREE(m_pRecvPacket);
+    //std::cout << "TCPSession::~TCPSession()" << std::endl;
 }
 
 unsigned int TCPSession::GetHandlerId()

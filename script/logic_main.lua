@@ -4,6 +4,7 @@ package.path = lua_path .."/?.lua;".. package.path
 
 require("defination.load")
 require("common.load")
+require("object.load")
 require("manager.load")
 
 require("module.protocol")

@@ -31,6 +31,11 @@ end
 function EventManager:PostEvent(strEventName, tbParam)
 
 	local tbEvent = self.m_tbRegisterEvent[strEventName];
+	if not tbEvent then
+		LOG_ERROR(string.format("Event [%s] does not register...", strEventName))
+		return;
+	end
+	
 	local obj = tbEvent.obj;
 	local callback = tbEvent.callback;
 

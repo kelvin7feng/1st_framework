@@ -1,7 +1,7 @@
 UserManager = class()
 
 function UserManager:ctor()
-	self.m_tbUser = {};
+	self.m_tbUserDataPool = {};
 	G_EventManager:Register(EVENT_NAME.OnRegister, self.OnRegister, self)
 end
 
@@ -9,47 +9,15 @@ function UserManager:OnRegister(tbParam)
 	LOG_DEBUG("User OnRegister Event...")
 end
 
-function UserManager:GetUser(nUserId)
-	LOG_DEBUG("User id:" .. nUserId)
-	LOG_DEBUG("self.m_tbUser:" .. json.encode(self.m_tbUser));
-	if not self.m_tbUser[tostring(nUserId)] then
-		return nil
-	end
-
-	return self.m_tbUser[tostring(nUserId)].UserInfo or nil;
-end
-
-function UserManager:GetUserGameData(nUserId)
-	LOG_DEBUG("User id:" .. nUserId)
-	if not self.m_tbUser[tostring(nUserId)] then
-		return nil
-	end
-
-	return self.m_tbUser[tostring(nUserId)].GameData or nil;
-end
-
-function UserManager:CacheUser(nUserId, tbUserInfo, tbGameData)
-	if IsString(tbUserInfo) then
-		tbUserInfo = json.decode(tbUserInfo);
-	end
-
-	if not self.m_tbUser[tostring(nUserId)] then
-		self.m_tbUser[tostring(nUserId)] = {}
-	end
-	self.m_tbUser[tostring(nUserId)].UserInfo = tbUserInfo;
-	self.m_tbUser[tostring(nUserId)].GameData = tbGameData;
-end
-
-function UserManager:CacheUserGameData(nUserId, tbGameData)
-	if IsString(tbUserInfo) then
-		tbUserInfo = json.decode(tbUserInfo);
-	end
-
-	if not self.m_tbUser[tostring(nUserId)] then
-		self.m_tbUser[tostring(nUserId)] = {}
-	end
+function UserManager:CacheUserObject(nUserId, tbGameData)
+	local objUser = UserData:new(nUserId, tbGameData);
+	self.m_tbUserDataPool[tostring(nUserId)] = objUser;
 	
-	self.m_tbUser[tostring(nUserId)].GameData = tbGameData;
+	LOG_TABLE(tbGameData);
+end
+
+function UserManager:GetUserObject(nUserId)
+	return self.m_tbUserDataPool[tostring(nUserId)];
 end
 
 function UserManager:GetInitUser(tbParam)
@@ -62,8 +30,14 @@ function UserManager:GetInitUser(tbParam)
 end
 
 function UserManager:GetInitGameData(nUserId)
-	local tbGameData = DATABASE_TABLE_FIELD[DATABASE_TABLE.GAME_DATA].BASE_INFO;
-	tbGameData.UserId = nUserId
+
+	local tbGameData = {}
+
+	local tbBaseInfo = DATABASE_TABLE_FIELD[DATABASE_TABLE.GAME_DATA].BASE_INFO;
+	tbBaseInfo.UserId = nUserId
+
+	tbGameData["BaseInfo"] = tbBaseInfo;
+
 	return tbGameData;
 end
 
@@ -82,6 +56,7 @@ function UserManager:Register(nHandlerId, tbParam)
 		return nErrorCode
 	end
 
+	LOG_DEBUG("register Param:" .. json.encode(tbParam))
 	strIp = tbParam.ip;
 	if not IsString(strIp) then
 		nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
@@ -115,15 +90,14 @@ function UserManager:EnterGame(nUserId)
 		return nErrorCode;
 	end
 
-	local tbGameData = G_UserManager:GetUserGameData(nUserId);
-	LOG_DEBUG("tbGameData:" .. json.encode(tbGameData))
-	if not tbGameData or nUserId ~= tbGameData.UserId then
+	local objUser = G_UserManager:GetUserObject(nUserId);
+	if not objUser or nUserId ~= objUser:GetUserId() then
 		nErrorCode = ERROR_CODE.SYSTEM.USER_NO_REGISTER;
 		return nErrorCode;
 	end
 
 	nErrorCode = ERROR_CODE.SYSTEM.OK;
-	return nErrorCode, tbGameData;
+	return nErrorCode, objUser;
 end
 
 function UserManager:Login(nUserId)
@@ -134,9 +108,8 @@ function UserManager:Login(nUserId)
 		return nErrorCode;
 	end
 
-	local tbGameData = G_UserManager:GetUserGameData(nUserId);
-	LOG_DEBUG("tbGameData:" .. json.encode(tbGameData))
-	if not tbGameData or nUserId ~= tbGameData.UserId then
+	local objUser = G_UserManager:GetUserObject(nUserId);
+	if not objUser or nUserId ~= objUser:GetUserId() then
 		nErrorCode = ERROR_CODE.SYSTEM.USER_NO_REGISTER;
 		return nErrorCode;
 	end
@@ -207,8 +180,8 @@ function UserManager:CheckUserInfo(nHandlerId, tbParam)
 	G_NetManager:SetHandlerId(nUserId, nHandlerId);
 
 	-- 如果没有缓存，则需要从数据库里面读取出来，在数据回来后再处理
-	local tbUserGameData = self:GetUserGameData(nUserId);
-	if not tbUserGameData then
+	local objUser = self:GetUserObject(nUserId);
+	if not objUser then
 		nErrorCode = ERROR_CODE.SYSTEM.USER_DATA_NIL;
 		return nErrorCode;
 	end
@@ -219,11 +192,11 @@ end
 
 function UserManager:RegisterProcess(nUserId, nHandlerId, tbUserInfo, tbGameData)
 	G_GlobalConfigManager:IncrementGlobalUserId()
-	self:CacheUser(nUserId, tbUserInfo, tbGameData);
+	self:CacheUserObject(nUserId, tbGameData)
 	G_NetManager:SetHandlerId(nUserId, nHandlerId);
 	G_RegisterRedis:SetValue(0, 0, tbUserInfo.DeviceId, nUserId);
 	G_AccountRedis:SetValue(0, 0, nUserId, tbUserInfo);
-	G_GameDataRedis:SetValue(nUserId, EVENT_ID.SYSTEM.REGISTERING, nUserId, tbGameData);
+	G_GameDataRedis:SetValue(nUserId, EVENT_ID.GET_ASYN_DATA.REGISTERING, nUserId, tbGameData);
 end
 
 G_UserManager = UserManager:new()

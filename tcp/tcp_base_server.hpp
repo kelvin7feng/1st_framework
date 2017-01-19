@@ -22,7 +22,7 @@
 
 using namespace std;
 
-typedef std::map<uv_stream_t*, TCPSession> session_map_t;
+typedef std::map<uv_stream_t*, TCPSession*> session_map_t;
 typedef std::map<unsigned int, uv_stream_t*> id_map_to_handler_t;
 typedef std::map<uv_stream_t*, unsigned int> handler_map_to_id_t;
 
@@ -78,7 +78,7 @@ public:
     
     virtual handler_map_to_id_t& GetHandlerToIdMap();
     
-    virtual void AddSession(TCPSession session);
+    virtual void AddSession(TCPSession* session);
     
     virtual void RemoveClient(uv_stream_t* client);
     

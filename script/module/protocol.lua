@@ -20,7 +20,7 @@ function OnClientRequest(nHandlerId, nEventId, nSequenceId, strJson)
 				return 0;
 			end
 
-			local tbParam = json.decode(strJson);
+			local tbParam = json.decode(v);
 			
 			-- 添加到请求队列里
 			G_NetManager:PushRequestToSquence(nHandlerId, nSequenceId, tbParam);
@@ -39,6 +39,11 @@ end
 -- 全局配置表事件
 function OnResponseGlobalConfigEvent(nEventId, strRepsonseJson)
 	if nEventId == EVENT_ID.GLOBAL_CONFIG.GET_USER_GLOBAL_ID then
-		G_GlobalConfigManager:SetUserGlobalId(strRepsonseJson);
+		local bOnlyCache = false;
+		if IsString(strRepsonseJson) and string.len(strRepsonseJson) > 0 then
+			bOnlyCache = true;
+		end
+
+		G_GlobalConfigManager:SetUserGlobalId(strRepsonseJson, bOnlyCache);
 	end
 end

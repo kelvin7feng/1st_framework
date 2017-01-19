@@ -14,7 +14,7 @@
         "password": "123456",
         "scheme": "game"
     },
-    "logic_server_type" : 2,
+    "logic_server_type" : 1,
     "redis_log_frequency" : 5,
     "redis_max_reconnect_times" : 5,
     "redis_sleep_millisecond" : 1000,

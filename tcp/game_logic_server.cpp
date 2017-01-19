@@ -123,7 +123,7 @@ void GameLogicServer::RemoveClient(uv_stream_t* client)
     auto connection_pos = open_sessions.find(client);
     if (connection_pos != open_sessions.end())
     {
-        uv_close((uv_handle_t*)connection_pos->second.connection.get(),
+        uv_close((uv_handle_t*)connection_pos->second->connection.get(),
                  [] (uv_handle_t* handle)
                  {
                      GameLogicServer::GetInstance()->OnConnectionClose(handle);
@@ -145,13 +145,13 @@ void GameLogicServer::OnNewConnection(uv_stream_t *server, int status)
         return;
     }
     
-    TCPSession new_session;
-    new_session.connection = std::make_shared<uv_tcp_t>();
+    TCPSession* new_session = new TCPSession;
+    new_session->connection = std::make_shared<uv_tcp_t>();
     
-    uv_tcp_init(GetLoop(), new_session.connection.get());
-    if (uv_accept(server, (uv_stream_t*)new_session.connection.get()) == 0) {
+    uv_tcp_init(GetLoop(), new_session->connection.get());
+    if (uv_accept(server, (uv_stream_t*)new_session->connection.get()) == 0) {
         
-        uv_read_start((uv_stream_t*)new_session.connection.get(),
+        uv_read_start((uv_stream_t*)new_session->connection.get(),
                       [](uv_handle_t* stream, size_t nread, uv_buf_t *buf)
                       {
                           GameLogicServer::GetInstance()->AllocBuffer(stream, nread, buf);
@@ -161,12 +161,12 @@ void GameLogicServer::OnNewConnection(uv_stream_t *server, int status)
                           GameLogicServer::GetInstance()->OnMsgRecv(stream, nread, buf);
                       });
         
-        m_pGatewayClient = (uv_stream_t*)new_session.connection.get();
+        m_pGatewayClient = (uv_stream_t*)new_session->connection.get();
         AddSession(new_session);
         
     }
     else {
-        uv_close((uv_handle_t*)new_session.connection.get(), NULL);
+        uv_close((uv_handle_t*)new_session->connection.get(), NULL);
     }
 }
 

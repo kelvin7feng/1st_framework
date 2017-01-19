@@ -43,7 +43,7 @@ function NetManager:GetParamFromSquence(nHandlerId)
 		self.m_tbRequestSquence[tostring(nHandlerId)] = nil;
 	end
 
-	local tbParam = tbRequest[2];
+	local tbParam = tbRequest[2].parameter;
 	return tbParam;
 end
 

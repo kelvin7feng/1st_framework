@@ -1,7 +1,21 @@
+-- 全局唯一对象
 
-function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
+function ClientRequest(nHandlerId, nEventId, nSequenceId, tbContent)
 	
-	if nEventId == EVENT_ID.SYSTEM.ENTER_GAME then
+	local tbParam = tbContent.parameter
+	local nUserId = tbContent.user_id
+
+	if not IsTable(tbParam) then
+		LOG_ERROR("parameter of request is nil...")
+		return;
+	end
+
+	if not IsNumber(nUserId) then
+		LOG_ERROR("nUserId of request is nil...")
+		return;
+	end
+
+	if nEventId == EVENT_ID.CLIENT_LOGIN.ENTER_GAME then
 		LOG_DEBUG("OnClientEnterGame..........1")
 		OnClientEnterGame(nHandlerId, nEventId, nSequenceId, tbParam)
 	end
@@ -15,14 +29,15 @@ function OnClientEnterGame(nHandlerId, nEventId, nSequenceId, tbParam)
 	if nErrorCode == ERROR_CODE.SYSTEM.USER_DATA_NIL then
 		LOG_DEBUG("OnClientEnterGame User Info does not cache...")
 		local nUserId = tbParam.user_id
-		return G_GameDataRedis:GetValue(nUserId, EVENT_ID.SYSTEM.LOGIC_GET_GAME_DATA, nUserId);
+		return G_GameDataRedis:GetValue(nUserId, EVENT_ID.GET_ASYN_DATA.LOGIC_GET_GAME_DATA, nUserId);
 	elseif nErrorCode == ERROR_CODE.SYSTEM.PARAMTER_ERROR then
 		LOG_DEBUG("OnClientEnterGame paramter error...")
 	elseif IsOkCode(nErrorCode) then
 		LOG_DEBUG("OnClientEnterGame ok...")
 		local nUserId = tbParam.user_id
-		local nErrorCode, nRetInfo = G_UserManager:EnterGame(nUserId);
-		OnResponeClientLogin(nUserId, nErrorCode, nRetInfo)
+		local nErrorCode,objUser = G_UserManager:EnterGame(nUserId);
+		local tbRetInfo = objUser:GetGameData();
+		OnResponeClientLogin(nUserId, nErrorCode, tbRetInfo);
 	end
 end
 
@@ -30,7 +45,7 @@ end
 function OnResponeClientLogin(nUserId, nErrorCode, nRetInfo)
 	local nHandlerId = G_NetManager:GetHandlerId(nUserId);
 	local nSequenceId = G_NetManager:GetSquenceIdFromSquence(nHandlerId);
-	G_NetManager:SendToGateway(nSequenceId, EVENT_ID.SYSTEM.LOGIN_DIRECT, nErrorCode, nHandlerId, string.len(json.encode(nRetInfo)), nRetInfo);
+	G_NetManager:SendToGateway(nSequenceId, EVENT_ID.CLIENT_LOGIN.LOGIN_DIRECT, nErrorCode, nHandlerId, string.len(json.encode(nRetInfo)), nRetInfo);
 end
 
 -- 响应redis
@@ -45,12 +60,18 @@ end
 
 -- 响应进入游戏事件
 function OnResponseEnterGameEvent(nUserId, nEventId, strRepsonseJson)
-	if nEventId == EVENT_ID.SYSTEM.LOGIC_GET_GAME_DATA then
-		LOG_DEBUG("ON GET GAME DATA BACK..........1")
-		local tbGameData = json.decode(strRepsonseJson)
-		LOG_TABLE(tbGameData)
-		G_UserManager:CacheUserGameData(nUserId, tbGameData)
-		local nErrorCode, nRetInfo = G_UserManager:EnterGame(nUserId);
-		OnResponeClientLogin(nUserId, nErrorCode, nRetInfo)
+	if nEventId == EVENT_ID.GET_ASYN_DATA.LOGIC_GET_GAME_DATA then
+		LOG_DEBUG("ON GET GAME DATA BACK..........1" .. strRepsonseJson)
+		if IsString(strRepsonseJson) and string.len(strRepsonseJson) > 0 then
+			local tbGameData = json.decode(strRepsonseJson)
+			G_UserManager:CacheUserObject(nUserId, tbGameData)
+			local nErrorCode, objUser = G_UserManager:EnterGame(nUserId);
+			local tbRetInfo = objUser:GetGameData();
+			LOG_DEBUG("ret:" .. json.encode(tbRetInfo))
+			OnResponeClientLogin(nUserId, nErrorCode, tbRetInfo)
+		else
+			LOG_DEBUG("User Is Nil");
+			OnResponeClientLogin(nUserId, ERROR_CODE.SYSTEM.USER_DATA_NIL, "")
+		end
 	end
 end

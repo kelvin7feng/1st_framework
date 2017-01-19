@@ -1,7 +1,14 @@
 
-function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
+function ClientRequest(nHandlerId, nEventId, nSequenceId, tbContent)
 
-	if nEventId == EVENT_ID.SYSTEM.LOGIN_DIRECT then
+	local tbParam = tbContent.parameter
+
+	if not IsTable(tbParam) then
+		LOG_ERROR("parameter of request is nil...")
+		return;
+	end
+	
+	if nEventId == EVENT_ID.CLIENT_LOGIN.LOGIN_DIRECT then
 		LOG_DEBUG("OnClientLoginDirect..........1")
 		return OnClientLoginDirect(nHandlerId, nEventId, nSequenceId, tbParam);
 	end
@@ -15,7 +22,7 @@ function OnClientLoginDirect(nHandlerId, nEventId, nSequenceId, tbParam)
 	if IsOkCode(nErrorCode) then
 		LOG_DEBUG("OnClientLoginDirect..........2")
 		-- 把nHandlerId当作nUserId来用，在OnRedisResponse使用时注意
-		G_RegisterRedis:GetValue(nHandlerId, EVENT_ID.SYSTEM.GET_DEVICE_ID, tbParam.device_id);
+		G_RegisterRedis:GetValue(nHandlerId, EVENT_ID.GET_ASYN_DATA.GET_DEVICE_ID, tbParam.device_id);
 	else
 		-- 参数有误，直接返回给客户端
 		G_NetManager:PopRequestFromSquence(nHandlerId);
@@ -32,7 +39,7 @@ function OnClientRegister(nHandlerId, nEventId, nSequenceId, tbParam)
 	if nErrorCode == ERROR_CODE.SYSTEM.PARAMTER_ERROR then
 		LOG_DEBUG("OnClientRegister PARAMTER_ERROR")
 		LOG_DEBUG("OnClientLoginDirect..........4")
-		G_NetManager:SendToGateway(nSequenceId, EVENT_ID.SYSTEM.LOGIN_DIRECT, nErrorCode, nHandlerId, 0, "");
+		G_NetManager:SendToGateway(nSequenceId, EVENT_ID.CLIENT_LOGIN.LOGIN_DIRECT, nErrorCode, nHandlerId, 0, "");
 	end
 end
 
@@ -43,7 +50,7 @@ function OnClientLogin(nHandlerId, tbParam)
 	if nErrorCode == ERROR_CODE.SYSTEM.USER_DATA_NIL then
 		LOG_DEBUG("OnClientLogin User Info does not cache...")
 		local nUserId = tbParam.user_id
-		return G_GameDataRedis:GetValue(nUserId, EVENT_ID.SYSTEM.GET_GAME_DATA, nUserId);
+		return G_GameDataRedis:GetValue(nUserId, EVENT_ID.GET_ASYN_DATA.GET_GAME_DATA, nUserId);
 	elseif nErrorCode == ERROR_CODE.SYSTEM.PARAMTER_ERROR then
 		LOG_DEBUG("OnClientLogin paramter error...")
 	elseif IsOkCode(nErrorCode) then
@@ -59,7 +66,7 @@ end
 function OnResponeClientLogin(nUserId, nErrorCode, nRetInfo)
 	local nHandlerId = G_NetManager:GetHandlerId(nUserId);
 	local nSequenceId = G_NetManager:GetSquenceIdFromSquence(nHandlerId);
-	G_NetManager:SendToGateway(nSequenceId, EVENT_ID.SYSTEM.LOGIN_DIRECT, nErrorCode, nHandlerId, string.len(json.encode(nRetInfo)), nRetInfo);
+	G_NetManager:SendToGateway(nSequenceId, EVENT_ID.CLIENT_LOGIN.LOGIN_DIRECT, nErrorCode, nHandlerId, string.len(json.encode(nRetInfo)), nRetInfo);
 end
 
 -- 响应redis
@@ -77,7 +84,7 @@ end
 -- 登录流程事件
 function OnResponseLoginEvent(nUserId, nEventId, strRepsonseJson)
 	
-	if nEventId == EVENT_ID.SYSTEM.GET_DEVICE_ID then
+	if nEventId == EVENT_ID.GET_ASYN_DATA.GET_DEVICE_ID then
 		
 		local nHandlerId = nUserId;
 		local nSequenceId = G_NetManager:GetSquenceIdFromSquence(nHandlerId);
@@ -88,7 +95,7 @@ function OnResponseLoginEvent(nUserId, nEventId, strRepsonseJson)
 			LOG_DEBUG("Go to Register");
 			LOG_DEBUG("nHandlerId Id:" .. nHandlerId);
 			LOG_DEBUG("Squence Id:" .. nSequenceId);
-			return OnClientRegister(nHandlerId, EVENT_ID.SYSTEM.REGISTERING, nSequenceId, tbParam)
+			return OnClientRegister(nHandlerId, EVENT_ID.GET_ASYN_DATA.REGISTERING, nSequenceId, tbParam)
 		end
 
 		local nUserId = tonumber(strRepsonseJson);
@@ -97,16 +104,17 @@ function OnResponseLoginEvent(nUserId, nEventId, strRepsonseJson)
 		return OnClientLogin(nHandlerId, tbLoginParam);
 	end
 
-	if nEventId == EVENT_ID.SYSTEM.REGISTERING then
+	if nEventId == EVENT_ID.GET_ASYN_DATA.REGISTERING then
 		LOG_DEBUG("ON REGISTERING BACK..........4")
 		local nErrorCode, nRetInfo = G_UserManager:Login(nUserId);
 		OnResponeClientLogin(nUserId, nErrorCode, nRetInfo)
 	end
 
-	if nEventId == EVENT_ID.SYSTEM.GET_GAME_DATA then
+	if nEventId == EVENT_ID.GET_ASYN_DATA.GET_GAME_DATA then
 		LOG_DEBUG("ON GET GAME DATA BACK..........5")
 		local tbGameData = json.decode(strRepsonseJson)
-		G_UserManager:CacheUserGameData(nUserId, tbGameData)
+		G_UserManager:CacheUserObject(nUserId, tbGameData)
+		LOG_DEBUG(tbGameData);
 		local nErrorCode, nRetInfo = G_UserManager:Login(nUserId);
 		OnResponeClientLogin(nUserId, nErrorCode, nRetInfo)
 	end

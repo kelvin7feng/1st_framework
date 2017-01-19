@@ -27,13 +27,13 @@ function GlobalConfigManager:GetUserGlobalId()
 end
 
 -- 设置全局玩家Id
-function GlobalConfigManager:SetUserGlobalId(nUserGlobalId)
+function GlobalConfigManager:SetUserGlobalId(nUserGlobalId, bOnlyCache)
 	local nUserGlobalId = tonumber(nUserGlobalId);
 	if not nUserGlobalId or (nUserGlobalId and nUserGlobalId == 0) then
 		nUserGlobalId = DATABASE_TABLE_GLOBAL_DEFALUT[DATABASE_TABLE_GLOBAL_FIELD.USER_ID]
 	end
 
-	self:SetConfigField(DATABASE_TABLE_GLOBAL_FIELD.USER_ID, nUserGlobalId)
+	self:SetConfigField(DATABASE_TABLE_GLOBAL_FIELD.USER_ID, nUserGlobalId, bOnlyCache);
 end
 
 -- 检查全局配置是否存在
@@ -46,11 +46,13 @@ function GlobalConfigManager:CheckConfigField(strField)
 end
 
 -- 设置字段
-function GlobalConfigManager:SetConfigField(strField, val)
+function GlobalConfigManager:SetConfigField(strField, val, bOnlyCache)
 	self.m_tbGlobalConfig[strField] = val;
 
-	LOG_DEBUG("set " .. strField .. ":" .. val);
-	G_GlobalRedis:SetValue(0, 0, strField, val);
+	LOG_DEBUG("Cache " .. strField .. ":" .. val);
+	if not bOnlyCache then
+		G_GlobalRedis:SetValue(0, 0, strField, val);
+	end
 end
 
 -- 设置字段
