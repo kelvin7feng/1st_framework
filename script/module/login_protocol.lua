@@ -1,7 +1,5 @@
 
-function ClientRequest(nHandlerId, nEventId, nSequenceId, tbContent)
-
-	local tbParam = tbContent.parameter
+function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 
 	if not IsTable(tbParam) then
 		LOG_ERROR("parameter of request is nil...")
@@ -21,8 +19,15 @@ function OnClientLoginDirect(nHandlerId, nEventId, nSequenceId, tbParam)
 	local nErrorCode = G_UserManager:CheckRegisterInfo(tbParam);
 	if IsOkCode(nErrorCode) then
 		LOG_DEBUG("OnClientLoginDirect..........2")
+		local strDeviceId = nil
+		for key, value in ipairs(tbParam) do
+			if key == 1 then
+				strDeviceId = value;
+				break;
+			end
+		end
 		-- 把nHandlerId当作nUserId来用，在OnRedisResponse使用时注意
-		G_RegisterRedis:GetValue(nHandlerId, EVENT_ID.GET_ASYN_DATA.GET_DEVICE_ID, tbParam.device_id);
+		G_RegisterRedis:GetValue(nHandlerId, EVENT_ID.GET_ASYN_DATA.GET_DEVICE_ID, strDeviceId);
 	else
 		-- 参数有误，直接返回给客户端
 		G_NetManager:PopRequestFromSquence(nHandlerId);
@@ -44,18 +49,16 @@ function OnClientRegister(nHandlerId, nEventId, nSequenceId, tbParam)
 end
 
 -- 登录函数
-function OnClientLogin(nHandlerId, tbParam)
+function OnClientLogin(nHandlerId, nUserId)
 
-	local nErrorCode = G_UserManager:CheckUserInfo(nHandlerId, tbParam);
+	local nErrorCode = G_UserManager:CheckUserInfo(nHandlerId, nUserId);
 	if nErrorCode == ERROR_CODE.SYSTEM.USER_DATA_NIL then
 		LOG_DEBUG("OnClientLogin User Info does not cache...")
-		local nUserId = tbParam.user_id
 		return G_GameDataRedis:GetValue(nUserId, EVENT_ID.GET_ASYN_DATA.GET_GAME_DATA, nUserId);
 	elseif nErrorCode == ERROR_CODE.SYSTEM.PARAMTER_ERROR then
 		LOG_DEBUG("OnClientLogin paramter error...")
 	elseif IsOkCode(nErrorCode) then
 		LOG_DEBUG("OnClientLogin ok...")
-		local nUserId = tbParam.user_id
 		local nErrorCode, nRetInfo = G_UserManager:Login(nUserId);
 		OnResponeClientLogin(nUserId, nErrorCode, nRetInfo)
 	end
@@ -99,9 +102,7 @@ function OnResponseLoginEvent(nUserId, nEventId, strRepsonseJson)
 		end
 
 		local nUserId = tonumber(strRepsonseJson);
-		local tbLoginParam = {}
-		tbLoginParam.user_id = nUserId;
-		return OnClientLogin(nHandlerId, tbLoginParam);
+		return OnClientLogin(nHandlerId, nUserId);
 	end
 
 	if nEventId == EVENT_ID.GET_ASYN_DATA.REGISTERING then
@@ -111,7 +112,7 @@ function OnResponseLoginEvent(nUserId, nEventId, strRepsonseJson)
 	end
 
 	if nEventId == EVENT_ID.GET_ASYN_DATA.GET_GAME_DATA then
-		LOG_DEBUG("ON GET GAME DATA BACK..........5")
+		LOG_DEBUG("ON GET GAME DATA BACK..........5" .. strRepsonseJson)
 		local tbGameData = json.decode(strRepsonseJson)
 		G_UserManager:CacheUserObject(nUserId, tbGameData)
 		LOG_DEBUG(tbGameData);

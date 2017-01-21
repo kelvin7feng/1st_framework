@@ -2,9 +2,8 @@
 
 RedisInterface = class()
 
-function RedisInterface:ctor(nType)
-	self.m_nRedisType = nType;
-	self.m_strRedisTableName = MAP_DATABSE_TABLE_KEY[nType];
+function RedisInterface:ctor(strDbTableName)
+	self.m_strRedisTableName = strDbTableName;
 end
 
 function RedisInterface:GetRedisTableName()
@@ -44,7 +43,7 @@ function RedisInterface:DeleteValue(nUserId, nEventType, strKey)
 	CRedis.PushRedisGet(nUserId, nEventType, self:GetRedisTableName(), strKey);
 end
 
-G_GlobalRedis = RedisInterface:new(DATABASE_TABLE.GLOBAL)
-G_AccountRedis = RedisInterface:new(DATABASE_TABLE.ACCCUNT)
-G_RegisterRedis = RedisInterface:new(DATABASE_TABLE.REGISTER)
-G_GameDataRedis = RedisInterface:new(DATABASE_TABLE.GAME_DATA)
+G_GlobalRedis = RedisInterface:new(DATABASE_TABLE_NAME.GLOBAL)
+G_AccountRedis = RedisInterface:new(DATABASE_TABLE_NAME.ACCCUNT)
+G_RegisterRedis = RedisInterface:new(DATABASE_TABLE_NAME.REGISTER)
+G_GameDataRedis = RedisInterface:new(DATABASE_TABLE_NAME.GAME_DATA)

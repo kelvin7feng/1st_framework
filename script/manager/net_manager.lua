@@ -15,7 +15,7 @@ function NetManager:PushRequestToSquence(nHandlerId, nSequenceId, tbParam)
 end
 
 function NetManager:PopRequestFromSquence(nHandlerId)
-
+	
 	local tbRequest = table.remove(self.m_tbRequestSquence[tostring(nHandlerId)], 1);
 	if table.maxn(self.m_tbRequestSquence[tostring(nHandlerId)]) == 0 then
 		self.m_tbRequestSquence[tostring(nHandlerId)] = nil;
@@ -43,7 +43,7 @@ function NetManager:GetParamFromSquence(nHandlerId)
 		self.m_tbRequestSquence[tostring(nHandlerId)] = nil;
 	end
 
-	local tbParam = tbRequest[2].parameter;
+	local tbParam = tbRequest[2];
 	return tbParam;
 end
 
@@ -62,10 +62,11 @@ function NetManager:GetHandlerId(nUserId)
 end
 
 function NetManager:SendToGateway(nSequenceId, nEventType, nErrorCode, nHandlerId, nLength, strRetParam)
+
 	if strRetParam and not IsString(strRetParam) then
 		strRetParam = json.encode(strRetParam);
 	end
-	
+
 	self:PopRequestFromSquence(nHandlerId);
 	CNet.SendToGateway(nSequenceId, nEventType, nErrorCode, nHandlerId, nLength or 1, strRetParam or "");
 end

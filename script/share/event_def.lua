@@ -31,9 +31,9 @@ EVENT_ID =  {
 
 	-- 客户端事件, 10001, 10100
 	CLIENT_LOGIN = {
-		LOGIN_DIRECT			=   10001,
-		ENTER_GAME				=	10002	
-	}
+		LOGIN_DIRECT			=   10001,		-- 直接登录
+		ENTER_GAME				=	10002		-- 进入游戏
+	},
 
 }
 

@@ -20,20 +20,21 @@ function OnClientRequest(nHandlerId, nEventId, nSequenceId, strJson)
 				return 0;
 			end
 
-			local tbParam = json.decode(v);
-			
+			local tbParam = json.decode(strJson);
+
 			-- 添加到请求队列里
 			G_NetManager:PushRequestToSquence(nHandlerId, nSequenceId, tbParam);
 
-			ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam) 
+			ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
+
 		end, __TRACKBACK__);
 
-	local nRetCode = -1;
-	if bRet then
-		nRetCode = 0;
+	-- 如果报错, 把请求从队列中移除
+	if not bRet then
+		G_NetManager:PopRequestFromSquence(nHandlerId);		
 	end
 	
-	return nRetCode;
+	return tonumber(bRet);
 end
 
 -- 全局配置表事件

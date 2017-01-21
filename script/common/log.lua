@@ -14,7 +14,7 @@ LOG_HEADER = {
 	[LOG_TYPE.INFO]  = "INFO"
 }
 
-DEBUG_SWITCH = false
+DEBUG_SWITCH = true
 
 --打印函数
 local function LOG_DEBUG_CORE(nLevel, ...)
@@ -133,6 +133,7 @@ function LOG_TABLE(value, sub, count, NotFirst, name, ttt)
 	end
 end
 
+-- 报错回调
 function __TRACKBACK__(errmsg)
     DEBUG_TRACE_BACE(errmsg);
     return false;
