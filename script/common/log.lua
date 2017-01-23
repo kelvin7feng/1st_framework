@@ -14,13 +14,25 @@ LOG_HEADER = {
 	[LOG_TYPE.INFO]  = "INFO"
 }
 
-DEBUG_SWITCH = true
+local print = print
+local tconcat = table.concat
+local tinsert = table.insert
+local srep = string.rep
+local type = type
+local pairs = pairs
+local ipairs = ipairs
+local tostring = tostring
+local next = next
 
 --打印函数
 local function LOG_DEBUG_CORE(nLevel, ...)
 
+	if nLevel > LOG_LEVEL then
+		return;
+	end
+
 	local args = {...}
-	local strMsg = "Lua: "
+	local strMsg = string.format("Lua %s: ", LOG_HEADER[nLevel]);
 
 	for k,v in ipairs(args) do
 		strMsg = strMsg .. tostring(v) .. "\t"
@@ -68,7 +80,7 @@ function OsExit(i)
 	os.exit(i)
 end
 
---检查是否为错误
+-- 检查是否为错误
 function IsError(value, strMessage)
 
 	local bIsError = not value
@@ -86,51 +98,32 @@ function IsError(value, strMessage)
 	return bIsError
 end
 
---打印table
-function LOG_TABLE(value, sub, count, NotFirst, name, ttt)
-	if not NotFirst then
-	    printCount = 0 --层深统计
-	    printMark = {} --重复标记
-	    name = name or ""
-	    ttt = ttt or ""
-	    print("["..os.date("%x %X").."]")
+-- 打印table
+function LOG_TABLE(root)
+	if not root then
+		LOG_INFO("Table is nil")
+		return;
 	end
 
-    if type(name) ~= "string" then
-		name = tostring(name)
-	end
-	
-	if type(value) == "number" then
-		print(ttt..name, "=", value)
-	elseif type(value) == "string" then
-		print(ttt..name, "=", "\""..value.."\"")
-	elseif type(value) == "boolean" or type(value) == "function" or type(value) == "userdata" then
-		print(ttt..name, "=", tostring(value))
-	elseif type(value) == "table" then
-		printCount = printCount + 1
-		if not printMark[value] then
-			printMark[value] = true
-		else
-			print(ttt..name, "=", value)
-			printCount = printCount - 1
-			return
-		end
-		--print(ttt..name, "=", value)
-		if count and printCount > count then
-			printCount = printCount - 1
-			return
-		end
-		if sub or (not NotFirst)then
-			print(ttt.."{")
-			for id, v in pairs(value) do
-				LOG_TABLE(v, sub, count, true, id, ttt.."	  ")
+	local cache = {[root] = "."}
+	local function _dump(t,space,name)
+		local temp = {}
+		for k,v in pairs(t) do
+			local key = tostring(k)
+			if cache[v] then
+				tinsert(temp,space .. key .. " {" .. cache[v].."}")
+			elseif type(v) == "table" then
+				local new_key = name .. "." .. key
+				cache[v] = new_key
+				tinsert(temp, space.."+"..key)
+				tinsert(temp, _dump(v, space.."┆  ", new_key))
+			else
+				tinsert(temp, space .. key .. " [" .. tostring(v).."]")
 			end
-			printCount = printCount - 1
-			print(ttt.."}")
 		end
-	else
-		print("error print" .. type(value))
-	end
+		return tconcat(temp,"\n")
+ 	end
+	LOG_INFO("+table\n"..(_dump(root, "┆  ","")))
 end
 
 -- 报错回调

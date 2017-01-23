@@ -1,0 +1,24 @@
+{
+    "listen": {
+        "ip": "0.0.0.0",
+        "port": 7002
+    },
+    "redis": {
+        "ip": "127.0.0.1",
+        "port": 6379
+    },
+    "mysql": {
+        "ip": "127.0.0.1",
+        "port": 3306,
+        "user": "root",
+        "password": "123456",
+        "scheme": "game"
+    },
+    "logic_server_type" : 1,
+    "redis_log_frequency" : 5,
+    "redis_max_reconnect_times" : 5,
+    "redis_sleep_millisecond" : 1000,
+    "mysql_print_query_switch" : false,
+    "mysql_max_reconnect_times" : 5,
+    "mysql_sleep_millisecond" : 1000
+}

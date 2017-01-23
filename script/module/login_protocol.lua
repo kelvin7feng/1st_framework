@@ -31,7 +31,7 @@ function OnClientLoginDirect(nHandlerId, nEventId, nSequenceId, tbParam)
 	else
 		-- 参数有误，直接返回给客户端
 		G_NetManager:PopRequestFromSquence(nHandlerId);
-		G_NetManager:SendToGateway(nSequenceId, nEventId, nErrorCode, nHandlerId, 0, "");
+		G_NetManager:SendToGateway(nSequenceId, nEventId, nErrorCode, nHandlerId, "");
 	end
 end
 
@@ -44,14 +44,14 @@ function OnClientRegister(nHandlerId, nEventId, nSequenceId, tbParam)
 	if nErrorCode == ERROR_CODE.SYSTEM.PARAMTER_ERROR then
 		LOG_DEBUG("OnClientRegister PARAMTER_ERROR")
 		LOG_DEBUG("OnClientLoginDirect..........4")
-		G_NetManager:SendToGateway(nSequenceId, EVENT_ID.CLIENT_LOGIN.LOGIN_DIRECT, nErrorCode, nHandlerId, 0, "");
+		G_NetManager:SendToGateway(nSequenceId, EVENT_ID.CLIENT_LOGIN.LOGIN_DIRECT, nErrorCode, nHandlerId, "");
 	end
 end
 
 -- 登录函数
 function OnClientLogin(nHandlerId, nUserId)
 
-	local nErrorCode = G_UserManager:CheckUserInfo(nHandlerId, nUserId);
+	local nErrorCode = G_UserManager:CheckUserDataStatus(nHandlerId, nUserId);
 	if nErrorCode == ERROR_CODE.SYSTEM.USER_DATA_NIL then
 		LOG_DEBUG("OnClientLogin User Info does not cache...")
 		return G_GameDataRedis:GetValue(nUserId, EVENT_ID.GET_ASYN_DATA.GET_GAME_DATA, nUserId);
@@ -66,10 +66,10 @@ function OnClientLogin(nHandlerId, nUserId)
 end
 
 -- 响应客户端登录请求
-function OnResponeClientLogin(nUserId, nErrorCode, nRetInfo)
+function OnResponeClientLogin(nUserId, nErrorCode, tbRetInfo)
 	local nHandlerId = G_NetManager:GetHandlerId(nUserId);
 	local nSequenceId = G_NetManager:GetSquenceIdFromSquence(nHandlerId);
-	G_NetManager:SendToGateway(nSequenceId, EVENT_ID.CLIENT_LOGIN.LOGIN_DIRECT, nErrorCode, nHandlerId, string.len(json.encode(nRetInfo)), nRetInfo);
+	G_NetManager:SendToGateway(nSequenceId, EVENT_ID.CLIENT_LOGIN.LOGIN_DIRECT, nErrorCode, nHandlerId, tbRetInfo);
 end
 
 -- 响应redis

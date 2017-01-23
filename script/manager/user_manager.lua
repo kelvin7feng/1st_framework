@@ -3,8 +3,29 @@ UserManager = class()
 function UserManager:ctor()
 
 	self.m_tbUserDataPool = {};
+	self.m_objCurrentUser = nil;
 
-	G_EventManager:Register(EVENT_NAME.OnRegister, self.OnRegister, self)
+	G_EventManager:Register(EVENT_ID.LOGIC_EVENT.ON_REGISTER, self.OnRegister, self)
+end
+
+-- 请求处理完毕提交数据变化处理
+function UserManager:Commit()
+
+	local objUser = self:GetCurrentUserObject()
+	if objUser:IsDirty() then
+		LOG_DEBUG("user data is dirty, commit change")
+		local nUserId = objUser:GetUserId()
+		self:SynchronizeToDB(nUserId)
+		objUser:SetDirty(false)
+		self:ResetCurrentUserObject()
+	end
+end
+
+-- 同步玩家数据到数据库里
+function UserManager:SynchronizeToDB(nUserId)
+	local objUser = self:GetUserObject(nUserId);
+	local tbGameData = objUser:GetGameData();
+	G_GameDataRedis:SetValue(0, 0, nUserId, tbGameData);
 end
 
 -- 注册成功事件
@@ -16,13 +37,28 @@ end
 function UserManager:CacheUserObject(nUserId, tbGameData)
 	local objUser = UserData:new(nUserId, tbGameData);
 	self.m_tbUserDataPool[tostring(nUserId)] = objUser;
-	
-	LOG_TABLE(tbGameData);
 end
 
 -- 获取玩家数据对象
 function UserManager:GetUserObject(nUserId)
 	return self.m_tbUserDataPool[tostring(nUserId)];
+end
+
+-- 设置当前请求的玩家数据对象
+function UserManager:SetCurrentUserObject(nUserId)
+	self.m_objCurrentUser = self:GetUserObject(nUserId);
+	LOG_DEBUG("SetCurrentUserObject:" .. nUserId)
+	LOG_TABLE(self.m_objCurrentUser);
+end
+
+-- 设置当前请求的玩家数据对象
+function UserManager:GetCurrentUserObject()
+	return self.m_objCurrentUser;
+end
+
+-- 置空当前请求的玩家数据对象
+function UserManager:ResetCurrentUserObject()
+	self.m_objCurrentUser = nil;
 end
 
 -- 玩家账号数据初始化
@@ -87,7 +123,7 @@ function UserManager:Register(nHandlerId, tbParam)
 	tbGameData = self:GetInitGameData(nUserId);
 	self:RegisterProcess(nUserId, nHandlerId, tbUserInfo, tbGameData)
 	nErrorCode = ERROR_CODE.SYSTEM.USER_REGISTERING;
-	G_EventManager:PostEvent(EVENT_NAME.OnRegister, tbParam);
+	G_EventManager:PostEvent(EVENT_ID.LOGIC_EVENT.ON_REGISTER, tbParam);
 
 	return nErrorCode
 end
@@ -178,7 +214,7 @@ function UserManager:CheckRegisterInfo(tbParam)
 end
 
 -- 检查玩家信息
-function UserManager:CheckUserInfo(nHandlerId, nUserId)
+function UserManager:CheckUserDataStatus(nHandlerId, nUserId)
 	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
 
 	if not IsNumber(nUserId) then
@@ -189,6 +225,7 @@ function UserManager:CheckUserInfo(nHandlerId, nUserId)
 
 	-- 映射玩家Id和Handler
 	G_NetManager:SetHandlerId(nUserId, nHandlerId);
+	G_NetManager:SetUserId(nHandlerId, nUserId);
 
 	-- 如果没有缓存，则需要从数据库里面读取出来，在数据回来后再处理
 	local objUser = self:GetUserObject(nUserId);
@@ -203,9 +240,10 @@ end
 
 -- 注册操作过程
 function UserManager:RegisterProcess(nUserId, nHandlerId, tbUserInfo, tbGameData)
-	G_GlobalConfigManager:IncrementGlobalUserId()
 	self:CacheUserObject(nUserId, tbGameData)
+	G_GlobalConfigManager:IncrementGlobalUserId()
 	G_NetManager:SetHandlerId(nUserId, nHandlerId);
+	G_NetManager:SetUserId(nHandlerId, nUserId);
 	G_RegisterRedis:SetValue(0, 0, tbUserInfo.DeviceId, nUserId);
 	G_AccountRedis:SetValue(0, 0, nUserId, tbUserInfo);
 	G_GameDataRedis:SetValue(nUserId, EVENT_ID.GET_ASYN_DATA.REGISTERING, nUserId, tbGameData);

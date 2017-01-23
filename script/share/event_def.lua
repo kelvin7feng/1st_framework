@@ -25,6 +25,12 @@ EVENT_ID =  {
 		GET_USER_GLOBAL_ID      =   1101
 	},
 
+	-- 全局配置事件, 2001-3000
+	LOGIC_EVENT = 
+	{
+		ON_REGISTER				=   2001
+	},
+
 	--[[
 	客户端事件定义规则：表名以CLIENT_开头,每个功能占位100个位置,必须紧接前一个功能分配
 	--]]
@@ -35,10 +41,9 @@ EVENT_ID =  {
 		ENTER_GAME				=	10002		-- 进入游戏
 	},
 
-}
-
--- 事件名称
-EVENT_NAME = {
-	OnRegister					= "OnRegister",
-	OnLogin						= "OnLogin"
+	-- 客户端测试接口事件, 10101， 10200
+	CLIENT_TEST = 
+	{
+		ADD_GOLD				= 	10101,		-- 增加金币
+	}
 }

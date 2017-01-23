@@ -2,6 +2,7 @@ NetManager = class()
 
 function NetManager:ctor()
 	self.m_tbUserHanderIdMap = {};
+	self.m_tbHanderIdUserMap = {};
 	self.m_tbRequestSquence = {}
 end
 
@@ -15,7 +16,7 @@ function NetManager:PushRequestToSquence(nHandlerId, nSequenceId, tbParam)
 end
 
 function NetManager:PopRequestFromSquence(nHandlerId)
-	
+
 	local tbRequest = table.remove(self.m_tbRequestSquence[tostring(nHandlerId)], 1);
 	if table.maxn(self.m_tbRequestSquence[tostring(nHandlerId)]) == 0 then
 		self.m_tbRequestSquence[tostring(nHandlerId)] = nil;
@@ -61,14 +62,30 @@ function NetManager:GetHandlerId(nUserId)
 	return self.m_tbUserHanderIdMap[tostring(nUserId)];
 end
 
-function NetManager:SendToGateway(nSequenceId, nEventType, nErrorCode, nHandlerId, nLength, strRetParam)
+function NetManager:SetUserId(nHandlerId, nUserId)
+	local bIsOk = false;
+	if nHandlerId > 0 then
+		bIsOk = true;
+		self.m_tbHanderIdUserMap[tostring(nHandlerId)] = nUserId;	
+	end	
+	
+	return bIsOk;
+end
 
+function NetManager:GetUserId(nHandlerId)
+	return self.m_tbHanderIdUserMap[tostring(nHandlerId)];
+end
+
+function NetManager:SendToGateway(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam)
+	
+	local nLength = 1
 	if strRetParam and not IsString(strRetParam) then
 		strRetParam = json.encode(strRetParam);
+		nLength = string.len(strRetParam)
 	end
 
 	self:PopRequestFromSquence(nHandlerId);
-	CNet.SendToGateway(nSequenceId, nEventType, nErrorCode, nHandlerId, nLength or 1, strRetParam or "");
+	CNet.SendToGateway(nSequenceId, nEventType, nErrorCode, nHandlerId, nLength, strRetParam or "");
 end
 
 G_NetManager = NetManager:new()

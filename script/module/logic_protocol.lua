@@ -4,7 +4,7 @@ function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 
 	if not IsTable(tbParam) then
 		LOG_ERROR("parameter of request is nil...")
-		return;
+		return 0;
 	end
 
 	if nEventId == EVENT_ID.CLIENT_LOGIN.ENTER_GAME then
@@ -12,6 +12,18 @@ function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 		return OnClientEnterGame(nHandlerId, nEventId, nSequenceId, tbParam)
 	end
 
+	local nUserId = G_NetManager:GetUserId(nHandlerId);
+	if not nUserId then
+		return 0;
+	end
+
+	G_UserManager:SetCurrentUserObject(nUserId);
+	
+	local tbRet = {G_EventManager:DispatcherEvent(nEventId, unpack(tbParam))};
+	local nErrorCode = table.remove(tbRet,1);
+	G_NetManager:SendToGateway(nSequenceId, nEventId, nErrorCode, nHandlerId, tbRet);
+	
+	G_UserManager:Commit();
 
 	return 0;
 end
@@ -19,7 +31,7 @@ end
 -- 进入游戏，获取玩家信息
 function OnClientEnterGame(nHandlerId, nEventId, nSequenceId, tbParam)
 	local nUserId = tbParam[1]
-	local nErrorCode = G_UserManager:CheckUserInfo(nHandlerId, nUserId);
+	local nErrorCode = G_UserManager:CheckUserDataStatus(nHandlerId, nUserId);
 	if nErrorCode == ERROR_CODE.SYSTEM.USER_DATA_NIL then
 		LOG_DEBUG("OnClientEnterGame User Info does not cache...")
 		return G_GameDataRedis:GetValue(nUserId, EVENT_ID.GET_ASYN_DATA.LOGIC_GET_GAME_DATA, nUserId);
@@ -34,10 +46,10 @@ function OnClientEnterGame(nHandlerId, nEventId, nSequenceId, tbParam)
 end
 
 -- 响应客户端登录请求
-function OnResponeClientEnterGame(nUserId, nErrorCode, nRetInfo)
+function OnResponeClientEnterGame(nUserId, nErrorCode, tbRetInfo)
 	local nHandlerId = G_NetManager:GetHandlerId(nUserId);
 	local nSequenceId = G_NetManager:GetSquenceIdFromSquence(nHandlerId);
-	G_NetManager:SendToGateway(nSequenceId, EVENT_ID.CLIENT_LOGIN.ENTER_GAME, nErrorCode, nHandlerId, string.len(json.encode(nRetInfo)), nRetInfo);
+	G_NetManager:SendToGateway(nSequenceId, EVENT_ID.CLIENT_LOGIN.ENTER_GAME, nErrorCode, nHandlerId, tbRetInfo);
 end
 
 -- 响应redis
@@ -53,7 +65,8 @@ end
 -- 响应进入游戏事件
 function OnResponseEnterGameEvent(nUserId, nEventId, strRepsonseJson)
 	if nEventId == EVENT_ID.GET_ASYN_DATA.LOGIC_GET_GAME_DATA then
-		LOG_DEBUG("ON GET GAME DATA BACK..........1" .. strRepsonseJson)
+		LOG_DEBUG("ON GET GAME DATA BACK..........1")
+		LOG_DEBUG("|" .. strRepsonseJson .. "|")
 		if IsString(strRepsonseJson) and string.len(strRepsonseJson) > 0 then
 			local tbGameData = json.decode(strRepsonseJson)
 			G_UserManager:CacheUserObject(nUserId, tbGameData)
