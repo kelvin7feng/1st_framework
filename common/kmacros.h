@@ -29,6 +29,11 @@
 #include "vld.h"
 #endif
 
+enum SERVER_TYPE {
+    LOGIN = 1,
+    LOGIC = 2,
+    ROOM  = 3
+};
 
 enum KGLOG_PRIORITY
 {

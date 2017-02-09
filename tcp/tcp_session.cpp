@@ -11,6 +11,10 @@
 #include "tcp_session.hpp"
 #include "gateway_client.hpp"
 
+GatewayClient* g_pLoginLogicClient = NULL;
+GatewayClient* g_pGameLogicClient = NULL;
+GatewayClient* g_pRoomLogicClient = NULL;
+
 TCPSession::TCPSession()
 {
     m_pRecvPacket = KG_CreateCommonPackage();
@@ -30,6 +34,25 @@ unsigned int TCPSession::GetHandlerId()
 void TCPSession::SetHandlerId(unsigned int uHandlerId)
 {
     m_uHandlerId = uHandlerId;
+}
+
+GatewayClient* TCPSession::GetGatewayClient(unsigned short uServerId)
+{
+    GatewayClient* pClient = NULL;
+    if(uServerId == SERVER_TYPE::LOGIN)
+    {
+        pClient = g_pLoginLogicClient;
+    }
+    else if(uServerId == SERVER_TYPE::LOGIC)
+    {
+        pClient = g_pGameLogicClient;
+    }
+    else if(uServerId == SERVER_TYPE::ROOM)
+    {
+        pClient = g_pRoomLogicClient;
+    }
+    
+    return pClient;
 }
 
 bool TCPSession::ProcessNetData(const char* pData, size_t uRead)
@@ -56,8 +79,9 @@ bool TCPSession::ProcessNetData(const char* pData, size_t uRead)
             {
                 unsigned int uHandlerId = GetHandlerId();
                 AddHanderIdToBuffer(uHandlerId, pDataBuffer, uDataBufferSize);
-                GatewayClient* pGamewayClientToLogic = GatewayClient::GetInstance();
-                pGamewayClientToLogic->TransferToLogicServer(pDataBuffer, uDataBufferSize);
+                unsigned short uServerId = GetServerId(pDataBuffer);
+                GatewayClient* pClient = GetGatewayClient(uServerId);
+                pClient->TransferToLogicServer(pDataBuffer, uDataBufferSize);
                 std::cout << "protobuf is legal..." << std::endl;
             } else {
                 std::cout << "protobuf is illegal..." << std::endl;

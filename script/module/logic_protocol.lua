@@ -22,7 +22,7 @@ function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 	local tbRet = {G_EventManager:DispatcherEvent(nEventId, unpack(tbParam))};
 	local nErrorCode = table.remove(tbRet,1);
 	G_NetManager:SendToGateway(nSequenceId, nEventId, nErrorCode, nHandlerId, tbRet);
-	
+
 	G_UserManager:Commit();
 
 	return 0;

@@ -19,6 +19,7 @@ LuaEngine::LuaEngine()
 {
     server_path[SERVER_TYPE::LOGIN] = "./../script/login_main.lua";
     server_path[SERVER_TYPE::LOGIC] = "./../script/logic_main.lua";
+    server_path[SERVER_TYPE::ROOM] = "./../script/room_main.lua";
 }
 
 LuaEngine::~LuaEngine()

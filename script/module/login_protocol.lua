@@ -5,12 +5,14 @@ function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 		LOG_ERROR("parameter of request is nil...")
 		return;
 	end
-	
+
 	if nEventId == EVENT_ID.CLIENT_LOGIN.LOGIN_DIRECT then
 		LOG_DEBUG("OnClientLoginDirect..........1")
 		return OnClientLoginDirect(nHandlerId, nEventId, nSequenceId, tbParam);
 	end
 
+	LOG_WARN(string.format("EVENT_ID %d is not response", nEventId))
+	
 	return 0;
 end
 

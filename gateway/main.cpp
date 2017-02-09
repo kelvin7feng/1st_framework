@@ -15,6 +15,7 @@
 
 #include "document.h"
 #include "file_util.h"
+#include "tcp_session.hpp"
 #include "gateway_server.hpp"
 #include "gateway_client.hpp"
 
@@ -43,13 +44,47 @@ int main() {
     GatewayServer *server = GatewayServer::GetInstance();
     server->Init(loop, gateway_ip.c_str(), gateway_port);
     
-    //连接逻辑服
-    const Value& game_logic_config = json_doc["game_logic"];
-    string game_loic_ip = game_logic_config["ip"].GetString();
-    int game_logic_port = game_logic_config["port"].GetInt();
+    //连接登录服
+    if(json_doc.HasMember("login_logic"))
+    {
+        const Value& login_logic_config = json_doc["login_logic"];
+        if(login_logic_config.HasMember("ip") && login_logic_config.HasMember("port"))
+        {
+            string login_logic_ip = login_logic_config["ip"].GetString();
+            int login_logic_port = login_logic_config["port"].GetInt();
+            
+            g_pLoginLogicClient = new GatewayClient();
+            g_pLoginLogicClient->Init(loop, login_logic_ip.c_str(), login_logic_port);
+        }
+    }
     
-    GatewayClient* client = GatewayClient::GetInstance();
-    client->Init(loop, game_loic_ip.c_str(), game_logic_port);
+    //连接逻辑服
+    if(json_doc.HasMember("game_logic"))
+    {
+        const Value& game_logic_config = json_doc["game_logic"];
+        if(game_logic_config.HasMember("ip") && game_logic_config.HasMember("port"))
+        {
+            string game_logic_ip = game_logic_config["ip"].GetString();
+            int game_logic_port = game_logic_config["port"].GetInt();
+            
+            g_pGameLogicClient = new GatewayClient();
+            g_pGameLogicClient->Init(loop, game_logic_ip.c_str(), game_logic_port);
+        }
+    }
+    
+    //连接房间服
+    if(json_doc.HasMember("room_logic"))
+    {
+        const Value& room_logic_config = json_doc["room_logic"];
+        if(room_logic_config.HasMember("ip") && room_logic_config.HasMember("port"))
+        {
+            string room_loic_ip = room_logic_config["ip"].GetString();
+            int room_logic_port = room_logic_config["port"].GetInt();
+            
+            g_pRoomLogicClient = new GatewayClient();
+            g_pRoomLogicClient->Init(loop, room_loic_ip.c_str(), room_logic_port);
+        }
+    }
     
     return uv_run(loop, UV_RUN_DEFAULT);
 }

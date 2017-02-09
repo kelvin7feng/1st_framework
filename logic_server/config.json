@@ -11,10 +11,10 @@
         "ip": "127.0.0.1",
         "port": 3306,
         "user": "root",
-        "password": "123456",
+        "password": "NullPass1#",
         "scheme": "game"
     },
-    "logic_server_type" : 1,
+    "logic_server_type" : 2,
     "redis_log_frequency" : 5,
     "redis_max_reconnect_times" : 5,
     "redis_sleep_millisecond" : 1000,

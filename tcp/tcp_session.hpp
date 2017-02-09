@@ -16,6 +16,7 @@
 #include <uv.h>
 
 #include "knetpacket.h"
+#include "gateway_client.hpp"
 
 class TCPSession
 {
@@ -35,10 +36,16 @@ public:
     
 private:
     
+    GatewayClient* GetGatewayClient(unsigned short uServerId);
+    
     unsigned int m_uHandlerId;
     
     IKNetPacket* m_pRecvPacket;
 
 };
+
+extern GatewayClient* g_pLoginLogicClient;
+extern GatewayClient* g_pGameLogicClient;
+extern GatewayClient* g_pRoomLogicClient;
 
 #endif /* tcp_session_hpp */

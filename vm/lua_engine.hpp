@@ -27,11 +27,6 @@ using namespace std;
 class LuaEngine {
     
 public:
-    enum SERVER_TYPE {
-        LOGIN = 1,
-        LOGIC = 2
-        
-    };
     
     LuaEngine();
     ~LuaEngine();
