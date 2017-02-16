@@ -45,5 +45,16 @@ EVENT_ID =  {
 	CLIENT_TEST = 
 	{
 		ADD_GOLD				= 	10101,		-- 增加金币
+	},
+
+	-- 修改个人信息, 10201， 10300
+	CLIENT_BASE_INFO = 
+	{
+		UPDATE_AVATAR			= 	10201,		-- 修改头像
+		UPDATE_SEX				= 	10202,		-- 修改性别
+		UPDATE_INVITER_ID		= 	10203,		-- 修改邀请人ID
+		UPDATE_NICK_NAME		= 	10204,		-- 修改昵称
+		UPDATE_SIGNATURE		= 	10205,		-- 修改个性签名
+		BINDING_PHONE_NO		= 	10206,		-- 绑定手机号码
 	}
 }

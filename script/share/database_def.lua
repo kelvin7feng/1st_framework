@@ -42,10 +42,17 @@ GAME_DATA_FIELD_NAME.UserInfo =
 GAME_DATA_FIELD_NAME.BaseInfo = 
 {
 	USER_ID									= "UserId",
+	AVATAR									= "Avatar",
 	SEX 									= "Sex",
-	NAME 									= "Name",
+	NAME									= "Name",
 	DIAMOND 								= "Diamond",
-	GOLD 									= "Gold"
+	GOLD 									= "Gold",
+	BALANCE 								= "Balance",
+	PHONE_NO								= "PhoneNo",
+	SIGNATURE								= "Signature",
+	AVATAR_URL								= "AvatarUrl",
+	ROOM_CARD								= "RoomCard",
+	INVITER_ID								= "InviterId",
 }
 
 -- 数据库字段,构建该表是为了初始化玩家数据时直接引用
@@ -67,10 +74,17 @@ DATABASE_TABLE_FIELD =
 		[GAME_DATA_TABLE_NAME.BASE_INFO]	= 
 		{
 			[GAME_DATA_FIELD_NAME.BaseInfo.USER_ID] 				 = 0,		-- 玩家Id
+			[GAME_DATA_FIELD_NAME.BaseInfo.AVATAR]					 = 0,		-- 头像, 0:女, 1:男
 			[GAME_DATA_FIELD_NAME.BaseInfo.SEX]					     = 0,		-- 性别
 			[GAME_DATA_FIELD_NAME.BaseInfo.NAME]					 = "Guest",	-- 名字
 			[GAME_DATA_FIELD_NAME.BaseInfo.DIAMOND]				     = 0,		-- 钻石
-			[GAME_DATA_FIELD_NAME.BaseInfo.GOLD]					 = 5000		-- 金币
+			[GAME_DATA_FIELD_NAME.BaseInfo.GOLD]				     = 5000,	-- 金币
+			[GAME_DATA_FIELD_NAME.BaseInfo.BALANCE]				     = 0,		-- 保险箱存款
+			[GAME_DATA_FIELD_NAME.BaseInfo.PHONE_NO]				 = "",		-- 电话
+			[GAME_DATA_FIELD_NAME.BaseInfo.SIGNATURE]				 = "",		-- 签名
+			[GAME_DATA_FIELD_NAME.BaseInfo.AVATAR_URL]				 = "",		-- 头像URL
+			[GAME_DATA_FIELD_NAME.BaseInfo.ROOM_CARD]				 = 0,		-- 房卡数量
+			[GAME_DATA_FIELD_NAME.BaseInfo.INVITER_ID]				 = 0,		-- 邀请人ID
 		}
 	}
 }

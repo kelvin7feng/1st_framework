@@ -183,6 +183,10 @@ bool KMysqlClient::ConnectDB()
         MYSQL* pConnectRet = NULL;
         MYSQL* pMysql = mysql_init(NULL);
         
+        //注意,必须执行,如果不执行会乱码
+        mysql_options(pMysql, MYSQL_SET_CHARSET_NAME, "utf8");
+        mysql_options(pMysql, MYSQL_INIT_COMMAND, "SET NAMES utf8");
+        
         if (strcmp(sConnectInfo.szHost, "127.0.0.1") != 0)
         {
             pcszHost = sConnectInfo.szHost;

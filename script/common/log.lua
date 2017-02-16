@@ -105,6 +105,11 @@ function LOG_TABLE(root)
 		return;
 	end
 
+	if not IsTable(root) then
+		LOG_WARN("Type is not table")
+		return;
+	end
+
 	local cache = {[root] = "."}
 	local function _dump(t,space,name)
 		local temp = {}

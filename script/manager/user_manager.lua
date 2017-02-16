@@ -48,7 +48,10 @@ end
 function UserManager:SetCurrentUserObject(nUserId)
 	self.m_objCurrentUser = self:GetUserObject(nUserId);
 	LOG_DEBUG("SetCurrentUserObject:" .. nUserId)
-	LOG_TABLE(self.m_objCurrentUser);
+	if not self.m_objCurrentUser then
+		LOG_ERROR("nUserId " .. nUserId .. " is nil")
+	end
+	--LOG_TABLE(self.m_objCurrentUser);
 end
 
 -- 设置当前请求的玩家数据对象
@@ -101,7 +104,7 @@ function UserManager:Register(nHandlerId, tbParam)
 		return nErrorCode
 	end
 
-	LOG_TABLE("Register tbParam:" .. json.encode(tbParam));
+	LOG_INFO("Register tbParam:" .. json.encode(tbParam));
 	strDeviceId = tbParam[1]
 	strIp = tbParam[2]
 
