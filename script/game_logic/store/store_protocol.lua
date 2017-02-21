@@ -16,10 +16,8 @@ function StoreProtocol:ClientBuyRoomCard(nId)
 		return nErrorCode;
 	end
 
-	local objUser = G_UserManager:GetCurrentUserObject()
-	nErrorCode = G_StoreLogic:BuyRoomCard(objUser, nId)
-
-	return nErrorCode;
+	local objUser = G_UserManager:GetCurrentUserObject();
+	return G_StoreLogic:BuyRoomCard(objUser, nId);
 end
 
 G_StoreProtocol = StoreProtocol:new()

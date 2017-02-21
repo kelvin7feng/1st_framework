@@ -72,14 +72,19 @@ bool KMysqlClient::Init(int nDBType)
     string sz_user = server_config["user"].GetString();
     string sz_password = server_config["password"].GetString();
     string sz_scheme = server_config["scheme"].GetString();
+
     
     m_uBuffLen = 1024 * 50;
     m_pSQLBuff = new char[m_uBuffLen];
     KConnectInfo* connectInfo = new KConnectInfo();
     connectInfo->nPort = port;
+    //初始化
     memcpy(connectInfo->szHost, sz_ip.c_str(), sz_ip.length());
     memcpy(connectInfo->szUser, sz_user.c_str(), sz_user.length());
     memcpy(connectInfo->szPwd, sz_password.c_str(), sz_password.length());
+    connectInfo->szHost[sz_ip.length()] = '\0';
+    connectInfo->szUser[sz_user.length()] = '\0';
+    connectInfo->szPwd[sz_password.length()] = '\0';
     std::vector<KConnectInfo> vecInfo;
     vecInfo.push_back(*connectInfo);
     
@@ -194,8 +199,7 @@ bool KMysqlClient::ConnectDB()
         pConnectRet = mysql_real_connect(pMysql, pcszHost, sConnectInfo.szUser, sConnectInfo.szPwd, m_szDBName, (unsigned int)sConnectInfo.nPort, NULL, CLIENT_FOUND_ROWS);
         if (pConnectRet != pMysql)
         {
-            //KGLogPrintf(KGLOG_ERR, "MysqlClient[%s:%d] Connect Error:%s", m_szDBName, i, mysql_error(pMysql));
-            //KGLOG_PROCESS_ERROR(false);
+            std::cout << "MysqlClient[" << m_szDBName << ":" << i << "] Connect Error:" << mysql_error(pMysql) << std::endl;
             exit(1);
         }
         mysql_options(pMysql, MYSQL_OPT_RECONNECT, &value);
@@ -210,6 +214,7 @@ bool KMysqlClient::ConnectDB()
     }
     m_bDatabaseLost = false;
     bResult = true;
+    
 Exit0:
     return bResult;
 }

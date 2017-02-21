@@ -148,7 +148,10 @@ bool KRedisClient::Init(int nDBType)
     
     KConnectInfo* connectInfo = new KConnectInfo();
     connectInfo->nPort = nPort;
+    
     memcpy(connectInfo->szHost, szIp.c_str(), szIp.length());
+    connectInfo->szHost[szIp.length()] = '\0';
+    
     std::vector<KConnectInfo> vecInfo;
     vecInfo.push_back(*connectInfo);
     
@@ -315,11 +318,8 @@ bool KRedisClient::OnRequest(IKG_Buffer* pBuffer)
 bool KRedisClient::OnResponsed(IKG_Buffer* pBuffer)
 {
     KRESOOND_COMMON* pResond = (KRESOOND_COMMON*)pBuffer->GetData();
-    //std::cout << "redis onResponse....event type:" << pResond->uEventType << std::endl;
-    //std::cout << "redis onResponse....data len:" << pResond->nDataLen << std::endl;
     GameLogicServer* pInstance = GameLogicServer::GetInstance();
     pInstance->OnDBResponse(pResond);
-    
     SAFE_DELETE(pBuffer);
     
     return true;
@@ -421,8 +421,8 @@ IKG_Buffer* KRedisClient::GenCommonRespond(long long lId, unsigned char byType, 
         pResond->nRetType = pReply->type;
         pResond->nParam = 0;
         pResond->nDataLen = (int)pReply->len;
+        memset(pResond->data, 0, pReply->len + 1);
         memcpy(pResond->data, pReply->str, pReply->len);
-        pResond->data[pReply->len] = '\0';
     }
     char* pData = (char*)pBuffer->GetData();
     pData -= sizeof(unsigned char);

@@ -51,15 +51,20 @@ function StoreLogic:BuyRoomCard(objUser, nId)
 		return nErrorCode;
 	end
 
+	-- 当前房卡数量
+	local nCurrentCount = objUser:GetRoomCard();
+
 	-- 先扣金币
+	local nGoldBalance = nUserGold - nGoldPrice;
 	objUser:CostGold(nGoldPrice);
 
 	-- 增加房卡
+	local nTotalRoomCard = nCurrentCount + nRoomCardCount;
 	objUser:AddRoomCard(nRoomCardCount);
 
 	nErrorCode = ERROR_CODE.SYSTEM.OK;
 
-	return nErrorCode;
+	return nErrorCode, nTotalRoomCard, nGoldBalance;
 end
 
 -- 检查配置是否存在

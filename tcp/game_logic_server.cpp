@@ -215,7 +215,8 @@ void GameLogicServer::OnDBResponse(KRESOOND_COMMON* pCommonResponse)
     int nDataLen = pCommonResponse->nDataLen;
     if(nDataLen < 0)
         nDataLen = 0;
-    char* szData = new char[nDataLen];
+    char* szData = new char[nDataLen+1];
+    memset(szData, 0, (size_t)(nDataLen + 1));
     memcpy(szData, pCommonResponse->data, (size_t)nDataLen);
     lua_engine.RedisCallLua(pCommonResponse->uUserId, pCommonResponse->uEventType, szData);
     
