@@ -64,9 +64,9 @@ struct KConnectInfo
     KConnectInfo()
     {
         nPort = 0;
-        szHost[0] = '\0';
-        szUser[0] = '\0';
-        szPwd[0] = '\0';
+        szHost[INET6_ADDRSTRLEN-1] = {0};
+        szUser[62] = {0};
+        szPwd[63] = {0};
     }
     int nPort;
     char szHost[INET6_ADDRSTRLEN];

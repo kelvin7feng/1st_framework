@@ -28,15 +28,35 @@ function UserManager:SynchronizeToDB(nUserId)
 	G_GameDataRedis:SetValue(0, 0, nUserId, tbGameData);
 end
 
+-- 同步玩家数据到数据库里
+function UserManager:SaveUserData(objUser)
+	if objUser and objUser:IsDirty() then
+		LOG_DEBUG("UserManager:SaveUserData...")
+		local tbGameData = objUser:GetGameData();
+		G_GameDataRedis:SetValue(0, 0, objUser:GetUserId(), tbGameData);
+	end
+end
+
 -- 注册成功事件
 function UserManager:OnRegister(tbParam)
 	LOG_DEBUG("User OnRegister Event...")
 end
 
 -- 缓存玩家数据对象
-function UserManager:CacheUserObject(nUserId, tbGameData)
-	local objUser = UserData:new(nUserId, tbGameData);
+function UserManager:CacheUserObject(tbGameData)
+	local nUserId = tbGameData[GAME_DATA_TABLE_NAME.BASE_INFO][GAME_DATA_FIELD_NAME.BaseInfo.USER_ID];
+	local objUser = UserData:new(tbGameData);
 	self.m_tbUserDataPool[tostring(nUserId)] = objUser;
+end
+
+-- 检查玩家数据对象是否被缓存
+function UserManager:IsUserObjectCache(nUserId)
+	local objUser = self:GetUserObject(nUserId);
+	if objUser then
+		return true;
+	else
+		return false;
+	end
 end
 
 -- 获取玩家数据对象
@@ -80,10 +100,12 @@ function UserManager:GetInitGameData(nUserId)
 	local tbGameData = {}
 
 	local tbBaseInfo = DATABASE_TABLE_FIELD[DATABASE_TABLE_NAME.GAME_DATA][GAME_DATA_TABLE_NAME.BASE_INFO];
+	tbBaseInfo[GAME_DATA_FIELD_NAME.BaseInfo.USER_ID] = nUserId;
 
-	tbBaseInfo[GAME_DATA_FIELD_NAME.BaseInfo.USER_ID] = nUserId
+	local tbFriendInfo = DATABASE_TABLE_FIELD[DATABASE_TABLE_NAME.GAME_DATA][GAME_DATA_TABLE_NAME.FRIEND_INFO];
 
-	tbGameData["BaseInfo"] = tbBaseInfo;
+	tbGameData[GAME_DATA_TABLE_NAME.BASE_INFO] = tbBaseInfo;
+	tbGameData[GAME_DATA_TABLE_NAME.FRIEND_INFO] = tbFriendInfo;
 
 	return tbGameData;
 end
@@ -243,7 +265,7 @@ end
 
 -- 注册操作过程
 function UserManager:RegisterProcess(nUserId, nHandlerId, tbUserInfo, tbGameData)
-	self:CacheUserObject(nUserId, tbGameData)
+	self:CacheUserObject(tbGameData)
 	G_GlobalConfigManager:IncrementGlobalUserId()
 	G_NetManager:SetHandlerId(nUserId, nHandlerId);
 	G_NetManager:SetUserId(nHandlerId, nUserId);

@@ -34,6 +34,8 @@ IKG_Buffer* DB_CreateSetBuffer(const std::string& szTable, const std::string& sz
 
 IKG_Buffer* DB_CreateGetBuffer(const std::string& szTable, const std::string& szKey);
 
+IKG_Buffer* DB_CreateGetsBuffer(const std::string& szKeys);
+
 IKG_Buffer* DB_CreateHSetBuffer(const std::string& szTable, const std::string& szKey, const std::string& szValue);
 
 IKG_Buffer* DB_CreateHgetBuffer(const std::string& szTable, const std::string& szKey);

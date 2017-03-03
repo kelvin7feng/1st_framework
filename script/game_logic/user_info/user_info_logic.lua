@@ -241,4 +241,20 @@ function UserInfoLogic:CheckPhoneNoFormat(strPhoneNo)
 	return bIsOk;
 end
 
+-- 检查用户ID是否合法
+function UserInfoLogic:CheckUserIdLegal(nUserId)
+	local bIsOk = false;
+	if not IsNumber(nUserId) then
+		return bIsOk;
+	end
+
+	if nUserId < DATABASE_TABLE_GLOBAL_DEFALUT[DATABASE_TABLE_GLOBAL_FIELD.USER_ID] or nUserId > G_GlobalConfigManager:GetUserGlobalId() then
+		return bIsOk;
+	end
+
+	bIsOk = true;
+
+	return bIsOk;
+end
+
 G_UserInfoLogic = UserInfoLogic:new()

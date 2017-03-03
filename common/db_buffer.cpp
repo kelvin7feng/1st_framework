@@ -132,6 +132,17 @@ IKG_Buffer* DB_CreateGetBuffer(const std::string& szTable, const std::string& sz
     return pBuffer;
 }
 
+IKG_Buffer* DB_CreateGetsBuffer(const std::string& szKeys)
+{
+    int nSize = (int)(sizeof(KREQUEST_GETS) + szKeys.length());
+    IKG_Buffer* pBuffer = DB_MemoryCreateBuffer(nSize);
+    KREQUEST_GETS* pRequest = (KREQUEST_GETS*)pBuffer->GetData();
+    pRequest->uHashKeyLen = (unsigned int)szKeys.length();
+    pRequest->byType = KE_REQUEST_TYPE::emREQUEST_GETS;
+    memcpy(pRequest->data, szKeys.c_str(), szKeys.length());
+    
+    return pBuffer;
+}
 
 IKG_Buffer* DB_CreateHSetBuffer(const std::string& szKey, const std::string& szField, const std::string& szValue)
 {

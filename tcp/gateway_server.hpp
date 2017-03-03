@@ -39,7 +39,7 @@ public:
     static GatewayServer* GetInstance();
     
     //初始化
-    int Init(uv_loop_t* loop, const char* ip, int port);
+    int Init(uv_loop_t* loop);
     
     //监听新建连接
     void OnNewConnection(uv_stream_t *server, int status);

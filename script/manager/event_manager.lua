@@ -52,16 +52,16 @@ function EventManager:DispatcherEvent(nEventId, tbParam)
 	local tbEvent = self.m_tbRegisterEvent[nEventId];
 	if not tbEvent then
 		LOG_ERROR(string.format("Event [%d] does not register...", nEventId))
-		return;
+		return ERROR_CODE.SYSTEM.EVENT_ID_ERROR;
 	end
 	
 	local obj = tbEvent.obj;
 	local callback = tbEvent.callback;
-
+	LOG_DEBUG("DispatcherEvent:" .. nEventId);
 	if obj then
-		return callback(obj, tbParam);
+		return callback(obj, unpack(tbParam));
 	else
-		return callback(tbParam);
+		return callback(unpack(tbParam));
 	end
 
 end

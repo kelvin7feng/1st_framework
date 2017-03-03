@@ -116,8 +116,7 @@ function OnResponseLoginEvent(nUserId, nEventId, strRepsonseJson)
 	if nEventId == EVENT_ID.GET_ASYN_DATA.GET_GAME_DATA then
 		LOG_DEBUG("ON GET GAME DATA BACK..........5" .. strRepsonseJson)
 		local tbGameData = json.decode(strRepsonseJson)
-		G_UserManager:CacheUserObject(nUserId, tbGameData)
-		LOG_DEBUG(tbGameData);
+		G_UserManager:CacheUserObject(tbGameData)
 		local nErrorCode, nRetInfo = G_UserManager:Login(nUserId);
 		OnResponeClientLogin(nUserId, nErrorCode, nRetInfo)
 	end

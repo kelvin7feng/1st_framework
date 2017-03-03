@@ -1,0 +1,4 @@
+
+EVENT_ID.CENTER_SERVER = {
+	REGISTER			= 3001, 	--服务器注册协议
+}

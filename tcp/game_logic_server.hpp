@@ -72,9 +72,7 @@ public:
     
     uv_timer_t m_db_timer_req;
 
-protected:
-    
-    bool _ProcessNetData(const char* pData, size_t uSize);
+    bool _ProcessNetData(const char* pData, size_t uSize, unsigned int uServerFrom);
     
 private:
     

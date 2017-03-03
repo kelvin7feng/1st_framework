@@ -1,10 +1,6 @@
 {
     "listen": {
         "ip": "0.0.0.0",
-        "port": 8002
-    },
-    "center_server": {
-        "ip": "127.0.0.1",
         "port": 8009
     },
     "redis": {
@@ -18,5 +14,5 @@
         "password": "NullPass1#",
         "scheme": "game"
     },
-    "logic_server_type" : 2
+    "logic_server_type" : 0
 }

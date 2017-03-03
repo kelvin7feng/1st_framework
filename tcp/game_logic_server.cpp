@@ -104,7 +104,7 @@ void GameLogicServer::OnMsgRecv(uv_stream_t* client, ssize_t nread, const uv_buf
         }
         else if (nread > 0)
         {
-            _ProcessNetData(buf->base, nread);
+            _ProcessNetData(buf->base, nread, SERVER_TYPE::GATEWAY);
         }
         
         free(buf->base);
@@ -223,7 +223,7 @@ void GameLogicServer::OnDBResponse(KRESOOND_COMMON* pCommonResponse)
     delete[] szData;
 }
 
-bool GameLogicServer::_ProcessNetData(const char* pData, size_t uRead)
+bool GameLogicServer::_ProcessNetData(const char* pData, size_t uRead, unsigned int uServerFrom)
 {
     bool bResult = false;
     unsigned int uWrite = 0;
@@ -255,7 +255,13 @@ bool GameLogicServer::_ProcessNetData(const char* pData, size_t uRead)
             bool bIsOk = msg.ParseFromArray(pNetBodyBuffer, uNetBodySize);
             if(bIsOk)
             {
-                lua_engine.CallLua(uHandlerId, uEventType, uSequenceId, msg.data().c_str());
+                if(uServerFrom == SERVER_TYPE::LOGIC || uServerFrom == SERVER_TYPE::GATEWAY){
+                    lua_engine.CallLua(uHandlerId, uEventType, uSequenceId, msg.data().c_str());
+                } else if(uServerFrom == SERVER_TYPE::CENTER){
+                    lua_engine.CallCenterRequestLua(uHandlerId, uEventType, uSequenceId, msg.data().c_str());
+                } else {
+                    cout <<  "Does not support server type:" << uServerFrom << endl;
+                }
             }
             
             SAFE_DELETE(pBuffer);

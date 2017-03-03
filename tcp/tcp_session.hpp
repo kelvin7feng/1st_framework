@@ -16,6 +16,7 @@
 #include <uv.h>
 
 #include "knetpacket.h"
+#include "center_client.hpp"
 #include "gateway_client.hpp"
 
 class TCPSession
@@ -29,7 +30,11 @@ public:
     
     void SetHandlerId(unsigned int uHandlerId);
     
+    //网关处理网络数据函数
     bool ProcessNetData(const char* pData, size_t uSize);
+    
+    //中心服处理网络数据函数
+    bool CenterServerProcessNetData(const char* pData, size_t uSize);
     
     std::shared_ptr<uv_tcp_t> connection;
     std::shared_ptr<uv_timer_t> activity_timer;
@@ -47,5 +52,6 @@ private:
 extern GatewayClient* g_pLoginLogicClient;
 extern GatewayClient* g_pGameLogicClient;
 extern GatewayClient* g_pRoomLogicClient;
+extern CenterClient* g_pCenterLogicClient;
 
 #endif /* tcp_session_hpp */

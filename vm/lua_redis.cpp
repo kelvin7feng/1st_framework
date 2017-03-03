@@ -59,13 +59,35 @@ static int PushRedisGet(lua_State* lua_state)
     return nRetCode;
 }
 
+static int PushRedisGets(lua_State* lua_state)
+{
+    int nRetCode = 0;
+    int nParam = lua_gettop(lua_state);
+    if(nParam != 3)
+    {
+        std::cout << "count of param is not equal to 3..." << std::endl;
+        return 0;
+    }
+    
+    unsigned int uUserId = lua_tonumber(lua_state, 1);
+    unsigned int uEventType = lua_tonumber(lua_state, 2);
+    std::string szKeys = lua_tostring(lua_state, 3);
+    
+    IKG_Buffer* pBuffer = DB_CreateGetsBuffer(szKeys);
+    DB_SetBufferHead(pBuffer, uUserId, uEventType);
+    
+    g_pDBClientMgr->PushRedisRequest(1, pBuffer);
+    
+    return nRetCode;
+}
+
 static int PushRedisDel(lua_State* lua_state)
 {
     int nRetCode = 0;
     int nParam = lua_gettop(lua_state);
     if(nParam != 4)
     {
-        std::cout << "count of param is not equal to 2..." << std::endl;
+        std::cout << "count of param is not equal to 4..." << std::endl;
         return 0;
     }
     
@@ -110,6 +132,7 @@ static const luaL_reg sLuaFunction[] =
 {
     {"PushRedisSet", PushRedisSet},
     {"PushRedisGet", PushRedisGet},
+    {"PushRedisGets", PushRedisGets},
     {"PushRedisDel", PushRedisDel},
     {"PushRedisHSet", PushRedisHSet},
     {NULL, NULL}

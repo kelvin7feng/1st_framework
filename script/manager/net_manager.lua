@@ -3,7 +3,8 @@ NetManager = class()
 function NetManager:ctor()
 	self.m_tbUserHanderIdMap = {};
 	self.m_tbHanderIdUserMap = {};
-	self.m_tbRequestSquence = {}
+	self.m_tbRequestSquence = {};
+	self.m_nCurrentHandlerId = nil;
 end
 
 function NetManager:PushRequestToSquence(nHandlerId, nSequenceId, tbParam)
@@ -21,6 +22,8 @@ function NetManager:PopRequestFromSquence(nHandlerId)
 	if table.maxn(self.m_tbRequestSquence[tostring(nHandlerId)]) == 0 then
 		self.m_tbRequestSquence[tostring(nHandlerId)] = nil;
 	end
+
+	LOG_DEBUG("PopRequestFromSquence:" .. json.encode(self.m_tbRequestSquence));
 
 	local nSequenceId = tbRequest[1];
 	return nSequenceId;
@@ -46,6 +49,14 @@ function NetManager:GetParamFromSquence(nHandlerId)
 
 	local tbParam = tbRequest[2];
 	return tbParam;
+end
+
+function NetManager:SetCurrentHandlerId(nHandlerId)
+	self.m_nCurrentHandlerId = nHandlerId;
+end
+
+function NetManager:GetCurrentHandlerId()
+	return self.m_nCurrentHandlerId;
 end
 
 function NetManager:SetHandlerId(nUserId, nHandlerId)
@@ -76,6 +87,18 @@ function NetManager:GetUserId(nHandlerId)
 	return self.m_tbHanderIdUserMap[tostring(nHandlerId)];
 end
 
+function NetManager:SendToCenter(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam)
+	
+	local nLength = 1
+	if strRetParam and not IsString(strRetParam) then
+		strRetParam = json.encode(strRetParam);
+		nLength = string.len(strRetParam)
+	end
+
+	self:PopRequestFromSquence(nHandlerId);
+	CNet.SendToCenter(nSequenceId, nEventType, nErrorCode, nHandlerId, nLength, strRetParam or "");
+end
+
 function NetManager:SendToGateway(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam)
 	
 	local nLength = 1
@@ -86,6 +109,30 @@ function NetManager:SendToGateway(nSequenceId, nEventType, nErrorCode, nHandlerI
 
 	self:PopRequestFromSquence(nHandlerId);
 	CNet.SendToGateway(nSequenceId, nEventType, nErrorCode, nHandlerId, nLength, strRetParam or "");
+end
+
+function NetManager:SendToLogicServer(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam)
+	
+	local nLength = 1
+	if strRetParam and not IsString(strRetParam) then
+		strRetParam = json.encode(strRetParam);
+		nLength = string.len(strRetParam)
+	end
+
+	self:PopRequestFromSquence(nHandlerId);
+	CNet.SendToLogicServer(nSequenceId, nEventType, nErrorCode, nHandlerId, nLength, strRetParam or "");
+end
+
+function NetManager:ResetRequest(nHandlerId)
+	self:PopRequestFromSquence(nHandlerId);
+end
+
+function NetManager:SetServerTypeToHandlerId(nServerType, nHandlerId)
+	
+	if not IsNumber(nServerType) or not IsNumber(nHandlerId) then
+		return;
+	end
+	return CNet.SetServerTypeToHandlerId(nServerType, nHandlerId);
 end
 
 G_NetManager = NetManager:new()

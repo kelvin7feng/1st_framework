@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>center.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>3</integer>
+		</dict>
 		<key>gateway.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -72,6 +77,11 @@
 			<true/>
 		</dict>
 		<key>B6091DA81DAD147300ABF7D0</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>B63623531E5D4436004FD7FD</key>
 		<dict>
 			<key>primary</key>
 			<true/>

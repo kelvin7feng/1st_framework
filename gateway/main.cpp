@@ -36,13 +36,9 @@ int main() {
     json_doc.Parse(sz_config.c_str());
     
     //初始化网关
-    const Value& server_config = json_doc["listen"];
-    string gateway_ip = server_config["ip"].GetString();
-    int gateway_port = server_config["port"].GetInt();
-    
     uv_loop_t *loop = uv_default_loop();
     GatewayServer *server = GatewayServer::GetInstance();
-    server->Init(loop, gateway_ip.c_str(), gateway_port);
+    server->Init(loop);
     
     //连接登录服
     if(json_doc.HasMember("login_logic"))

@@ -30,9 +30,11 @@
 #endif
 
 enum SERVER_TYPE {
+    CENTER = 0,
     LOGIN = 1,
     LOGIC = 2,
-    ROOM  = 3
+    ROOM  = 3,
+    GATEWAY =4,
 };
 
 enum KGLOG_PRIORITY

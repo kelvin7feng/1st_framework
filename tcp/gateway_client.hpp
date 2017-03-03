@@ -41,6 +41,7 @@ public:
 private:
     
     bool _ProcessNetData(const char* pData, size_t uSize);
+    
 };
 
 #endif /* gateway_client_hpp */
