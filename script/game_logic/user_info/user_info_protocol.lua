@@ -7,6 +7,23 @@ function UserInfoProtocol:ctor()
 	G_EventManager:Register(EVENT_ID.CLIENT_BASE_INFO.UPDATE_INVITER_ID, self.ClientUpdateInviterId, self);
 	G_EventManager:Register(EVENT_ID.CLIENT_BASE_INFO.UPDATE_NICK_NAME, self.ClientUpdateNickName, self);
 	G_EventManager:Register(EVENT_ID.CLIENT_BASE_INFO.BINDING_PHONE_NO, self.ClientBindingPhoneNo, self);	
+	G_EventManager:Register(EVENT_ID.CLIENT_BASE_INFO.UPDATE_BALANCE, self.ClientUpdateBalance, self);		
+end
+
+-- 客户端修改存款协议
+function UserInfoProtocol:ClientUpdateBalance(nBalance)
+	
+	LOG_DEBUG("UserInfoProtocol:ClientSetBalance")
+	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
+	if not IsNumber(nBalance) then
+		LOG_WARN("UserInfoProtocol:ClientSetBalance nBalance is illegal");
+		nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
+		return nErrorCode;
+	end
+
+	local objUser = G_UserManager:GetCurrentUserObject();
+
+	return G_UserInfoLogic:UpdateBalance(objUser, nBalance);
 end
 
 -- 客户端更新头像协议

@@ -30,6 +30,15 @@ function IsBoolean(t)
 	return type(t) == "boolean"
 end
 
+--检查是否浮点数
+function IsFloat(t)
+	if IsNumber(t) and math.floor(t) < t then
+		return true;
+	end
+
+	return false;
+end
+
 --检查是否为正确错误码
 function IsOkCode(t)
 	return t == ERROR_CODE.SYSTEM.OK

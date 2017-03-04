@@ -4,6 +4,54 @@ function UserInfoLogic:ctor()
 	
 end
 
+-- 更新存款
+function UserInfoLogic:UpdateBalance(objUser, nBalance)
+
+	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
+	if not objUser then
+		LOG_ERROR("UserInfoLogic:UpdateAvatar objUser is nil")
+		return nErrorCode;
+	end
+
+	-- 检查类型
+	if not IsNumber(nBalance) then
+		LOG_WARN("UserInfoLogic:UpdateBalance nBalance is illegal");
+		nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
+		return nErrorCode;
+	end
+
+	-- 不能小于0
+	if nBalance < 0 then
+		LOG_WARN("UserInfoLogic:UpdateBalance nBalance less than 0");
+		nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
+		return nErrorCode;
+	end
+
+	-- 如果是浮点数，不给处理
+	if IsFloat(nBalance) then
+		LOG_WARN("UserInfoLogic:UpdateBalance nBalance is float");
+		nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
+		return nErrorCode;
+	end
+
+	local nUserGold = objUser:GetGold();
+	local nUserBalance = objUser:GetBalance();
+	local nTotal = nUserGold + nUserBalance;
+
+	-- 不能超出总额
+	if nBalance > nTotal then
+		nErrorCode = ERROR_CODE.USER_BASE_INFO.BALANCE_IS_OUT_OF_RANGE;
+		return nErrorCode;
+	end 
+
+	local nGold = nTotal - nBalance;
+	objUser:SetGold(nGold);
+	objUser:SetBalance(nBalance);
+
+	nErrorCode = ERROR_CODE.SYSTEM.OK;
+	return nErrorCode, nBalance, nGold
+end
+
 -- 更新头像
 function UserInfoLogic:UpdateAvatar(objUser, nAvatarId)
 
