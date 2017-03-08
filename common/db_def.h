@@ -116,6 +116,51 @@ struct NET_PACKET_HEADER
     unsigned int uHandlerId;
 };
 
+enum PROXY2DRIVE_DATA_PROTOCOL
+{
+    PROXY2DRIVE_DATA_NONE,
+    PROXY2DRIVE_DATA_SET,
+    PROXY2DRIVE_DATA_GET,
+    PROXY2DRIVE_DATA_HSET,
+    PROXY2DRIVE_DATA_HGET,
+    PROXY2DRIVE_DATA_SETS,
+    PROXY2DRIVE_DATA_GETS,
+    PROXY2DRIVE_DATA_HSETS,
+    PROXY2DRIVE_DATA_HGETS,
+    PROXY2DRIVE_DATA_HGETALL,
+    PROXY2DRIVE_DATA_DEL,
+    PROXY2DRIVE_DATA_DELS,
+    PROXY2DRIVE_DATA_HDEL,
+    PROXY2DRIVE_DATA_HDELS,
+    PROXY2DRIVE_DATA_DELTB,
+    PROXY2DRIVE_DATA_NUM,
+};
+
+// respond头
+struct KP_DBRESPOND_HEAD
+{
+    long long lRef;
+    unsigned int uUserId;
+    unsigned int uEventType;
+    unsigned char byHandle;		// 操作者，redis或mysql
+    unsigned char byRetType;	// 返回值
+    unsigned char byRequestType;	// 预留字段1,对齐
+    unsigned char byReserved;	// 预留字段2，对齐
+};
+
+struct KP_DBRESPOND_COMMON : KP_DBRESPOND_HEAD
+{
+    int nLen;
+    char data[1];
+};
+
+struct KP_DBRESPOND_MULTI_DATA : KP_DBRESPOND_HEAD
+{
+    long long lId;	// 冗余数据，非完整包时使用
+    int nCount;
+    char data[1];
+};
+
 #pragma pack(pop)
 
 #endif /* db_def_h */

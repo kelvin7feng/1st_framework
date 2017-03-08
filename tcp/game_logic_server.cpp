@@ -11,6 +11,7 @@
 #include "kmacros.h"
 #include "document.h"
 #include "file_util.h"
+#include "db_def.h"
 #include "net_buffer.hpp"
 #include "db_client_manager.hpp"
 #include "game_logic_server.hpp"
@@ -223,6 +224,15 @@ void GameLogicServer::OnDBResponse(KRESOOND_COMMON* pCommonResponse)
     delete[] szData;
 }
 
+void GameLogicServer::OnDBResponse(KP_DBRESPOND_MULTI_DATA* pMulDataResponse)
+{
+    //调用lua处理回调
+    int nParamCount = pMulDataResponse->nCount;
+    if(nParamCount < 0)
+        nParamCount = 0;
+    lua_engine.RedisCallLua(pMulDataResponse->uUserId, pMulDataResponse->uEventType, nParamCount, pMulDataResponse->data);
+}
+
 bool GameLogicServer::_ProcessNetData(const char* pData, size_t uRead, unsigned int uServerFrom)
 {
     bool bResult = false;
@@ -264,7 +274,6 @@ bool GameLogicServer::_ProcessNetData(const char* pData, size_t uRead, unsigned 
                 }
             }
             
-            SAFE_DELETE(pBuffer);
             m_pRecvPacket->Reset();
         }
         pData += uWrite;

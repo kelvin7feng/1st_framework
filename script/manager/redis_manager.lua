@@ -21,6 +21,29 @@ function RedisInterface:GetValue(nUserId, nEventType, strKey)
 	CRedis.PushRedisGet(nUserId, nEventType, self:GetRedisTableName(), strKey);
 end
 
+function RedisInterface:MGetValue(nUserId, nEventType, tbKeys)
+
+	local tbName = self:GetRedisTableName();
+	if #tbKeys <= 0 then
+		LOG_WARN("tbKeys is empty");
+		return false;
+	end
+
+	local strKeys = "";
+	for nIndex, strKey in ipairs(tbKeys) do
+		if nIndex == 1 then
+			strKeys = string.format("%s_%s", tbName, tostring(strKey));
+		else
+			strKeys = string.format("%s %s_%s", strKeys, tbName, tostring(strKey));
+		end
+	end
+
+	LOG_DEBUG("nUserId " .. nUserId);
+	LOG_DEBUG("nEventType " .. nEventType);
+	LOG_DEBUG("MGET " .. strKeys);
+	CRedis.PushRedisGets(nUserId, nEventType, strKeys);
+end
+
 function RedisInterface:SetValue(nUserId, nEventType, strKey, strValue)
 
 	if IsNumber(strValue) then

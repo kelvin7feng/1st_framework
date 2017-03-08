@@ -28,9 +28,10 @@ static int PushRedisSet(lua_State* lua_state)
     std::string szKey = lua_tostring(lua_state, nParam - 1);
     std::string szValue = lua_tostring(lua_state, nParam);
     
-    IKG_Buffer* pBuffer = DB_CreateSetBuffer(szTableName, szKey, szValue);
+    IKG_Buffer* pBuffer = NULL;
+    //DBThreadActivate释放内存
+    pBuffer = DB_CreateSetBuffer(szTableName, szKey, szValue);
     DB_SetBufferHead(pBuffer, uUserId, uEventType);
-    
     g_pDBClientMgr->PushRedisRequest(1, pBuffer);
     
     return nRetCode;
@@ -51,9 +52,9 @@ static int PushRedisGet(lua_State* lua_state)
     std::string szTableName = lua_tostring(lua_state, 3);
     std::string szKey = lua_tostring(lua_state, 4);
     
+    //DBThreadActivate释放内存
     IKG_Buffer* pBuffer = DB_CreateGetBuffer(szTableName, szKey);
     DB_SetBufferHead(pBuffer, uUserId, uEventType);
-    
     g_pDBClientMgr->PushRedisRequest(1, pBuffer);
     
     return nRetCode;
@@ -73,9 +74,9 @@ static int PushRedisGets(lua_State* lua_state)
     unsigned int uEventType = lua_tonumber(lua_state, 2);
     std::string szKeys = lua_tostring(lua_state, 3);
     
+    //DBThreadActivate释放内存
     IKG_Buffer* pBuffer = DB_CreateGetsBuffer(szKeys);
     DB_SetBufferHead(pBuffer, uUserId, uEventType);
-    
     g_pDBClientMgr->PushRedisRequest(1, pBuffer);
     
     return nRetCode;
@@ -96,9 +97,9 @@ static int PushRedisDel(lua_State* lua_state)
     std::string szTableName = lua_tostring(lua_state, 3);
     std::string szKey = lua_tostring(lua_state, 4);
     
+    //DBThreadActivate释放内存
     IKG_Buffer* pBuffer = DB_CreateDelBuffer(szTableName, szKey);
     DB_SetBufferHead(pBuffer, uUserId, uEventType);
-    
     g_pDBClientMgr->PushRedisRequest(1, pBuffer);
     
     return nRetCode;
@@ -120,9 +121,9 @@ static int PushRedisHSet(lua_State* lua_state)
     std::string szKey = lua_tostring(lua_state, nParam - 1);
     std::string szValue = lua_tostring(lua_state, nParam);
     
+    //DBThreadActivate释放内存
     IKG_Buffer* pBuffer = DB_CreateHSetBuffer(szTableName, szKey, szValue);
     DB_SetBufferHead(pBuffer, uUserId, uEventType);
-    
     g_pDBClientMgr->PushRedisRequest(1, pBuffer);
     
     return nRetCode;

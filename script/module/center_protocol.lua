@@ -1,11 +1,6 @@
 
 function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
-
-	if not IsTable(tbParam) then
-		LOG_ERROR("parameter of request is nil...")
-		return 0;
-	end
-
+	
 	LOG_INFO("nHandlerId:" .. nHandlerId);
 	LOG_INFO("nEventId:" .. nEventId);
 	LOG_INFO("tbParam:" .. json.encode(tbParam));

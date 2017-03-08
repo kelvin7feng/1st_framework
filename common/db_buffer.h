@@ -26,6 +26,8 @@ void DB_SetBufferHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uE
 
 void DB_SetCommonHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uEventType);
 
+void DB_SetMulDataHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uEventType);
+
 IKG_Buffer* DB_MemoryCreateBuffer(unsigned int uSize);
 
 IKG_Buffer* DB_CreateRedisExpireBuffer(const std::string& szKey, int nSecond);

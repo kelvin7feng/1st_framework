@@ -53,3 +53,16 @@ function GetTotalSeconds(nYear, nMonth, nDay, nHour, nMin, nSec)
     end
     return os.time(tbParam)
 end
+
+-- 获取表的元素总数
+function CountTab(tb)
+    local nCount = 0;
+
+    if tb and IsTable(tb) then
+        for _ in pairs(tb) do
+            nCount = nCount + 1;
+        end
+    end
+
+    return nCount;
+end

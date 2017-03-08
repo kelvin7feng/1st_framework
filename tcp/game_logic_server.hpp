@@ -21,6 +21,7 @@
 #include <map>
 #include <uv.h>
 
+#include "db_def.h"
 #include "google.pb.h"
 #include "krequest_def.h"
 #include "lua_engine.hpp"
@@ -53,6 +54,8 @@ public:
     
     //数据处理的回调
     void OnDBResponse(KRESOOND_COMMON* pCommonResponse);
+    
+    void OnDBResponse(KP_DBRESPOND_MULTI_DATA* pMulDataResponse);
     
     //释放客户端句柄
     void RemoveClient(uv_stream_t* client);

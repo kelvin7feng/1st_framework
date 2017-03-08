@@ -68,12 +68,13 @@ void CenterClient::RegisterToCenter()
 {
     
     Message msg;
-    char buffer[50];
+    char* buffer = new char[100];
     int n = sprintf(buffer, "[\"%s\", 8001, %d]", GetIp(), GetSeverType());
     msg.set_data(buffer, n);
     std::string str;
     msg.SerializeToString(&str);
     SendNetPacket(SERVER_TYPE::CENTER, 3001, str.c_str(), (unsigned int)str.length());
+    SAFE_DELETE_ARRAY(buffer);
 }
 
 void CenterClient::SendNetPacket(unsigned short uServerId, unsigned int uEventType, const char* pBuffer, unsigned int uMsgSize){
@@ -85,6 +86,7 @@ void CenterClient::SendNetPacket(unsigned short uServerId, unsigned int uEventTy
     void* pvNetBuffer = CreateNetBuffer(uEventType, uErrorCode, uHandlerId, uServerId, uSequenceId, pBuffer, uMsgSize, &uPacketLen);
     
     TransferToCenterServer((char*)pvNetBuffer, uPacketLen);
+    SAFE_DELETE(pvNetBuffer);
 }
 
 void CenterClient::OnConnect(uv_connect_t *pServer, int nStatus) {

@@ -283,11 +283,11 @@ bool KRedisClient::OnRequest(IKG_Buffer* pBuffer)
         case emREQUEST_HDEL:
             bResult = OnRequestHDel(nIndex, (const KREQUEST_HDEL*)pRequest);
             break;
-        /*case emREQUEST_SETS:
-            bResult = OnRequestSets(nIndex, (const KREQUEST_SETS*)pRequest);
-            break;
         case emREQUEST_GETS:
             bResult = OnRequestGets(nIndex, (const KREQUEST_GETS*)pRequest);
+            break;
+        /*case emREQUEST_SETS:
+            bResult = OnRequestSets(nIndex, (const KREQUEST_SETS*)pRequest);
             break;
         case emREQUEST_HSETS:
             bResult = OnRequestHSets(nIndex, (const KREQUEST_HSETS*)pRequest);
@@ -317,11 +317,34 @@ bool KRedisClient::OnRequest(IKG_Buffer* pBuffer)
 
 bool KRedisClient::OnResponsed(IKG_Buffer* pBuffer)
 {
-    KRESOOND_COMMON* pResond = (KRESOOND_COMMON*)pBuffer->GetData();
-    GameLogicServer* pInstance = GameLogicServer::GetInstance();
-    pInstance->OnDBResponse(pResond);
-    SAFE_DELETE(pBuffer);
+    char* pData = (char*)pBuffer->GetData();
+    unsigned char byPacketType = *(unsigned char*)(pData - 1);
+    switch (byPacketType)
+    {
+        case RESPOND_FLAG_COMMON:
+        {
+            KRESOOND_COMMON* pRespond = (KRESOOND_COMMON*)pBuffer->GetData();
+            GameLogicServer* pInstance = GameLogicServer::GetInstance();
+            pInstance->OnDBResponse(pRespond);
+        }
+        break;
+        case RESPOND_FLAG_NET_PART1:
+        case RESPOND_FLAG_NET_PART2:
+        case RESPOND_FLAG_NET_FULL:
+        {
+            //printf("=====================pBuffer: %p\r\n", pBuffer);
+            KP_DBRESPOND_MULTI_DATA* pRespond = (KP_DBRESPOND_MULTI_DATA*)((char*)pBuffer->GetData() + 1);
+            //printf("=====================pRespond: %p\r\n", pRespond);
+            GameLogicServer* pInstance = GameLogicServer::GetInstance();
+            pInstance->OnDBResponse(pRespond);
+        }
+        break;
+        default:
+            _ASSERT(false);
+            break;
+    }
     
+    //SAFE_DELETE(pBuffer);
     return true;
 }
 
@@ -384,6 +407,7 @@ IKG_Buffer* KRedisClient::GenCommonRespond(long long lId, unsigned char byType, 
     IKG_Buffer* pBuffer = NULL;
     if (pReply->type == REDIS_REPLY_ERROR)
     {
+        //OnRespond函数释放内存
         pBuffer = DB_MemoryCreateBuffer((int)(sizeof(KRESOOND_COMMON) + pReply->len));
         KRESOOND_COMMON* pResond = (KRESOOND_COMMON*)pBuffer->GetData();
         pResond->lId = lId;
@@ -397,6 +421,7 @@ IKG_Buffer* KRedisClient::GenCommonRespond(long long lId, unsigned char byType, 
     }
     else if (pReply->type == REDIS_REPLY_ARRAY)
     {
+        //OnRespond函数释放内存
         pBuffer = DB_MemoryCreateBuffer((int)(sizeof(KRESOOND_COMMON) + pReply->elements * sizeof(int) - 1));
         KRESOOND_COMMON* pResond = (KRESOOND_COMMON*)pBuffer->GetData();
         pResond->lId = lId;
@@ -413,6 +438,7 @@ IKG_Buffer* KRedisClient::GenCommonRespond(long long lId, unsigned char byType, 
     }
     else
     {
+        //OnRespond函数释放内存
         pBuffer = DB_MemoryCreateBuffer((int)(sizeof(KRESOOND_COMMON) + pReply->len));
         KRESOOND_COMMON* pResond = (KRESOOND_COMMON*)pBuffer->GetData();
         pResond->lId = lId;
@@ -424,6 +450,7 @@ IKG_Buffer* KRedisClient::GenCommonRespond(long long lId, unsigned char byType, 
         memset(pResond->data, 0, pReply->len + 1);
         memcpy(pResond->data, pReply->str, pReply->len);
     }
+    
     char* pData = (char*)pBuffer->GetData();
     pData -= sizeof(unsigned char);
     *(unsigned char*)pData = RESPOND_FLAG_COMMON;
@@ -433,7 +460,6 @@ IKG_Buffer* KRedisClient::GenCommonRespond(long long lId, unsigned char byType, 
 bool KRedisClient::OnRequestSet(int nIndex, const KREQUEST_SET* pRequestSet)
 {
     bool bResult = false;
-    //bool bRet = false;
     redisReply* pReply = NULL;
     IKG_Buffer* pCommonBuffer = NULL;
     size_t uPrefixLen = pRequestSet->uPrefixLen;
@@ -441,7 +467,6 @@ bool KRedisClient::OnRequestSet(int nIndex, const KREQUEST_SET* pRequestSet)
     size_t uValueLen = pRequestSet->uValueLen;
     size_t uSetKeyLen = uPrefixLen + uKeyLen + REQUEST_KEY_UNDERLINED_LEN;
     pReply = RedisCommand(nIndex, "set %b %b", pRequestSet->data, uSetKeyLen , pRequestSet->data + uSetKeyLen, uValueLen);
-    
     //同步到数据库里
     if(pReply!=NULL)
     {
@@ -450,8 +475,10 @@ bool KRedisClient::OnRequestSet(int nIndex, const KREQUEST_SET* pRequestSet)
         KREQUEST_SET* pRequest = (KREQUEST_SET*)pBuffer->GetData();
         memcpy(pRequest, pRequestSet, pBuffer->GetSize());
         g_pDBClientMgr->PushMysqlRequest(nIndex + 1, pBuffer);
+        printf("---------------------KRedisClient::PushMysqlRequest %p\r\n", pBuffer);
     }
     
+    //OnRespond的时候释放
     pCommonBuffer = GenCommonRespond(pRequestSet->lId, pRequestSet->byType, pReply);
     DB_SetCommonHead(pCommonBuffer, pRequestSet->uUserId, pRequestSet->uEventType);
     PushRespond(pCommonBuffer);
@@ -470,7 +497,6 @@ bool KRedisClient::OnRequestGet(int nIndex, const KREQUEST_GET* pRequestGet)
 {
     bool bResult = false;
     redisReply* pReply = NULL;
-    IKG_Buffer* pPacketBuffer = NULL;
     IKG_Buffer* pCommonBuffer = NULL;
     size_t uPrefixLen = pRequestGet->uPrefixLen;
     size_t uKeyLen = pRequestGet->uKeyLen;
@@ -479,7 +505,7 @@ bool KRedisClient::OnRequestGet(int nIndex, const KREQUEST_GET* pRequestGet)
     
     //从数据库中读取出来
     
-    //同步的时候有bug
+    //to do:同步
     /*if (pReply->type == REDIS_REPLY_NIL && !pRequestGet->bAllowRedisNil)
     {
         size_t nSize = sizeof(KREQUEST_GET) + uGetKeyLen;
@@ -492,6 +518,7 @@ bool KRedisClient::OnRequestGet(int nIndex, const KREQUEST_GET* pRequestGet)
         PushRespond(pPacketBuffer);
     }*/
     
+    //OnRespond的时候释放
     pCommonBuffer = GenCommonRespond(pRequestGet->lId, pRequestGet->byType, pReply);
     DB_SetCommonHead(pCommonBuffer, pRequestGet->uUserId, pRequestGet->uEventType);
     PushRespond(pCommonBuffer);
@@ -503,8 +530,38 @@ Exit0:
         freeReplyObject(pReply);
     }
     
-    //SAFE_RELEASE(pPacketBuffer);
-    //SAFE_RELEASE(pCommonBuffer);
+    SAFE_RELEASE(pCommonBuffer);
+    return bResult;
+}
+
+bool KRedisClient::OnRequestGets(int nIndex, const KREQUEST_GETS* pRequestGets)
+{
+    bool bResult = false;
+    redisReply* pReply = NULL;
+    IKG_Buffer* pPackatBuffer = NULL;
+    size_t uHashKeyLen = pRequestGets->uHashKeyLen;
+    char* szCmd = new char[uHashKeyLen+5+1];
+    memset(szCmd, 0, uHashKeyLen + 5 + 1);
+    memcpy(szCmd, "mget ", 5);
+    memcpy(szCmd + 5, pRequestGets->data, uHashKeyLen);
+    pReply = RedisCommand(nIndex, szCmd);
+    
+    //_ASSERT(pReply->elements == pRequestGets->nCount);
+    pPackatBuffer = _GenMultiDataNetRespond(pRequestGets->bAllowRedisNil, pRequestGets->lId, pRequestGets->lRef, PROXY2DRIVE_DATA_GETS, pRequestGets->byType, pRequestGets->nConnectId, pReply);
+    DB_SetMulDataHead(pPackatBuffer, pRequestGets->uUserId, pRequestGets->uEventType);
+    
+    PushRespond(pPackatBuffer);
+    
+    bResult = true;
+Exit0:
+    if (pReply)
+    {
+        freeReplyObject(pReply);
+    }
+    
+    SAFE_DELETE_ARRAY(szCmd);
+    //SAFE_RELEASE(pPackatBuffer);
+    
     return bResult;
 }
 
@@ -651,4 +708,80 @@ Exit0:
     }
     
     return bResult;
+}
+
+
+IKG_Buffer* KRedisClient::_GenMultiDataNetRespond(bool bAllowNil, long long lId, long long lRef, unsigned char byProtocolId, unsigned char byRequestType, int nConnectId, redisReply* pReply)
+{
+    int nProtocolReserved = GetNetPacketReserved();
+    bool bHasNil = false;
+    size_t uSize = sizeof(KP_DBRESPOND_MULTI_DATA) + sizeof(int) * pReply->elements + nProtocolReserved;
+    if (pReply->type == REDIS_REPLY_ERROR)
+    {
+        uSize += pReply->len + 1;
+    }
+    else
+    {
+        for (int i = 0; i < (int)pReply->elements; i++)
+        {
+            if (pReply->element[i]->type == REDIS_REPLY_STRING)
+            {
+                uSize += pReply->element[i]->len;
+            }
+            else
+            {
+                _ASSERT(pReply->element[i]->type == REDIS_REPLY_NIL);
+                bHasNil = true;
+            }
+        }
+    }
+    
+    IKG_Buffer* pPackatBuffer = DB_MemoryCreateBuffer(uSize);
+    char* pData = (char*)pPackatBuffer->GetData();
+    //SetNetPacketReserved(pData + nProtocolReserved);
+    if (bHasNil && !bAllowNil)
+    {
+        KD_INIT_NONFULL_NETPACKET_HEAD(pData, nConnectId);
+    }
+    else
+    {
+        KD_INIT_NETPACKET_HEAD(pData, nConnectId);
+    }
+    pData += nProtocolReserved;
+    *pData++ = byProtocolId;
+    KP_DBRESPOND_MULTI_DATA* pRespond = (KP_DBRESPOND_MULTI_DATA*)pData;
+    pRespond->byHandle = DB_FLAG_REDIS;
+    pRespond->byRetType = pReply->type;
+    pRespond->byRequestType = byRequestType;
+    pRespond->nCount = pReply->elements;
+    pRespond->lRef = lRef;
+    pRespond->lId = lId;
+    if (pReply->type == REDIS_REPLY_ERROR)
+    {
+        memcpy(pRespond->data, pReply->str, pReply->len);
+        pRespond->data[pReply->len] = '\0';
+    }
+    else
+    {
+        int* pnValueLen = (int*)pRespond->data;
+        char* pTmp = pRespond->data + sizeof(int) * pReply->elements;
+        for (int i = 0; i < (int)pReply->elements; i++)
+        {
+            if (pReply->element[i]->type == REDIS_REPLY_STRING || pReply->element[i]->type == REDIS_REPLY_ARRAY)
+            {
+                *pnValueLen = pReply->element[i]->len;
+                memcpy(pTmp, pReply->element[i]->str, pReply->element[i]->len);
+                pTmp += *pnValueLen;
+            }
+            else
+            {
+                *pnValueLen = -1;
+            }
+            pnValueLen++;
+        }
+    }
+    //printf("---------------------------_GenMultiDataNetRespond pPackatBuffer %p\r\n", pPackatBuffer);
+    //printf("---------------------------_GenMultiDataNetRespond pData %p\r\n", pData);
+    //printf("---------------------------_GenMultiDataNetRespond pRespond->data %p\r\n", pRespond->data);
+    return pPackatBuffer;
 }

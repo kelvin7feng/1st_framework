@@ -1,11 +1,6 @@
 
 function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 
-	if not IsTable(tbParam) then
-		LOG_ERROR("parameter of request is nil...")
-		return;
-	end
-
 	if nEventId == EVENT_ID.CLIENT_LOGIN.LOGIN_DIRECT then
 		LOG_DEBUG("OnClientLoginDirect..........1")
 		return OnClientLoginDirect(nHandlerId, nEventId, nSequenceId, tbParam);

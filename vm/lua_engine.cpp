@@ -191,6 +191,56 @@ int LuaEngine::RedisCallLua(const unsigned int uUserId, const unsigned int uEven
     return 0;
 }
 
+//调用脚本处理
+int LuaEngine::RedisCallLua(const unsigned int uUserId, const unsigned int uEventType, const unsigned int nParamCount, char* szData)
+{
+    int nTop = lua_gettop(m_lua_state);
+    
+    lua_getglobal(m_lua_state, "OnRedisMulDataRespone");
+    lua_pushnumber(m_lua_state, uUserId);
+    lua_pushnumber(m_lua_state, uEventType);
+    
+    //把字符串处理成table
+    lua_createtable(m_lua_state, 0, nParamCount);
+    if(nParamCount > 0)
+    {
+        int* pnValueLen = (int*)szData;
+        char* pTmp = szData + sizeof(int) * nParamCount;
+        for(int i = 0; i < nParamCount; i++)
+        {
+            lua_pushnumber(m_lua_state, i);
+            lua_pushlstring(m_lua_state, pTmp, *pnValueLen);
+            pTmp += *pnValueLen;
+            pnValueLen++;
+            lua_settable(m_lua_state, -3);
+        }
+    }
+    
+    int ret = lua_pcall(m_lua_state, 3, 1, 0);
+    
+    //调用出错
+    if(ret)
+    {
+        const char *pErrorMsg = lua_tostring(m_lua_state, -1);
+        cout << pErrorMsg << endl;
+        return 0;
+    }
+    
+    //取值输出
+    if (lua_isnumber(m_lua_state, -1))
+    {
+        int fValue = lua_tonumber(m_lua_state, -1);
+        if(fValue){
+            //成功逻辑
+        }
+    } else {
+        //返回值类型错误
+    }
+    
+    lua_settop(m_lua_state, nTop);
+    return 0;
+}
+
 //Lua引擎初始化
 int LuaEngine::InitState(int server_type)
 {

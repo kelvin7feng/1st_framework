@@ -11,8 +11,10 @@
 #include <stdio.h>
 #include <iostream>
 #include "kmacros.h"
+#include "db_def.h"
 #include "db_buffer.h"
 #include "krequest_def.h"
+#include "kg_interlockedvariable.h"
 
 #define MEMORY_BUFFER_RESERVE_SIZE   8
 
@@ -50,12 +52,26 @@ KG_Buffer::~KG_Buffer()
 
 long KG_Buffer::AddRef()
 {
+    //return KG_InterlockedIncrement((long*)&m_lRefCount);
     return 0;
 }
 
 long KG_Buffer::Release()
 {
     return 0;
+    /*long lRefNow = KG_InterlockedDecrement((long*)&m_lRefCount);
+    if (lRefNow > 0)
+        goto Exit0;
+    if (lRefNow < 0)
+    {
+        _ASSERT(false);
+        printf("Err: Bad use of memory block : Unexpected memory release!");
+    }
+    
+    this->~KG_Buffer();
+    free((void*)this);
+Exit0:
+    return lRefNow;*/
 }
 
 void DB_SetBufferHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uEventType)
@@ -68,6 +84,13 @@ void DB_SetBufferHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uE
 void DB_SetCommonHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uEventType)
 {
     KRESOOND_COMMON* pResond = (KRESOOND_COMMON*)pBuffer->GetData();
+    pResond->uUserId = uUserId;
+    pResond->uEventType = uEventType;
+}
+
+void DB_SetMulDataHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uEventType)
+{
+    KP_DBRESPOND_MULTI_DATA* pResond = (KP_DBRESPOND_MULTI_DATA*)((char*)pBuffer->GetData() + 1);
     pResond->uUserId = uUserId;
     pResond->uEventType = uEventType;
 }
@@ -114,6 +137,7 @@ IKG_Buffer* DB_CreateSetBuffer(const std::string& szTable, const std::string& sz
     memcpy(pRequest->data + szTable.length() + REQUEST_KEY_UNDERLINED_LEN, szKey.c_str(), szKey.length());
     memcpy(pRequest->data + szTable.length() + szKey.length() + REQUEST_KEY_UNDERLINED_LEN, szValue.c_str(), szValue.length());
     
+    printf("-----------------------DB_CreateSetBuffer %p\r\n", pBuffer);
     return pBuffer;
 }
 
@@ -140,6 +164,7 @@ IKG_Buffer* DB_CreateGetsBuffer(const std::string& szKeys)
     pRequest->uHashKeyLen = (unsigned int)szKeys.length();
     pRequest->byType = KE_REQUEST_TYPE::emREQUEST_GETS;
     memcpy(pRequest->data, szKeys.c_str(), szKeys.length());
+    pRequest->data[szKeys.length()+1] = '\0';
     
     return pBuffer;
 }

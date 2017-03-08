@@ -332,7 +332,6 @@ IKG_Buffer* KMysqlClient::OnRequestQuery(IKG_Buffer* pBuffer)
 
 bool KMysqlClient::OnResponsed(IKG_Buffer* pBuffer)
 {
-    //g_pDBClientMgr->ProcessRespond(pBuffer);
     SAFE_DELETE(pBuffer);
     return true;
 }

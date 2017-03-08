@@ -21,11 +21,15 @@ function OnClientRequest(nHandlerId, nEventId, nSequenceId, strJson)
 			end
 
 			local tbParam = json.decode(strJson);
+			if not IsTable(tbParam) then
+				LOG_ERROR("parameter of request is nil...")
+				return 0;
+			end
 
 			-- 添加到请求队列里
 			G_NetManager:PushRequestToSquence(nHandlerId, nSequenceId, tbParam);
 
-			ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
+			return ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 
 		end, __TRACKBACK__);
 

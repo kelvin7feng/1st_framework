@@ -1,11 +1,6 @@
 
 function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 
-	if not IsTable(tbParam) then
-		LOG_ERROR("parameter of request is nil...")
-		return 0;
-	end
-
 	if nEventId == EVENT_ID.CLIENT_LOGIN.ENTER_GAME then
 		LOG_DEBUG("OnClientEnterGame..........1")
 		return OnClientEnterGame(nHandlerId, nEventId, nSequenceId, tbParam)
@@ -13,17 +8,19 @@ function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 
 	local nUserId = G_NetManager:GetUserId(nHandlerId);
 	if not nUserId then
-		return 0;
+		return false;
 	end
 
 	G_UserManager:SetCurrentUserObject(nUserId);
 	
 	local tbRet = {G_EventManager:DispatcherEvent(nEventId, tbParam)};
 	local nErrorCode = table.remove(tbRet,1);
-	if nErrorCode ~= ERROR_CODE.NET.LOGIN_TO_ROOM_SERVER then
-		G_NetManager:SendToGateway(nSequenceId, nEventId, nErrorCode, nHandlerId, tbRet);
-	else
-		G_NetManager:SendToCenter(nSequenceId, nEventId, nErrorCode, nHandlerId, tbRet);
+	if nErrorCode ~= ERROR_CODE.SYSTEM.ASYN_EVENT then
+		if nErrorCode ~= ERROR_CODE.NET.LOGIN_TO_ROOM_SERVER then
+			G_NetManager:SendToGateway(nSequenceId, nEventId, nErrorCode, nHandlerId, tbRet);
+		else
+			G_NetManager:SendToCenter(nSequenceId, nEventId, nErrorCode, nHandlerId, tbRet);
+		end
 	end
 
 	G_UserManager:Commit();
@@ -90,6 +87,20 @@ function OnRedisRespone(nUserId, nEventId, strRepsonseJson)
 	OnResponseGlobalConfigEvent(nEventId, strRepsonseJson);
 	OnResponseEnterGameEvent(nUserId, nEventId, strRepsonseJson);
 	OnResponseFriendEvent(nUserId, nEventId, strRepsonseJson);
+end
+
+-- 响应多个数据redis, 只支持处理一次异步, 如果是多个异步, 需要单独处理
+function OnRedisMulDataRespone(nUserId, nEventId, tbMulData)
+	LOG_DEBUG("nUserId :" .. nUserId)
+	LOG_DEBUG("nEventId :" .. nEventId)
+	LOG_DEBUG("tbMulData type:" .. type(tbMulData))
+	LOG_DEBUG("tbMulData :" .. json.encode(tbMulData))
+	
+	local nHandlerId = G_NetManager:GetHandlerId(nUserId);
+	local nSequenceId = G_NetManager:GetSquenceIdFromSquence(nHandlerId);
+	LOG_DEBUG("nHandlerId :" .. nHandlerId)
+	LOG_DEBUG("nSequenceId :" .. nSequenceId)
+	return ClientRequest(nHandlerId, nEventId, nSequenceId, {tbMulData})
 end
 
 -- 响应进入游戏事件

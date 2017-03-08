@@ -1,7 +1,101 @@
 FriendLogic = class()
 
 function FriendLogic:ctor()
+	G_EventManager:Register(EVENT_ID.GET_ASYN_DATA.GET_FRIEND_LIST, self.OnGetFriendList, self);
+end
+
+-- 获取好友请求列表
+function FriendLogic:OnGetFriendList(tbFriendList)
 	
+	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
+
+	if not IsTable(tbFriendList) then
+		LOG_ERROR("FriendLogic:OnGetFriendList tbFriendList is error...")
+		return nErrorCode;
+	end
+
+	local tbClientFriendsData = {}
+	for _,userData in pairs(tbFriendList) do
+		if not IsTable(userData) then
+			userData = json.decode(userData);
+		end
+
+		local tbFriendData = self:GetClientFriendData(userData);
+		table.insert(tbClientFriendsData, tbFriendData);
+        
+	end
+
+	nErrorCode = ERROR_CODE.SYSTEM.OK;
+	return nErrorCode, tbClientFriendsData;
+end
+
+-- 抽取好友列表需要的数据
+function FriendLogic:GetClientFriendData(tbUserInfo)
+	
+	local tbClientFriendData = nil;
+
+	if tbUserInfo and tbUserInfo[GAME_DATA_TABLE_NAME.BASE_INFO] then
+		local tbBaseInfo = tbUserInfo[GAME_DATA_TABLE_NAME.BASE_INFO]
+		tbClientFriendData = {
+			[GAME_DATA_FIELD_NAME.BaseInfo.USER_ID] 				 = tbBaseInfo[GAME_DATA_FIELD_NAME.BaseInfo.USER_ID],
+			[GAME_DATA_FIELD_NAME.BaseInfo.AVATAR]					 = tbBaseInfo[GAME_DATA_FIELD_NAME.BaseInfo.AVATAR],
+			[GAME_DATA_FIELD_NAME.BaseInfo.SEX]					     = tbBaseInfo[GAME_DATA_FIELD_NAME.BaseInfo.SEX],
+			[GAME_DATA_FIELD_NAME.BaseInfo.NAME]					 = tbBaseInfo[GAME_DATA_FIELD_NAME.BaseInfo.NAME],
+			[GAME_DATA_FIELD_NAME.BaseInfo.GOLD]				     = tbBaseInfo[GAME_DATA_FIELD_NAME.BaseInfo.GOLD],
+			[GAME_DATA_FIELD_NAME.BaseInfo.SIGNATURE]				 = tbBaseInfo[GAME_DATA_FIELD_NAME.BaseInfo.SIGNATURE],
+			[GAME_DATA_FIELD_NAME.BaseInfo.AVATAR_URL]				 = tbBaseInfo[GAME_DATA_FIELD_NAME.BaseInfo.AVATAR_URL],
+		};
+	end
+
+	return tbClientFriendData;
+end
+
+-- 获取好友请求列表
+function FriendLogic:GetAddFriendRequest(objUser)
+	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
+	if not objUser then
+		LOG_ERROR("FriendLogic:AddFriend objUser is nil...")
+		return nErrorCode;
+	end
+
+	local tbTempUser = nil;
+	local tbFriendList = {};
+	for i=1, 5 do
+		tbTempUser = {
+			[GAME_DATA_FIELD_NAME.BaseInfo.USER_ID] 				 = 100001 + i,
+			[GAME_DATA_FIELD_NAME.BaseInfo.AVATAR]					 = math.random(15),
+			[GAME_DATA_FIELD_NAME.BaseInfo.SEX]					     = math.random(1),
+			[GAME_DATA_FIELD_NAME.BaseInfo.NAME]					 = "Guest",
+			[GAME_DATA_FIELD_NAME.BaseInfo.AVATAR_URL]				 = "",
+		};
+		table.insert(tbFriendList, tbTempUser);
+	end
+
+	nErrorCode = ERROR_CODE.SYSTEM.OK;
+	return nErrorCode, tbFriendList;
+end
+
+-- 获取好友列表
+function FriendLogic:GetFriendList(objUser)
+	
+	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
+	local tbFriendList = objUser:GetFriendList();
+	local nCount = CountTab(tbFriendList);
+	LOG_DEBUG("GetFriendList nCount:" .. nCount)
+	if nCount > 0 then
+		nErrorCode = ERROR_CODE.SYSTEM.ASYN_EVENT;
+		local tbTempList = {}
+		for strUserId, _ in pairs(tbFriendList) do
+			table.insert(tbTempList, strUserId);
+		end
+
+		LOG_DEBUG("FriendLogic:GetFriendList ............ " .. json.encode(tbTempList))
+		G_GameDataRedis:MGetValue(objUser:GetUserId(), EVENT_ID.GET_ASYN_DATA.GET_FRIEND_LIST, tbTempList);
+	else
+		nErrorCode = ERROR_CODE.SYSTEM.OK;
+	end
+	
+	return nErrorCode, tbFriendList or {};
 end
 
 -- 通过请求
