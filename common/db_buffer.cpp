@@ -52,14 +52,12 @@ KG_Buffer::~KG_Buffer()
 
 long KG_Buffer::AddRef()
 {
-    //return KG_InterlockedIncrement((long*)&m_lRefCount);
-    return 0;
+    return KG_InterlockedIncrement((long*)&m_lRefCount);
 }
 
 long KG_Buffer::Release()
 {
-    return 0;
-    /*long lRefNow = KG_InterlockedDecrement((long*)&m_lRefCount);
+    long lRefNow = KG_InterlockedDecrement((long*)&m_lRefCount);
     if (lRefNow > 0)
         goto Exit0;
     if (lRefNow < 0)
@@ -71,7 +69,7 @@ long KG_Buffer::Release()
     this->~KG_Buffer();
     free((void*)this);
 Exit0:
-    return lRefNow;*/
+    return lRefNow;
 }
 
 void DB_SetBufferHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uEventType)
@@ -137,7 +135,7 @@ IKG_Buffer* DB_CreateSetBuffer(const std::string& szTable, const std::string& sz
     memcpy(pRequest->data + szTable.length() + REQUEST_KEY_UNDERLINED_LEN, szKey.c_str(), szKey.length());
     memcpy(pRequest->data + szTable.length() + szKey.length() + REQUEST_KEY_UNDERLINED_LEN, szValue.c_str(), szValue.length());
     
-    printf("-----------------------DB_CreateSetBuffer %p\r\n", pBuffer);
+    //printf("-----------------------DB_CreateSetBuffer %p\r\n", pBuffer);
     return pBuffer;
 }
 

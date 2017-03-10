@@ -122,7 +122,10 @@ bool KNetPackage::Reset()
 {
 	m_uPacketLen = KD_INVALID_PACKET_LEN;
 	m_uRecvOffset = 0;
-	SAFE_RELEASE(m_pBuffer);
+    if(m_pBuffer)
+    {
+        SAFE_RELEASE(m_pBuffer);
+    }
 	return true;
 }
 
