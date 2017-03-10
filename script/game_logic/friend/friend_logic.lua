@@ -2,6 +2,64 @@ FriendLogic = class()
 
 function FriendLogic:ctor()
 	G_EventManager:Register(EVENT_ID.GET_ASYN_DATA.GET_FRIEND_LIST, self.OnGetFriendList, self);
+	G_EventManager:Register(EVENT_ID.GET_ASYN_DATA.GET_ADD_FRIEND_REQUEST, self.OnGetAddFriendRequest, self);
+	G_EventManager:Register(EVENT_ID.GET_ASYN_DATA.ADD_FRIEND_GET_GAME_DATA, self.AddFriendRequest, self);
+	G_EventManager:Register(EVENT_ID.GET_ASYN_DATA.GET_FRIEND_INVITER_DATA, self.OnGetFriendInviterData, self);
+end
+
+-- 获取好友请求列表
+function FriendLogic:OnGetFriendInviterData(nInviteeUserId, objInviter)
+	
+	LOG_DEBUG("FriendLogic:OnGetFriendInviterData")
+	if not objInviter then
+		LOG_ERROR("FriendLogic:OnGetFriendInviterData objInviter is nil...");
+		return false;
+	end
+
+	if not IsNumber(nInviteeUserId) then
+		LOG_ERROR("FriendLogic:OnGetFriendInviterData nInviteeUserId isn't number...");
+		return false;
+	end
+
+	-- 添加好友
+	self:UserAddFriend(objInviter, nInviteeUserId)
+
+	-- 由于是异步事件, 执行完即可
+	return ERROR_CODE.SYSTEM.ASYN_EVENT;
+end
+
+-- 增加好友
+function FriendLogic:UserAddFriend(objUser, nUserId)
+	objUser:AddToFriendList(nUserId);
+	G_UserManager:SaveUserData(objUser);
+
+	-- 通知玩家申请通过
+	--G_NetManager:SendNoticeToUser(EVENT_ID.CLIENT_NOTICE.PASS_REQUEST, ERROR_CODE.SYSTEM.OK, objUser:GetUserId(), {})
+end
+
+-- 获取好友请求列表
+function FriendLogic:OnGetAddFriendRequest(tbFriendList)
+	
+	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
+
+	if not IsTable(tbFriendList) then
+		LOG_ERROR("FriendLogic:OnGetAddFriendRequest tbFriendList is error...")
+		return nErrorCode;
+	end
+
+	local tbClientFriendsData = {}
+	for _,userData in pairs(tbFriendList) do
+		if not IsTable(userData) then
+			userData = json.decode(userData);
+		end
+
+		local tbFriendData = self:GetClientFriendData(userData);
+		table.insert(tbClientFriendsData, tbFriendData);
+        
+	end
+
+	nErrorCode = ERROR_CODE.SYSTEM.OK;
+	return nErrorCode, tbClientFriendsData;
 end
 
 -- 获取好友请求列表
@@ -53,26 +111,23 @@ end
 -- 获取好友请求列表
 function FriendLogic:GetAddFriendRequest(objUser)
 	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
-	if not objUser then
-		LOG_ERROR("FriendLogic:AddFriend objUser is nil...")
-		return nErrorCode;
-	end
+	local tbFriendRequest = objUser:GetFriendRequest();
+	local nCount = CountTab(tbFriendRequest);
+	LOG_DEBUG("GetAddFriendRequest nCount:" .. nCount)
+	if nCount > 0 then
+		nErrorCode = ERROR_CODE.SYSTEM.ASYN_EVENT;
+		local tbTempList = {}
+		for strUserId, _ in pairs(tbFriendRequest) do
+			table.insert(tbTempList, strUserId);
+		end
 
-	local tbTempUser = nil;
-	local tbFriendList = {};
-	for i=1, 5 do
-		tbTempUser = {
-			[GAME_DATA_FIELD_NAME.BaseInfo.USER_ID] 				 = 100001 + i,
-			[GAME_DATA_FIELD_NAME.BaseInfo.AVATAR]					 = math.random(15),
-			[GAME_DATA_FIELD_NAME.BaseInfo.SEX]					     = math.random(1),
-			[GAME_DATA_FIELD_NAME.BaseInfo.NAME]					 = "Guest",
-			[GAME_DATA_FIELD_NAME.BaseInfo.AVATAR_URL]				 = "",
-		};
-		table.insert(tbFriendList, tbTempUser);
+		LOG_DEBUG("FriendLogic:GetAddFriendRequest ............ " .. json.encode(tbTempList))
+		G_GameDataRedis:MGetValue(objUser:GetUserId(), EVENT_ID.GET_ASYN_DATA.GET_ADD_FRIEND_REQUEST, tbTempList);
+	else
+		nErrorCode = ERROR_CODE.SYSTEM.OK;
 	end
-
-	nErrorCode = ERROR_CODE.SYSTEM.OK;
-	return nErrorCode, tbFriendList;
+	
+	return nErrorCode, tbFriendList or {};
 end
 
 -- 获取好友列表
@@ -120,10 +175,19 @@ function FriendLogic:PassRequest(objUser, nInviter)
 		return nErrorCode;
 	end
 
+	LOG_DEBUG("FriendLogic:PassRequest -------------- " .. nInviter);
 	-- 删除请求
 	objUser:DelFriendRequest(nInviter);
-	-- 增加好友
+	-- 双方互加好友
 	objUser:AddToFriendList(nInviter);
+
+	local bIsCache = G_UserManager:IsUserObjectCache(nInviter);
+	if not bIsCache then
+		G_GameDataRedis:MGetValue(objUser:GetUserId(), EVENT_ID.GET_ASYN_DATA.GET_FRIEND_INVITER_DATA, {nInviter});
+	else
+		local objInviterUser = G_UserManager:GetUserObject(nInviter);
+		self:UserAddFriend(objInviterUser, objUser:GetUserId());
+	end
 
 	nErrorCode = ERROR_CODE.SYSTEM.OK;
 
@@ -165,12 +229,20 @@ function FriendLogic:AddFriend(objUser, nUserId)
 	end
 
 	local nInviterUserId = objUser:GetUserId();
+
+	-- 检查是否加自己
+	if nInviterUserId == nUserId then
+		LOG_WARN("FriendLogic:AddFriend friend id is oneself...")
+		nErrorCode = ERROR_CODE.FRIEND.FRIEND_ID_IS_ONESELF;
+		return nErrorCode;
+	end
+
 	local bIsCache = G_UserManager:IsUserObjectCache(nUserId);
 	if not bIsCache then
 		-- 假设已经发送请求,留待数据回来再处理
 		LOG_DEBUG("AddFriend User Info does not cache...")
-		G_GameDataRedis:GetValue(nInviterUserId, EVENT_ID.GET_ASYN_DATA.ADD_FRIEND_GET_GAME_DATA, nUserId);
-		nErrorCode = ERROR_CODE.SYSTEM.OK;
+		G_GameDataRedis:MGetValue(nInviterUserId, EVENT_ID.GET_ASYN_DATA.ADD_FRIEND_GET_GAME_DATA, {nUserId});
+		nErrorCode = ERROR_CODE.SYSTEM.ASYN_EVENT;
 		return nErrorCode;
 	end
 
@@ -195,10 +267,15 @@ function FriendLogic:AddFriendRequest(nInviterUserId, objInvitee)
 		return nErrorCode;
 	end
 
+	LOG_TABLE(objInvitee);
 	objInvitee:AddFriendRequest(nInviterUserId);
-
+	LOG_TABLE(objInvitee:GetGameData())
 	-- 异步数据, 需要手动保存
 	G_UserManager:SaveUserData(objInvitee);
+	
+	-- 通知玩家有新的好友请求
+	G_NetManager:SendNoticeToUser(EVENT_ID.CLIENT_NOTICE.NEW_FRIEND_REQUEST, ERROR_CODE.SYSTEM.OK, objInvitee:GetUserId(), {})
+
 	nErrorCode = ERROR_CODE.SYSTEM.OK;
 
 	return nErrorCode;

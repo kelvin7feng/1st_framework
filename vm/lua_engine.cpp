@@ -206,7 +206,7 @@ int LuaEngine::RedisCallLua(const unsigned int uUserId, const unsigned int uEven
     {
         int* pnValueLen = (int*)szData;
         char* pTmp = szData + sizeof(int) * nParamCount;
-        for(int i = 0; i < nParamCount; i++)
+        for(int i = 1; i <= nParamCount; i++)
         {
             lua_pushnumber(m_lua_state, i);
             lua_pushlstring(m_lua_state, pTmp, *pnValueLen);

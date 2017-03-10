@@ -31,7 +31,17 @@ end
 
 function NetManager:GetSquenceIdFromSquence(nHandlerId)
 
+	LOG_DEBUG("nHandlerId:"..nHandlerId)
+	LOG_TABLE(self.m_tbRequestSquence)
+	if not self.m_tbRequestSquence[tostring(nHandlerId)] then
+		return 0;
+	end
+
 	local tbRequest = self.m_tbRequestSquence[tostring(nHandlerId)][1];
+	if not tbRequest then
+		return 0;
+	end
+	
 	if table.maxn(self.m_tbRequestSquence[tostring(nHandlerId)]) == 0 then
 		self.m_tbRequestSquence[tostring(nHandlerId)] = nil;
 	end
@@ -133,6 +143,28 @@ function NetManager:SetServerTypeToHandlerId(nServerType, nHandlerId)
 		return;
 	end
 	return CNet.SetServerTypeToHandlerId(nServerType, nHandlerId);
+end
+
+function NetManager:SendNoticeToUser(nEventType, nErrorCode, nUserId, strRetParam)
+	
+	do return false; end
+	local nLength = 1
+	local nSequenceId = 0;
+	local nHandlerId = G_NetManager:GetHandlerId(nUserId);
+	
+	if not nHandlerId then
+		LOG_DEBUG("User is offline...")
+		return ;
+	end
+
+	if strRetParam and not IsString(strRetParam) then
+		strRetParam = json.encode(strRetParam);
+		nLength = string.len(strRetParam)
+	end
+
+	LOG_DEBUG("SendNoticeToUser :" .. nUserId);
+	CNet.SendToGateway(nSequenceId, nEventType, nErrorCode, nHandlerId, nLength, strRetParam or "");
+
 end
 
 G_NetManager = NetManager:new()

@@ -3,7 +3,7 @@ lua_path = "./../script"
 package.path = lua_path .."/?.lua;".. package.path
 
 require("setting")
-require("share.load")
+require("dev_share.load")
 require("defination.load")
 require("common.load")
 require("object.load")
