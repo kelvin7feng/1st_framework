@@ -96,28 +96,28 @@ function OnRedisMulDataRespone(nAsyncSquenceId, nUserId, nEventId, tbMulData)
 	LOG_DEBUG("nEventId :" .. nEventId)
 	LOG_DEBUG("tbMulData type:" .. type(tbMulData))
 	LOG_DEBUG("tbMulData :" .. json.encode(tbMulData))
-	LOG_DEBUG("Async Parameter:" .. json.encode(G_AsyncManager:Pop(nAsyncSquenceId)));
 	
-	local tbParam = nil;
+	local tbParam = G_AsyncManager:Pop(nAsyncSquenceId);
 	local nHandlerId = nil;
 	local nSequenceId = nil;
 	if nEventId == EVENT_ID.GET_ASYN_DATA.ADD_FRIEND_GET_GAME_DATA then
 		local tbGameData = json.decode(table.remove(tbMulData, 1));
 		local objInvitee = UserData:new(tbGameData);
-		tbParam = {nUserId, objInvitee};
+		table.insert(tbParam, objInvitee);
 
 	elseif nEventId == EVENT_ID.GET_ASYN_DATA.GET_FRIEND_INVITER_DATA then
 		local tbGameData = json.decode(table.remove(tbMulData, 1));
 		local objInviter = UserData:new(tbGameData);
-		tbParam = {nUserId, objInviter};
-		
+		table.insert(tbParam, objInviter);
+
 	elseif nEventId == EVENT_ID.GET_ASYN_DATA.SEARCH_USER_DATA then
 		local tbGameData = json.decode(table.remove(tbMulData, 1));
 		local objUser = UserData:new(tbGameData);
-		tbParam = {objUser};
+		table.insert(tbParam, objUser);
 		
 	else
-		tbParam = {tbMulData};
+		table.insert(tbParam, tbMulData);
+		
 	end
 
 	nHandlerId = G_NetManager:GetHandlerId(nUserId);
