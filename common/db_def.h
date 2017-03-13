@@ -142,6 +142,7 @@ struct KP_DBRESPOND_HEAD
     long long lRef;
     unsigned int uUserId;
     unsigned int uEventType;
+    unsigned int uSquenceId;
     unsigned char byHandle;		// 操作者，redis或mysql
     unsigned char byRetType;	// 返回值
     unsigned char byRequestType;	// 预留字段1,对齐

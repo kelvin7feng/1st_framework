@@ -1,5 +1,6 @@
 package.path = lua_path.."/manager/?.lua;"..package.path
 
+require("async_manager")
 require("redis_manager")
 require("event_manager")
 require("net_manager")

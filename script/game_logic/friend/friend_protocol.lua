@@ -6,14 +6,26 @@ function FriendProtocol:ctor()
 	G_EventManager:Register(EVENT_ID.CLIENT_FRIEND.GET_ADD_FRIEND_REQUEST, self.ClientGetAddFriendRequest, self);
 	G_EventManager:Register(EVENT_ID.CLIENT_FRIEND.ADD_FRIEND, self.ClientAddFriend, self);
 	G_EventManager:Register(EVENT_ID.CLIENT_FRIEND.PASS_REQUEST, self.ClientPassRequest, self);
+	G_EventManager:Register(EVENT_ID.CLIENT_FRIEND.SEARCH_USER, self.ClientSearchUser, self);
+end
+
+-- 客户端搜索用户
+function FriendProtocol:ClientSearchUser(nUserId)
+	
+	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
+	if not IsNumber(nUserId) then
+		nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
+		return nErrorCode;
+	end
+
+	local objUser = G_UserManager:GetCurrentUserObject();
+	return G_FriendLogic:SearchUser(objUser, nUserId);
 end
 
 -- 客户端增加好友列表协议
 function FriendProtocol:ClientGetAddFriendRequest()
 	
 	LOG_DEBUG("FriendProtocol:ClientGetAddFriendRequest")
-	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
-
 	local objUser = G_UserManager:GetCurrentUserObject();
 	return G_FriendLogic:GetAddFriendRequest(objUser);
 end
@@ -22,8 +34,6 @@ end
 function FriendProtocol:ClientGetFriendList()
 	
 	LOG_DEBUG("FriendProtocol:ClientGetFriendList")
-	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
-
 	local objUser = G_UserManager:GetCurrentUserObject();
 	return G_FriendLogic:GetFriendList(objUser);
 end

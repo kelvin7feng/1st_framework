@@ -21,7 +21,7 @@ function RedisInterface:GetValue(nUserId, nEventType, strKey)
 	CRedis.PushRedisGet(nUserId, nEventType, self:GetRedisTableName(), strKey);
 end
 
-function RedisInterface:MGetValue(nUserId, nEventType, tbKeys)
+function RedisInterface:MGetValue(nUserId, nEventType, tbKeys, tbParameters)
 
 	local tbName = self:GetRedisTableName();
 	if #tbKeys <= 0 then
@@ -41,7 +41,8 @@ function RedisInterface:MGetValue(nUserId, nEventType, tbKeys)
 	LOG_DEBUG("nUserId " .. nUserId);
 	LOG_DEBUG("nEventType " .. nEventType);
 	LOG_DEBUG("MGET " .. strKeys);
-	CRedis.PushRedisGets(nUserId, nEventType, strKeys);
+	local nSquenceId = G_AsyncManager:Push(tbParameters)
+	CRedis.PushRedisGets(nSquenceId, nUserId, nEventType, strKeys);
 end
 
 function RedisInterface:SetValue(nUserId, nEventType, strKey, strValue)

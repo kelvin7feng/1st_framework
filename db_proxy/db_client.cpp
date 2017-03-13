@@ -189,6 +189,7 @@ void KDBClient::DBThreadActivate()
     IKG_Buffer*  pPackage = NULL;
     while (IsOpen())
     {
+        //释放DB请求时创建的内存
         SAFE_RELEASE(pPackage);
         pPackage = PopRequest();
         if(!pPackage)

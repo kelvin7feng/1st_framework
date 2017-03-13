@@ -31,6 +31,11 @@ end
 
 function NetManager:GetSquenceIdFromSquence(nHandlerId)
 
+	if not nHandlerId then
+        LOG_ERROR("nHandlerId is nil");
+		return 0;
+	end
+
 	LOG_DEBUG("nHandlerId:"..nHandlerId)
 	LOG_TABLE(self.m_tbRequestSquence)
 	if not self.m_tbRequestSquence[tostring(nHandlerId)] then

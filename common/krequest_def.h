@@ -56,6 +56,7 @@ struct KREQUEST_HEAD : KREQUEST_TYPE
     bool bAllowRedisNil;
     unsigned int uUserId;
     unsigned int uEventType;
+    unsigned int uSquenceId;
 };
 
 struct KREQUEST_SET : KREQUEST_HEAD

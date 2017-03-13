@@ -79,6 +79,14 @@ void DB_SetBufferHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uE
     pResond->uEventType = uEventType;
 }
 
+void DB_SetBufferHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uEventType, unsigned int uSquenceId)
+{
+    KREQUEST_HEAD* pResond = (KREQUEST_HEAD*)pBuffer->GetData();
+    pResond->uUserId = uUserId;
+    pResond->uEventType = uEventType;
+    pResond->uSquenceId = uSquenceId;
+}
+
 void DB_SetCommonHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uEventType)
 {
     KRESOOND_COMMON* pResond = (KRESOOND_COMMON*)pBuffer->GetData();
@@ -91,6 +99,14 @@ void DB_SetMulDataHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int u
     KP_DBRESPOND_MULTI_DATA* pResond = (KP_DBRESPOND_MULTI_DATA*)((char*)pBuffer->GetData() + 1);
     pResond->uUserId = uUserId;
     pResond->uEventType = uEventType;
+}
+
+void DB_SetMulDataHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uEventType, unsigned int uSquenceId)
+{
+    KP_DBRESPOND_MULTI_DATA* pResond = (KP_DBRESPOND_MULTI_DATA*)((char*)pBuffer->GetData() + 1);
+    pResond->uUserId = uUserId;
+    pResond->uEventType = uEventType;
+    pResond->uSquenceId = uSquenceId;
 }
 
 IKG_Buffer* DB_MemoryCreateBuffer(unsigned int uSize)

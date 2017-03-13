@@ -21,6 +21,8 @@ function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 			nEventId = EVENT_ID.CLIENT_FRIEND.GET_FRIEND_LIST;
 		elseif nEventId == EVENT_ID.GET_ASYN_DATA.GET_ADD_FRIEND_REQUEST then
 			nEventId = EVENT_ID.CLIENT_FRIEND.GET_ADD_FRIEND_REQUEST;
+		elseif nEventId == EVENT_ID.GET_ASYN_DATA.SEARCH_USER_DATA then
+			nEventId = EVENT_ID.CLIENT_FRIEND.SEARCH_USER;
 		end
 
 		if nErrorCode ~= ERROR_CODE.NET.LOGIN_TO_ROOM_SERVER then
@@ -88,12 +90,14 @@ function OnRedisRespone(nUserId, nEventId, strRepsonseJson)
 end
 
 -- 响应多个数据redis, 只支持处理一次异步, 如果是多个异步, 需要单独处理
-function OnRedisMulDataRespone(nUserId, nEventId, tbMulData)
+function OnRedisMulDataRespone(nAsyncSquenceId, nUserId, nEventId, tbMulData)
+	LOG_DEBUG("nAsyncSquenceId :" .. nAsyncSquenceId)
 	LOG_DEBUG("nUserId :" .. nUserId)
 	LOG_DEBUG("nEventId :" .. nEventId)
 	LOG_DEBUG("tbMulData type:" .. type(tbMulData))
 	LOG_DEBUG("tbMulData :" .. json.encode(tbMulData))
-
+	LOG_DEBUG("Async Parameter:" .. json.encode(G_AsyncManager:Pop(nAsyncSquenceId)));
+	
 	local tbParam = nil;
 	local nHandlerId = nil;
 	local nSequenceId = nil;
@@ -106,6 +110,11 @@ function OnRedisMulDataRespone(nUserId, nEventId, tbMulData)
 		local tbGameData = json.decode(table.remove(tbMulData, 1));
 		local objInviter = UserData:new(tbGameData);
 		tbParam = {nUserId, objInviter};
+		
+	elseif nEventId == EVENT_ID.GET_ASYN_DATA.SEARCH_USER_DATA then
+		local tbGameData = json.decode(table.remove(tbMulData, 1));
+		local objUser = UserData:new(tbGameData);
+		tbParam = {objUser};
 		
 	else
 		tbParam = {tbMulData};

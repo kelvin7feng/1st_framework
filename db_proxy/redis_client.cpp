@@ -548,7 +548,7 @@ bool KRedisClient::OnRequestGets(int nIndex, const KREQUEST_GETS* pRequestGets)
     
     //_ASSERT(pReply->elements == pRequestGets->nCount);
     pPackatBuffer = _GenMultiDataNetRespond(pRequestGets->bAllowRedisNil, pRequestGets->lId, pRequestGets->lRef, PROXY2DRIVE_DATA_GETS, pRequestGets->byType, pRequestGets->nConnectId, pReply);
-    DB_SetMulDataHead(pPackatBuffer, pRequestGets->uUserId, pRequestGets->uEventType);
+    DB_SetMulDataHead(pPackatBuffer, pRequestGets->uUserId, pRequestGets->uEventType, pRequestGets->uSquenceId);
     
     PushRespond(pPackatBuffer);
     

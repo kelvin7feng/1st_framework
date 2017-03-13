@@ -5,6 +5,67 @@ function FriendLogic:ctor()
 	G_EventManager:Register(EVENT_ID.GET_ASYN_DATA.GET_ADD_FRIEND_REQUEST, self.OnGetAddFriendRequest, self);
 	G_EventManager:Register(EVENT_ID.GET_ASYN_DATA.ADD_FRIEND_GET_GAME_DATA, self.AddFriendRequest, self);
 	G_EventManager:Register(EVENT_ID.GET_ASYN_DATA.GET_FRIEND_INVITER_DATA, self.OnGetFriendInviterData, self);
+	G_EventManager:Register(EVENT_ID.GET_ASYN_DATA.SEARCH_USER_DATA, self.OnSearchUser, self);
+end
+
+-- 查找好友回调
+function FriendLogic:OnSearchUser(objUser)
+	
+	if not objUser then
+		return ERROR_CODE.FRIEND.USER_NOT_FOUND;
+	end
+
+	return self:GetSearchUserData(objUser);
+end
+
+-- 查找好友
+function FriendLogic:SearchUser(objUser, nUserId)
+	
+	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
+	if not IsNumber(nUserId) then
+		nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
+		return nErrorCode;
+	end
+
+	-- 检查ID是否合法
+	local bIsOk = G_UserInfoLogic:CheckUserIdLegal(nUserId);
+	if not bIsOk then
+		nErrorCode = ERROR_CODE.FRIEND.USER_NOT_FOUND;
+		return nErrorCode;
+	end
+
+	local nCurrentUserId = objUser:GetUserId();
+	-- 检查是否加自己
+	if nCurrentUserId == nUserId then
+		LOG_WARN("SearchFriend friend id is oneself...")
+		nErrorCode = ERROR_CODE.FRIEND.FRIEND_ID_IS_ONESELF;
+		return nErrorCode;
+	end
+
+	local bIsCache = G_UserManager:IsUserObjectCache(nUserId);
+	if not bIsCache then
+		-- 假设已经发送请求,留待数据回来再处理
+		LOG_DEBUG("SearchFriend User Info does not cache...")
+		G_GameDataRedis:MGetValue(nCurrentUserId, EVENT_ID.GET_ASYN_DATA.SEARCH_USER_DATA, {nUserId});
+		nErrorCode = ERROR_CODE.SYSTEM.ASYN_EVENT;
+		return nErrorCode;
+	end
+
+	local objUser = G_UserManager:GetUserObject(nUserId);
+	return self:GetSearchUserData(objUser);
+end
+
+-- 获取好友请求列表
+function FriendLogic:GetSearchUserData(objUser)
+	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
+	local tbSearchResult = self:GetClientFriendData(objUser:GetGameData());
+	if not tbSearchResult then
+		nErrorCode = ERROR_CODE.FRIEND.USER_NOT_FOUND;
+		return nErrorCode;
+	end
+
+	nErrorCode = ERROR_CODE.SYSTEM.OK;
+	return nErrorCode, tbSearchResult;
 end
 
 -- 获取好友请求列表

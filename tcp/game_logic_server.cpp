@@ -230,7 +230,7 @@ void GameLogicServer::OnDBResponse(KP_DBRESPOND_MULTI_DATA* pMulDataResponse)
     int nParamCount = pMulDataResponse->nCount;
     if(nParamCount < 0)
         nParamCount = 0;
-    lua_engine.RedisCallLua(pMulDataResponse->uUserId, pMulDataResponse->uEventType, nParamCount, pMulDataResponse->data);
+    lua_engine.RedisCallLua(pMulDataResponse->uSquenceId, pMulDataResponse->uUserId, pMulDataResponse->uEventType, nParamCount, pMulDataResponse->data);
 }
 
 bool GameLogicServer::_ProcessNetData(const char* pData, size_t uRead, unsigned int uServerFrom)
