@@ -6,6 +6,7 @@
 //  Copyright © 2016年 kelvin. All rights reserved.
 //
 
+#include <stdlib.h>
 #include "kmacros.h"
 #include "tcp_client.hpp"
 

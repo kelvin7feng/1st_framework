@@ -40,15 +40,15 @@ void TCPSession::SetHandlerId(unsigned int uHandlerId)
 GatewayClient* TCPSession::GetGatewayClient(unsigned short uServerId)
 {
     GatewayClient* pClient = NULL;
-    if(uServerId == SERVER_TYPE::LOGIN)
+    if(uServerId == LOGIN)
     {
         pClient = g_pLoginLogicClient;
     }
-    else if(uServerId == SERVER_TYPE::LOGIC)
+    else if(uServerId == LOGIC)
     {
         pClient = g_pGameLogicClient;
     }
-    else if(uServerId == SERVER_TYPE::ROOM)
+    else if(uServerId == ROOM)
     {
         pClient = g_pRoomLogicClient;
     }
@@ -127,7 +127,7 @@ bool TCPSession::CenterServerProcessNetData(const char* pData, size_t uRead)
                 unsigned short uServerId = GetServerId(pDataBuffer);
                 std::cout << "protobuf is legal..." << std::endl;
 
-                if(uServerId == SERVER_TYPE::CENTER)
+                if(uServerId == CENTER)
                 {
                     std::cout << "send to center deal..." << std::endl;
                     char* pNetBodyBuffer = NULL;

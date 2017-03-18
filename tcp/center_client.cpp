@@ -73,7 +73,7 @@ void CenterClient::RegisterToCenter()
     msg.set_data(buffer, n);
     std::string str;
     msg.SerializeToString(&str);
-    SendNetPacket(SERVER_TYPE::CENTER, 3001, str.c_str(), (unsigned int)str.length());
+    SendNetPacket(CENTER, 3001, str.c_str(), (unsigned int)str.length());
     SAFE_DELETE_ARRAY(buffer);
 }
 
@@ -124,7 +124,7 @@ void CenterClient::OnMsgRecv(uv_stream_t* pServer, ssize_t nread, const uv_buf_t
     }
     else if (nread > 0)
     {
-        GameLogicServer::GetInstance()->_ProcessNetData(buf->base, (unsigned int)nread, SERVER_TYPE::CENTER);
+        GameLogicServer::GetInstance()->_ProcessNetData(buf->base, (unsigned int)nread, CENTER);
     }
     
     free(buf->base);

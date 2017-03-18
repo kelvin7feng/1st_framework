@@ -105,7 +105,7 @@ void GameLogicServer::OnMsgRecv(uv_stream_t* client, ssize_t nread, const uv_buf
         }
         else if (nread > 0)
         {
-            _ProcessNetData(buf->base, nread, SERVER_TYPE::GATEWAY);
+            _ProcessNetData(buf->base, nread, GATEWAY);
         }
         
         free(buf->base);

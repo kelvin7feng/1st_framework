@@ -152,7 +152,6 @@ end
 
 function NetManager:SendNoticeToUser(nEventType, nErrorCode, nUserId, strRetParam)
 	
-	do return false; end
 	local nLength = 1
 	local nSequenceId = 0;
 	local nHandlerId = G_NetManager:GetHandlerId(nUserId);
@@ -167,7 +166,6 @@ function NetManager:SendNoticeToUser(nEventType, nErrorCode, nUserId, strRetPara
 		nLength = string.len(strRetParam)
 	end
 
-	LOG_DEBUG("SendNoticeToUser :" .. nUserId);
 	CNet.SendToGateway(nSequenceId, nEventType, nErrorCode, nHandlerId, nLength, strRetParam or "");
 
 end

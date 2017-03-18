@@ -6,6 +6,7 @@
 //  Copyright © 2016年 kelvin. All rights reserved.
 //
 
+#include <stdlib.h>
 #include <iostream>
 #include "db_client_manager.hpp"
 #include "redis_client.hpp"

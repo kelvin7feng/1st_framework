@@ -6,6 +6,8 @@
 //  Copyright © 2016年 kelvin. All rights reserved.
 //
 
+//exit函数使用
+#include <stdlib.h>
 #include "map"
 #include "kmacros.h"
 #include "lua_player.h"
@@ -17,10 +19,10 @@ using namespace std;
 
 LuaEngine::LuaEngine()
 {
-    server_path[SERVER_TYPE::LOGIN] = "./../script/login_main.lua";
-    server_path[SERVER_TYPE::LOGIC] = "./../script/logic_main.lua";
-    server_path[SERVER_TYPE::ROOM] = "./../script/room_main.lua";
-    server_path[SERVER_TYPE::CENTER] = "./../script/center_main.lua";
+    server_path[LOGIN] = "./../script/login_main.lua";
+    server_path[LOGIC] = "./../script/logic_main.lua";
+    server_path[ROOM] = "./../script/room_main.lua";
+    server_path[CENTER] = "./../script/center_main.lua";
 }
 
 LuaEngine::~LuaEngine()

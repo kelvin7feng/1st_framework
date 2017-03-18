@@ -15,6 +15,7 @@
 #include "document.h"
 #include <string.h>
 #include <iostream>
+#include <stdlib.h>
 
 #define KD_INIT_NETPACKET_HEAD(data, connectId)	\
 data -= sizeof(unsigned char);				\

@@ -69,7 +69,7 @@ static int SendToCenter(lua_State* lua_state)
     std::string szNetBody;
     msg.SerializeToString(&szNetBody);
     
-    unsigned short uServerId = SERVER_TYPE::ROOM;
+    unsigned short uServerId = ROOM;
     unsigned int uNetPacketSize = 0;
     void* pNetPackage = CreateNetBuffer(uEventType, uErrorCode, uHandlerId, uServerId, uSequenceId, szNetBody.c_str(), (unsigned int)szNetBody.length(), &uNetPacketSize);
     if(g_pCenterLogicClient)
