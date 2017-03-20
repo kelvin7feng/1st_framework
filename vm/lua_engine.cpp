@@ -259,7 +259,7 @@ int LuaEngine::InitState(int server_type)
     
     LuaRegisterRedis(m_lua_state);
     LuaRegisterNet(m_lua_state);
-    tolua_player_open(m_lua_state);
+    //tolua_player_open(m_lua_state);
     string szScriptPath = server_path[server_type];
     int nStatus = luaL_dofile(m_lua_state, szScriptPath.c_str());
     
