@@ -15,6 +15,7 @@
 #include <mysql.h>
 #include <set>
 #include <map>
+#include <string.h>
 
 class KMysqlClient : public KDBClient
 {
