@@ -1,0 +1,3 @@
+[submodule "script/dev_share"]
+	path = script/dev_share
+	url = http://fwb:12345678@192.168.0.248/ironnet/dev_share.git

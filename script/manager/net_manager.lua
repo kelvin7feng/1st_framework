@@ -150,17 +150,28 @@ function NetManager:SetServerTypeToHandlerId(nServerType, nHandlerId)
 	return CNet.SetServerTypeToHandlerId(nServerType, nHandlerId);
 end
 
+function NetManager:UserIsOnline(nUserId)
+	local bIsOnline = false;
+	local nHandlerId = self:GetHandlerId(nUserId);
+	if nHandlerId then
+		bIsOnline = true;
+	end
+
+	return bIsOnline;
+end
+
 function NetManager:SendNoticeToUser(nEventType, nErrorCode, nUserId, strRetParam)
 	
 	local nLength = 1
 	local nSequenceId = 0;
-	local nHandlerId = G_NetManager:GetHandlerId(nUserId);
+	local nHandlerId = nil;
 	
-	if not nHandlerId then
+	if not self:UserIsOnline(nUserId) then
 		LOG_DEBUG("User is offline...")
 		return ;
 	end
 
+	nHandlerId = G_NetManager:GetHandlerId(nUserId);
 	if strRetParam and not IsString(strRetParam) then
 		strRetParam = json.encode(strRetParam);
 		nLength = string.len(strRetParam)

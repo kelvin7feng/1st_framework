@@ -7,6 +7,25 @@ function FriendProtocol:ctor()
 	G_EventManager:Register(EVENT_ID.CLIENT_FRIEND.ADD_FRIEND, self.ClientAddFriend, self);
 	G_EventManager:Register(EVENT_ID.CLIENT_FRIEND.PASS_REQUEST, self.ClientPassRequest, self);
 	G_EventManager:Register(EVENT_ID.CLIENT_FRIEND.SEARCH_USER, self.ClientSearchUser, self);
+	G_EventManager:Register(EVENT_ID.CLIENT_FRIEND.CHAT, self.ClientChat, self);
+end
+
+-- 客户端搜索用户
+function FriendProtocol:ClientChat(nUserId, strContent)
+	
+	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
+	if not IsNumber(nUserId) then
+		nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
+		return nErrorCode;
+	end
+
+	if not IsString(strContent) then
+		nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
+		return nErrorCode;
+	end	
+
+	local objUser = G_UserManager:GetCurrentUserObject();
+	return G_FriendLogic:Chat(objUser, nUserId, strContent);
 end
 
 -- 客户端搜索用户

@@ -8,6 +8,63 @@ function FriendLogic:ctor()
 	G_EventManager:Register(EVENT_ID.GET_ASYN_DATA.SEARCH_USER_DATA, self.OnSearchUser, self);
 end
 
+-- 检查是否为好友
+function FriendLogic:IsFriend(objUser, nUserId)
+	
+	local bIsFriend = false;
+	local tbFriendRequest = objUser:GetFriendList();
+	local nCount = CountTab(tbFriendRequest);
+
+	if not IsNumber(nUserId) then
+		return bIsFriend;
+	end
+
+	LOG_DEBUG("tbFriendRequest:");
+	LOG_TABLE(tbFriendRequest);
+	if nCount > 0 then
+		if tbFriendRequest[tostring(nUserId)] then
+			bIsFriend = true;
+		end
+	end
+
+	return bIsFriend;
+end
+
+-- 查找好友回调
+function FriendLogic:Chat(objUser, nUserId, strContent)
+	
+	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
+	if not objUser then
+		LOG_ERROR("FriendLogic:Chat objUser is nil...")
+		return nErrorCode;
+	end
+
+	if not IsNumber(nUserId) then
+		nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
+		return nErrorCode;
+	end
+
+	if not IsString(strContent) then
+		nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
+		return nErrorCode;
+	end
+
+	-- 检查接收方是否为好友
+	if not self:IsFriend(objUser, nUserId) then
+		nErrorCode = ERROR_CODE.FRIEND.IS_NOT_YOUR_FRIEND;
+		return nErrorCode;
+	end
+
+	local bIsOnline = G_NetManager:UserIsOnline(nUserId);
+	if bIsOnline then
+		-- 把聊天内容转发给好友
+		LOG_DEBUG("Transfer chatting content to friend...")
+		G_NetManager:SendNoticeToUser(EVENT_ID.CLIENT_NOTICE.RECEIVE_CHAT, ERROR_CODE.SYSTEM.OK, nUserId, {objUser:GetUserId(), strContent});
+	end
+
+	return ERROR_CODE.SYSTEM.OK
+end
+
 -- 查找好友回调
 function FriendLogic:OnSearchUser(objUser)
 	

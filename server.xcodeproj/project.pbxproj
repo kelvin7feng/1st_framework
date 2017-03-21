@@ -82,12 +82,10 @@
 		B636235A1E5D4436004FD7FD /* game_logic_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B6091D211DABDD8E00ABF7D0 /* game_logic_server.cpp */; };
 		B636235B1E5D4436004FD7FD /* db_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B60182701E1D3A730086BC92 /* db_client.cpp */; };
 		B636235C1E5D4436004FD7FD /* redis_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B60182751E1D3A730086BC92 /* redis_client.cpp */; };
-		B636235D1E5D4436004FD7FD /* player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B667A8B21DEED75100E1B497 /* player.cpp */; };
 		B636235E1E5D4436004FD7FD /* db_client_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B601826E1E1D3A730086BC92 /* db_client_manager.cpp */; };
 		B636235F1E5D4436004FD7FD /* lua_net.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B624ABA01E260A64000D7C84 /* lua_net.cpp */; };
 		B63623601E5D4436004FD7FD /* gateway_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B6091CCA1DABD1C000ABF7D0 /* gateway_server.cpp */; };
 		B63623621E5D4436004FD7FD /* tcp_base_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B6091CCC1DABD1C000ABF7D0 /* tcp_base_server.cpp */; };
-		B63623631E5D4436004FD7FD /* lua_player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B667A8B01DEED75100E1B497 /* lua_player.cpp */; };
 		B63623641E5D4436004FD7FD /* file_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B62BF77F1DE81A0F0080C6A2 /* file_util.cpp */; };
 		B63623651E5D4436004FD7FD /* db_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B60182641E1D3A570086BC92 /* db_buffer.cpp */; };
 		B63623661E5D4436004FD7FD /* net_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B624ABA91E27598C000D7C84 /* net_buffer.cpp */; };
@@ -108,12 +106,6 @@
 		B6473FE61E5E8BFB002B391D /* center_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B63623881E5D8141004FD7FD /* center_client.cpp */; };
 		B6473FE71E5ED09E002B391D /* center_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B63623831E5D6A50004FD7FD /* center_server.cpp */; };
 		B667A8AF1DEED3FA00E1B497 /* libtolua++.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B667A8AE1DEED3FA00E1B497 /* libtolua++.a */; };
-		B667A8B41DEED75100E1B497 /* lua_player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B667A8B01DEED75100E1B497 /* lua_player.cpp */; };
-		B667A8B51DEED75100E1B497 /* player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B667A8B21DEED75100E1B497 /* player.cpp */; };
-		B667A8B61DEED75400E1B497 /* lua_player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B667A8B01DEED75100E1B497 /* lua_player.cpp */; };
-		B667A8B71DEED75500E1B497 /* lua_player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B667A8B01DEED75100E1B497 /* lua_player.cpp */; };
-		B667A8B81DEED75700E1B497 /* player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B667A8B21DEED75100E1B497 /* player.cpp */; };
-		B667A8B91DEED75800E1B497 /* player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B667A8B21DEED75100E1B497 /* player.cpp */; };
 		B667A8BC1DEED7D100E1B497 /* lua_engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B667A8BA1DEED7D100E1B497 /* lua_engine.cpp */; };
 		B667A8BD1DEED7D400E1B497 /* lua_engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B667A8BA1DEED7D100E1B497 /* lua_engine.cpp */; };
 		B667A8BE1DEED7D400E1B497 /* lua_engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B667A8BA1DEED7D100E1B497 /* lua_engine.cpp */; };
@@ -222,10 +214,6 @@
 		B63623881E5D8141004FD7FD /* center_client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = center_client.cpp; path = tcp/center_client.cpp; sourceTree = "<group>"; };
 		B63623891E5D8141004FD7FD /* center_client.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = center_client.hpp; path = tcp/center_client.hpp; sourceTree = "<group>"; };
 		B667A8AE1DEED3FA00E1B497 /* libtolua++.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libtolua++.a"; path = "third_party/lib/libtolua++.a"; sourceTree = "<group>"; };
-		B667A8B01DEED75100E1B497 /* lua_player.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lua_player.cpp; path = class/lua_player.cpp; sourceTree = "<group>"; };
-		B667A8B11DEED75100E1B497 /* lua_player.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lua_player.h; path = class/lua_player.h; sourceTree = "<group>"; };
-		B667A8B21DEED75100E1B497 /* player.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = player.cpp; path = class/player.cpp; sourceTree = "<group>"; };
-		B667A8B31DEED75100E1B497 /* player.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = player.h; path = class/player.h; sourceTree = "<group>"; };
 		B667A8BA1DEED7D100E1B497 /* lua_engine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lua_engine.cpp; path = vm/lua_engine.cpp; sourceTree = "<group>"; };
 		B667A8BB1DEED7D100E1B497 /* lua_engine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lua_engine.hpp; path = vm/lua_engine.hpp; sourceTree = "<group>"; };
 		B68F7D6E1E2F5E9A009153B7 /* config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = config.json; path = logic/config.json; sourceTree = "<group>"; };
@@ -332,7 +320,6 @@
 				B63623781E5D445D004FD7FD /* center */,
 				B601826D1E1D3A5F0086BC92 /* db_proxy */,
 				B60182631E1D3A410086BC92 /* common */,
-				B628D5931DEEBA8000D4C87C /* class */,
 				B628D57C1DEE71AD00D4C87C /* vm */,
 				B62BF77E1DE81A030080C6A2 /* util */,
 				B60788681DAE5D660089A30C /* script */,
@@ -441,17 +428,6 @@
 				B624ABA11E260A64000D7C84 /* lua_net.hpp */,
 			);
 			name = vm;
-			sourceTree = "<group>";
-		};
-		B628D5931DEEBA8000D4C87C /* class */ = {
-			isa = PBXGroup;
-			children = (
-				B667A8B01DEED75100E1B497 /* lua_player.cpp */,
-				B667A8B11DEED75100E1B497 /* lua_player.h */,
-				B667A8B21DEED75100E1B497 /* player.cpp */,
-				B667A8B31DEED75100E1B497 /* player.h */,
-			);
-			name = class;
 			sourceTree = "<group>";
 		};
 		B62BF77E1DE81A030080C6A2 /* util */ = {
@@ -587,10 +563,8 @@
 				B60182981E24B31D0086BC92 /* gateway_client.cpp in Sources */,
 				B601826B1E1D3A570086BC92 /* db_buffer.cpp in Sources */,
 				B60182791E1D3A730086BC92 /* mysql_client.cpp in Sources */,
-				B667A8B41DEED75100E1B497 /* lua_player.cpp in Sources */,
 				B60182781E1D3A730086BC92 /* db_client.cpp in Sources */,
 				B601827A1E1D3A730086BC92 /* redis_client.cpp in Sources */,
-				B667A8B51DEED75100E1B497 /* player.cpp in Sources */,
 				B6091CC91DABD1B100ABF7D0 /* google.pb.cc in Sources */,
 				B6091D231DABDD8E00ABF7D0 /* game_logic_server.cpp in Sources */,
 				B601828E1E1F6D4C0086BC92 /* lua_redis.cpp in Sources */,
@@ -618,13 +592,11 @@
 				B6091D2B1DABE00600ABF7D0 /* game_logic_server.cpp in Sources */,
 				B601827F1E1D3A8D0086BC92 /* db_client.cpp in Sources */,
 				B60182831E1D3A950086BC92 /* redis_client.cpp in Sources */,
-				B667A8B81DEED75700E1B497 /* player.cpp in Sources */,
 				B60182851E1D3DF70086BC92 /* db_client_manager.cpp in Sources */,
 				B624ABA31E260A64000D7C84 /* lua_net.cpp in Sources */,
 				B6091D2C1DABE00600ABF7D0 /* gateway_server.cpp in Sources */,
 				B60788741DAE60390089A30C /* main.cpp in Sources */,
 				B6091D2D1DABE00600ABF7D0 /* tcp_base_server.cpp in Sources */,
-				B667A8B61DEED75400E1B497 /* lua_player.cpp in Sources */,
 				B62BF7831DE81A740080C6A2 /* file_util.cpp in Sources */,
 				B601827B1E1D3A7D0086BC92 /* db_buffer.cpp in Sources */,
 				B624ABAC1E27598C000D7C84 /* net_buffer.cpp in Sources */,
@@ -647,7 +619,6 @@
 				B6091DAC1DAD147300ABF7D0 /* game_logic_server.cpp in Sources */,
 				B60182801E1D3A8D0086BC92 /* db_client.cpp in Sources */,
 				B60182841E1D3A960086BC92 /* redis_client.cpp in Sources */,
-				B667A8B91DEED75800E1B497 /* player.cpp in Sources */,
 				B6473FE71E5ED09E002B391D /* center_server.cpp in Sources */,
 				B636238B1E5D8F89004FD7FD /* center_client.cpp in Sources */,
 				B60182861E1D3DF80086BC92 /* db_client_manager.cpp in Sources */,
@@ -655,7 +626,6 @@
 				B6091DAD1DAD147300ABF7D0 /* gateway_server.cpp in Sources */,
 				B6091DAF1DAD147300ABF7D0 /* tcp_base_server.cpp in Sources */,
 				B6091DBB1DAD14A100ABF7D0 /* main.cpp in Sources */,
-				B667A8B71DEED75500E1B497 /* lua_player.cpp in Sources */,
 				B62BF7841DE81A750080C6A2 /* file_util.cpp in Sources */,
 				B601827C1E1D3A7E0086BC92 /* db_buffer.cpp in Sources */,
 				B624ABAD1E27598C000D7C84 /* net_buffer.cpp in Sources */,
@@ -680,13 +650,11 @@
 				B636237C1E5D44B2004FD7FD /* main.cpp in Sources */,
 				B636235C1E5D4436004FD7FD /* redis_client.cpp in Sources */,
 				B6473FE61E5E8BFB002B391D /* center_client.cpp in Sources */,
-				B636235D1E5D4436004FD7FD /* player.cpp in Sources */,
 				B636235E1E5D4436004FD7FD /* db_client_manager.cpp in Sources */,
 				B63623851E5D6A50004FD7FD /* center_server.cpp in Sources */,
 				B636235F1E5D4436004FD7FD /* lua_net.cpp in Sources */,
 				B63623601E5D4436004FD7FD /* gateway_server.cpp in Sources */,
 				B63623621E5D4436004FD7FD /* tcp_base_server.cpp in Sources */,
-				B63623631E5D4436004FD7FD /* lua_player.cpp in Sources */,
 				B63623641E5D4436004FD7FD /* file_util.cpp in Sources */,
 				B63623651E5D4436004FD7FD /* db_buffer.cpp in Sources */,
 				B63623661E5D4436004FD7FD /* net_buffer.cpp in Sources */,
