@@ -124,7 +124,7 @@ bool KNetPackage::Reset()
 	m_uRecvOffset = 0;
     if(m_pBuffer)
     {
-        SAFE_RELEASE(m_pBuffer);
+        //SAFE_RELEASE(m_pBuffer);
     }
 	return true;
 }

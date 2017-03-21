@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include "map"
 #include "kmacros.h"
-#include "lua_player.h"
 #include "lua_engine.hpp"
 #include "lua_redis.hpp"
 #include "lua_net.hpp"
