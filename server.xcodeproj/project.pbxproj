@@ -111,6 +111,8 @@
 		B667A8BE1DEED7D400E1B497 /* lua_engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B667A8BA1DEED7D100E1B497 /* lua_engine.cpp */; };
 		B6BC01A11DEFC775006BE204 /* liblua.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B62BF8131DE982730080C6A2 /* liblua.a */; };
 		B6BC01A21DEFC775006BE204 /* libtolua++.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B667A8AE1DEED3FA00E1B497 /* libtolua++.a */; };
+		B6F101C91E83DA86008FE6E3 /* center_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B63623831E5D6A50004FD7FD /* center_server.cpp */; };
+		B6F101CA1E83DAE3008FE6E3 /* center_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B63623881E5D8141004FD7FD /* center_client.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -595,10 +597,12 @@
 				B60182851E1D3DF70086BC92 /* db_client_manager.cpp in Sources */,
 				B624ABA31E260A64000D7C84 /* lua_net.cpp in Sources */,
 				B6091D2C1DABE00600ABF7D0 /* gateway_server.cpp in Sources */,
+				B6F101CA1E83DAE3008FE6E3 /* center_client.cpp in Sources */,
 				B60788741DAE60390089A30C /* main.cpp in Sources */,
 				B6091D2D1DABE00600ABF7D0 /* tcp_base_server.cpp in Sources */,
 				B62BF7831DE81A740080C6A2 /* file_util.cpp in Sources */,
 				B601827B1E1D3A7D0086BC92 /* db_buffer.cpp in Sources */,
+				B6F101C91E83DA86008FE6E3 /* center_server.cpp in Sources */,
 				B624ABAC1E27598C000D7C84 /* net_buffer.cpp in Sources */,
 				B60182941E22221F0086BC92 /* knetpacket.cpp in Sources */,
 				B6091D2E1DABE00600ABF7D0 /* tcp_client.cpp in Sources */,

@@ -192,23 +192,28 @@ void GatewayServer::TransferToClient(unsigned int uHandlerId, const char* pBuffe
     cout << "gateway send data to client..." << endl;
     uv_stream_t* pClientHandler = GetHandlerById(uHandlerId);
     
-    char* pvBuffer = NULL;
-    pvBuffer = (char*)malloc(uSize);
-    memcpy(pvBuffer, pBuffer, uSize);
-    
-    uv_write_t* pWriteReq = new uv_write_t;
-    
-    uv_buf_t buf = uv_buf_init(pvBuffer, uSize);
-    int nRet = uv_write(pWriteReq, pClientHandler, &buf, 1,
-                       [](uv_write_t *req, int status)
-                       {
-                           GatewayServer::GetInstance()->OnTransferToClient(req, status);
-                       });
-    if(nRet != 0)
+    if(pClientHandler != NULL)
     {
-        cout << "transfer to client failed;" << endl;
-        SAFE_DELETE(pWriteReq);
+        char* pvBuffer = NULL;
+        pvBuffer = (char*)malloc(uSize);
+        memcpy(pvBuffer, pBuffer, uSize);
+        
+        uv_write_t* pWriteReq = new uv_write_t;
+        
+        uv_buf_t buf = uv_buf_init(pvBuffer, uSize);
+        int nRet = uv_write(pWriteReq, pClientHandler, &buf, 1,
+                           [](uv_write_t *req, int status)
+                           {
+                               GatewayServer::GetInstance()->OnTransferToClient(req, status);
+                           });
+        if(nRet != 0)
+        {
+            cout << "transfer to client failed;" << endl;
+            SAFE_DELETE(pWriteReq);
+        }
+        SAFE_FREE(pvBuffer);
+    } else {
+        //需要通过逻辑服去移除相关的缓存
+        cout << "client have been disconnected;" << endl;
     }
-    
-    SAFE_FREE(pvBuffer);
 }

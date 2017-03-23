@@ -10,11 +10,11 @@ function FriendProtocol:ctor()
 	G_EventManager:Register(EVENT_ID.CLIENT_FRIEND.CHAT, self.ClientChat, self);
 end
 
--- 客户端搜索用户
-function FriendProtocol:ClientChat(nUserId, strContent)
+-- 客户端发送聊天
+function FriendProtocol:ClientChat(nChatType, strContent, nUserId)
 	
 	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
-	if not IsNumber(nUserId) then
+	if not IsNumber(nChatType) then
 		nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
 		return nErrorCode;
 	end
@@ -25,7 +25,7 @@ function FriendProtocol:ClientChat(nUserId, strContent)
 	end	
 
 	local objUser = G_UserManager:GetCurrentUserObject();
-	return G_FriendLogic:Chat(objUser, nUserId, strContent);
+	return G_FriendLogic:Chat(objUser, nChatType, strContent, nUserId);
 end
 
 -- 客户端搜索用户

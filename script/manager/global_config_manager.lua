@@ -21,6 +21,11 @@ function GlobalConfigManager:IncrementGlobalUserId()
 	self:SetUserGlobalId(nUserGlobalId);
 end
 
+-- 通知逻辑服更新当前最大玩家Id
+function GlobalConfigManager:NoticeLogicServer(nUserGlobalId)
+	G_NetManager:TransferToCenter(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam)
+end
+
 -- 设置全局玩家Id
 function GlobalConfigManager:GetUserGlobalId()
 	return self:GetConfigField(DATABASE_TABLE_GLOBAL_FIELD.USER_ID);

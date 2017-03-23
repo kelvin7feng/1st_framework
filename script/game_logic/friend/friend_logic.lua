@@ -31,16 +31,11 @@ function FriendLogic:IsFriend(objUser, nUserId)
 end
 
 -- 查找好友回调
-function FriendLogic:Chat(objUser, nUserId, strContent)
+function FriendLogic:Chat(objUser, nChatType, strContent, nUserId)
 	
 	local nErrorCode = ERROR_CODE.SYSTEM.UNKNOWN_ERROR;
 	if not objUser then
 		LOG_ERROR("FriendLogic:Chat objUser is nil...")
-		return nErrorCode;
-	end
-
-	if not IsNumber(nUserId) then
-		nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
 		return nErrorCode;
 	end
 
@@ -49,20 +44,55 @@ function FriendLogic:Chat(objUser, nUserId, strContent)
 		return nErrorCode;
 	end
 
-	-- 检查接收方是否为好友
-	if not self:IsFriend(objUser, nUserId) then
-		nErrorCode = ERROR_CODE.FRIEND.IS_NOT_YOUR_FRIEND;
+	if not IsNumber(nChatType) then
+		nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
 		return nErrorCode;
 	end
 
-	local bIsOnline = G_NetManager:UserIsOnline(nUserId);
-	if bIsOnline then
-		-- 把聊天内容转发给好友
-		LOG_DEBUG("Transfer chatting content to friend...")
-		G_NetManager:SendNoticeToUser(EVENT_ID.CLIENT_NOTICE.RECEIVE_CHAT, ERROR_CODE.SYSTEM.OK, nUserId, {objUser:GetUserId(), strContent});
+	if nChatType ~= CHAT_TYPE.FRIEND and nChatType ~= CHAT_TYPE.WORLD then
+		nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
+		return nErrorCode;
+	end
+
+	-- 好友聊天时, 玩家ID不能为空
+	if nChatType == CHAT_TYPE.FRIEND then
+		if not IsNumber(nUserId) then
+			nErrorCode = ERROR_CODE.SYSTEM.PARAMTER_ERROR;
+			return nErrorCode;
+		end
+
+		-- 检查接收方是否为好友
+		if not self:IsFriend(objUser, nUserId) then
+			nErrorCode = ERROR_CODE.FRIEND.IS_NOT_YOUR_FRIEND;
+			return nErrorCode;
+		end
+	end
+
+	-- 转发聊天内容
+	LOG_DEBUG("Transfer chatting content to friend...")
+	local tbRetData = {nChatType, self:GetClientFriendDataByObject(objUser), strContent};
+	if nChatType == CHAT_TYPE.FRIEND then
+		local bIsOnline = G_NetManager:UserIsOnline(nUserId);
+		if bIsOnline then
+			G_NetManager:SendNoticeToUser(EVENT_ID.CLIENT_NOTICE.RECEIVE_CHAT, ERROR_CODE.SYSTEM.OK, nUserId, tbRetData);
+		end
+	elseif nChatType == CHAT_TYPE.WORLD then
+		self:SendChattingToWorldChannel(objUser, tbRetData)
 	end
 
 	return ERROR_CODE.SYSTEM.OK
+end
+
+-- 把聊天信息发送给客户端
+function FriendLogic:SendChattingToWorldChannel(objUser, tbRetData)
+	local nSendUserId = objUser:GetUserId();
+	local tbOnlineUserId = G_NetManager:GetAllOnlineUserId();
+	LOG_TABLE(tbOnlineUserId)
+	for _, nUserId in ipairs(tbOnlineUserId) do
+		if nUserId ~= nSendUserId then
+			G_NetManager:SendNoticeToUser(EVENT_ID.CLIENT_NOTICE.RECEIVE_CHAT, ERROR_CODE.SYSTEM.OK, nUserId, tbRetData);
+		end
+	end
 end
 
 -- 查找好友回调
@@ -203,6 +233,11 @@ function FriendLogic:OnGetFriendList(tbFriendList)
 
 	nErrorCode = ERROR_CODE.SYSTEM.OK;
 	return nErrorCode, tbClientFriendsData;
+end
+
+-- 抽取好友列表需要的数据
+function FriendLogic:GetClientFriendDataByObject(objUser)
+	return self:GetClientFriendData(objUser:GetGameData());
 end
 
 -- 抽取好友列表需要的数据
