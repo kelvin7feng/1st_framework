@@ -157,16 +157,17 @@ int LuaEngine::CallLua(unsigned int uHandlerId, unsigned int uEventType, unsigne
 }
 
 //调用脚本处理
-int LuaEngine::RedisCallLua(const unsigned int uUserId, const unsigned int uEventType, const std::string& request)
+int LuaEngine::RedisCallLua(const unsigned int uSquenceId, const unsigned int uUserId, const unsigned int uEventType, const std::string& request)
 {
     int nTop = lua_gettop(m_lua_state);
     
     lua_getglobal(m_lua_state, "OnRedisRespone");
+    lua_pushnumber(m_lua_state, uSquenceId);
     lua_pushnumber(m_lua_state, uUserId);
     lua_pushnumber(m_lua_state, uEventType);
     lua_pushstring(m_lua_state, request.c_str());
     
-    int ret = lua_pcall(m_lua_state, 3, 1, 0);
+    int ret = lua_pcall(m_lua_state, 4, 1, 0);
     
     //调用出错
     if(ret)

@@ -481,7 +481,7 @@ bool KRedisClient::OnRequestSet(int nIndex, const KREQUEST_SET* pRequestSet)
     
     //OnRespond的时候释放
     pCommonBuffer = GenCommonRespond(pRequestSet->lId, pRequestSet->byType, pReply);
-    DB_SetCommonHead(pCommonBuffer, pRequestSet->uUserId, pRequestSet->uEventType);
+    DB_SetCommonHead(pCommonBuffer, pRequestSet->uUserId, pRequestSet->uEventType, pRequestSet->uSquenceId);
     PushRespond(pCommonBuffer);
     bResult = true;
 Exit0:
@@ -516,12 +516,13 @@ bool KRedisClient::OnRequestGet(int nIndex, const KREQUEST_GET* pRequestGet)
         memcpy(pRequest, pRequestGet, pBuffer->GetSize());
         pPacketBuffer = g_pDBClientMgr->RequestMySQLQuery(nIndex + 1, pBuffer);
         DB_SetCommonHead(pPacketBuffer, pRequestGet->uUserId, pRequestGet->uEventType);
+        DB_SetCommonHead(pPacketBuffer, pRequestGet->uUserId, pRequestGet->uEventType, pRequestGet->uSquenceId);
         PushRespond(pPacketBuffer);
     }*/
     
     //OnRespond的时候释放
     pCommonBuffer = GenCommonRespond(pRequestGet->lId, pRequestGet->byType, pReply);
-    DB_SetCommonHead(pCommonBuffer, pRequestGet->uUserId, pRequestGet->uEventType);
+    DB_SetCommonHead(pCommonBuffer, pRequestGet->uUserId, pRequestGet->uEventType, pRequestGet->uSquenceId);
     PushRespond(pCommonBuffer);
     bResult = true;
     
@@ -604,7 +605,7 @@ bool KRedisClient::OnRequestHSet(int nIndex, const KREQUEST_HSET* pRequestHSet)
     }
     
     pCommonBuffer = GenCommonRespond(pRequestHSet->lId, pRequestHSet->byType, pReply);
-    DB_SetCommonHead(pCommonBuffer, pRequestHSet->uUserId, pRequestHSet->uEventType);
+    DB_SetCommonHead(pCommonBuffer, pRequestHSet->uUserId, pRequestHSet->uEventType, pRequestHSet->uSquenceId);
     PushRespond(pCommonBuffer);
     bResult = true;
     
@@ -636,7 +637,7 @@ bool KRedisClient::OnRequestHGet(int nIndex, const KREQUEST_HGET* pRequestHGet)
         KREQUEST_HGET* pRequest = (KREQUEST_HGET*)pBuffer->GetData();
         memcpy(pRequest, pRequestHGet, pBuffer->GetSize());
         pPacketBuffer = g_pDBClientMgr->RequestMySQLQuery(nIndex + 1, pBuffer);
-        DB_SetCommonHead(pPacketBuffer, pRequestHGet->uUserId, pRequestHGet->uEventType);
+        DB_SetCommonHead(pPacketBuffer, pRequestHGet->uUserId, pRequestHGet->uEventType, pRequestHGet->uSquenceId);
         PushRespond(pPacketBuffer);
     }
     

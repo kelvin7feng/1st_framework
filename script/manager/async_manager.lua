@@ -2,6 +2,7 @@ AsyncManager = class()
 
 function AsyncManager:ctor()
 	self.m_tbSquence = {};
+	self.m_tbSquenceIdToTableName = {};
 	self.m_nSquenceId = 1;
 end
 
@@ -20,6 +21,29 @@ function AsyncManager:GetSquenceId()
 	return self.m_nSquenceId;
 end
 
+-- 获取id对应操作的表名
+function AsyncManager:GetSquenceIdToTableName(nSquenceId)
+	return self.m_tbSquenceIdToTableName[nSquenceId];
+end
+
+-- 设置id对应操作的表名
+function AsyncManager:SetSquenceIdToTableName(nSquenceId, strTableName)
+	self.m_tbSquenceIdToTableName[nSquenceId] = strTableName;
+end
+
+-- 置空
+function AsyncManager:SetSquenceIdToTableNameNil(nSquenceId)
+	self.m_tbSquenceIdToTableName[nSquenceId] = nil;
+end
+
+-- 设置参数
+function AsyncManager:SetParameter(tbParameters, strTableName)
+	local nSquenceId = self:Push(tbParameters);
+	self:SetSquenceIdToTableName(nSquenceId, strTableName);
+
+	return nSquenceId;
+end
+
 -- Push到队列里
 function AsyncManager:Push(tbParameters)
 	tbParameters = tbParameters or {}
@@ -35,7 +59,7 @@ end
 -- 从队列里取出
 function AsyncManager:Pop(nSquenceId)
 	if not IsNumber(nSquenceId) then
-		LOG_ERROR("nSquenceId Is not number");
+		LOG_WARN("nSquenceId Is not number");
 		return nil;
 	end
 

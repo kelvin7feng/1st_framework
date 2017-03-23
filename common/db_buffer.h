@@ -28,6 +28,8 @@ void DB_SetBufferHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uE
 
 void DB_SetCommonHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uEventType);
 
+void DB_SetCommonHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uEventType, unsigned int uSquenceId);
+
 void DB_SetMulDataHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uEventType);
 
 void DB_SetMulDataHead(IKG_Buffer* pBuffer, unsigned int uUserId, unsigned int uEventType, unsigned int uSquenceId);

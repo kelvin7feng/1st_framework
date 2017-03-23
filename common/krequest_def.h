@@ -179,6 +179,7 @@ struct KRESOOND_COMMON
     int nDataLen;
     unsigned int uUserId;
     unsigned int uEventType;
+    unsigned int uSqueneceId;
     char data[1];
 };
 

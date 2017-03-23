@@ -35,7 +35,7 @@ public:
     int InitState(int server_type);
     int CallLua(unsigned int uHandlerId, unsigned int uEventType, unsigned short uSequenceId, const char* pParam);
     int CallCenterRequestLua(unsigned int uHandlerId, unsigned int uEventType, unsigned short uSequenceId, const char* pParam);
-    int RedisCallLua(const unsigned int uUserId, const unsigned int uEventType, const std::string& request);
+    int RedisCallLua(const unsigned int uSquenceId, const unsigned int uUserId, const unsigned int uEventType, const std::string& request);
     int RedisCallLua(const unsigned int uSquenceId, const unsigned int uUserId, const unsigned int uEventType, const unsigned int uParamCount, char* request);
 
 private:

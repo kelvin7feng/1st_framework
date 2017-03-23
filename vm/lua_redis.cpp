@@ -41,20 +41,21 @@ static int PushRedisGet(lua_State* lua_state)
 {
     int nRetCode = 0;
     int nParam = lua_gettop(lua_state);
-    if(nParam != 4)
+    if(nParam != 5)
     {
-        std::cout << "count of param is not equal to 4..." << std::endl;
+        std::cout << "count of param is not equal to 5..." << std::endl;
         return 0;
     }
     
-    unsigned int uUserId = lua_tonumber(lua_state, 1);
-    unsigned int uEventType = lua_tonumber(lua_state, 2);
-    std::string szTableName = lua_tostring(lua_state, 3);
-    std::string szKey = lua_tostring(lua_state, 4);
+    unsigned int uSquenceId = lua_tonumber(lua_state, 1);
+    unsigned int uUserId = lua_tonumber(lua_state, 2);
+    unsigned int uEventType = lua_tonumber(lua_state, 3);
+    std::string szTableName = lua_tostring(lua_state, 4);
+    std::string szKey = lua_tostring(lua_state, 5);
     
     //DBThreadActivate释放内存
     IKG_Buffer* pBuffer = DB_CreateGetBuffer(szTableName, szKey);
-    DB_SetBufferHead(pBuffer, uUserId, uEventType);
+    DB_SetBufferHead(pBuffer, uUserId, uEventType, uSquenceId);
     g_pDBClientMgr->PushRedisRequest(1, pBuffer);
     
     return nRetCode;

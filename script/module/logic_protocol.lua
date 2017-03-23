@@ -15,14 +15,10 @@ function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 	local tbRet = {G_EventManager:DispatcherEvent(nEventId, tbParam)};
 	local nErrorCode = table.remove(tbRet,1);
 	if nErrorCode ~= ERROR_CODE.SYSTEM.ASYN_EVENT then
-		if nEventId == EVENT_ID.GET_ASYN_DATA.ADD_FRIEND_GET_GAME_DATA then
-			nEventId = EVENT_ID.CLIENT_FRIEND.ADD_FRIEND;
-		elseif nEventId == EVENT_ID.GET_ASYN_DATA.GET_FRIEND_LIST then
-			nEventId = EVENT_ID.CLIENT_FRIEND.GET_FRIEND_LIST;
-		elseif nEventId == EVENT_ID.GET_ASYN_DATA.GET_ADD_FRIEND_REQUEST then
-			nEventId = EVENT_ID.CLIENT_FRIEND.GET_ADD_FRIEND_REQUEST;
-		elseif nEventId == EVENT_ID.GET_ASYN_DATA.SEARCH_USER_DATA then
-			nEventId = EVENT_ID.CLIENT_FRIEND.SEARCH_USER;
+
+		-- 映射事件源
+		if ASYNC_EVENT_MAP_TO_SOURCE_EVENT[nEventId] then
+			nEventId = ASYNC_EVENT_MAP_TO_SOURCE_EVENT[nEventId];
 		end
 
 		if nErrorCode ~= ERROR_CODE.NET.LOGIN_TO_ROOM_SERVER then
@@ -56,7 +52,13 @@ end
 
 -- 进入游戏，获取玩家信息
 function OnClientEnterGame(nHandlerId, nEventId, nSequenceId, tbParam)
-	local nUserId = tbParam[1]
+	local nUserId = tbParam[1];
+
+	local bExist = G_NetManager:ExistOldHanlder(nUserId);
+	if bExist then
+		G_NetManager:ReleaseHandler(nUserId);
+	end
+
 	local nErrorCode = G_UserManager:CheckUserDataStatus(nHandlerId, nUserId);
 	if nErrorCode == ERROR_CODE.SYSTEM.USER_DATA_NIL then
 		LOG_DEBUG("OnClientEnterGame User Info does not cache...")
@@ -78,52 +80,13 @@ function OnResponeClientEnterGame(nUserId, nErrorCode, tbRetInfo)
 	G_NetManager:SendToGateway(nSequenceId, EVENT_ID.CLIENT_LOGIN.ENTER_GAME, nErrorCode, nHandlerId, tbRetInfo);
 end
 
--- 响应redis
-function OnRedisRespone(nUserId, nEventId, strRepsonseJson)
-	if not IsString(strRepsonseJson) then
-		LOG_DEBUG("response data is nil");
-	end
+-- 处理数据库回调
+function OnRedisCallback(nUserId, nEventId, tbParam)
+	local nHandlerId = G_NetManager:GetHandlerId(nUserId);
+	local nSequenceId = G_NetManager:GetSquenceIdFromSquence(nHandlerId);
 
-	LOG_DEBUG("|" .. strRepsonseJson .. "|")
-	OnResponseGlobalConfigEvent(nEventId, strRepsonseJson);
-	OnResponseEnterGameEvent(nUserId, nEventId, strRepsonseJson);
-end
-
--- 响应多个数据redis, 只支持处理一次异步, 如果是多个异步, 需要单独处理
-function OnRedisMulDataRespone(nAsyncSquenceId, nUserId, nEventId, tbMulData)
-	LOG_DEBUG("nAsyncSquenceId :" .. nAsyncSquenceId)
-	LOG_DEBUG("nUserId :" .. nUserId)
-	LOG_DEBUG("nEventId :" .. nEventId)
-	LOG_DEBUG("tbMulData type:" .. type(tbMulData))
-	LOG_DEBUG("tbMulData :" .. json.encode(tbMulData))
-	
-	local tbParam = G_AsyncManager:Pop(nAsyncSquenceId);
-	local nHandlerId = nil;
-	local nSequenceId = nil;
-	if nEventId == EVENT_ID.GET_ASYN_DATA.ADD_FRIEND_GET_GAME_DATA then
-		local tbGameData = json.decode(table.remove(tbMulData, 1));
-		local objInvitee = UserData:new(tbGameData);
-		table.insert(tbParam, objInvitee);
-
-	elseif nEventId == EVENT_ID.GET_ASYN_DATA.GET_FRIEND_INVITER_DATA then
-		local tbGameData = json.decode(table.remove(tbMulData, 1));
-		local objInviter = UserData:new(tbGameData);
-		table.insert(tbParam, objInviter);
-
-	elseif nEventId == EVENT_ID.GET_ASYN_DATA.SEARCH_USER_DATA then
-		local tbGameData = json.decode(table.remove(tbMulData, 1));
-		local objUser = UserData:new(tbGameData);
-		table.insert(tbParam, objUser);
-		
-	else
-		table.insert(tbParam, tbMulData);
-		
-	end
-
-	nHandlerId = G_NetManager:GetHandlerId(nUserId);
-	nSequenceId = G_NetManager:GetSquenceIdFromSquence(nHandlerId);
-	LOG_DEBUG("nHandlerId :" .. nHandlerId)
-	LOG_DEBUG("nSequenceId :" .. nSequenceId)
+	--LOG_DEBUG("nHandlerId :" .. nHandlerId)
+	--LOG_DEBUG("nSequenceId :" .. nSequenceId)
 
 	local bRet = xpcall(
 		function()
@@ -135,20 +98,58 @@ function OnRedisMulDataRespone(nAsyncSquenceId, nUserId, nEventId, tbMulData)
 	end
 end
 
+-- 响应redis
+function OnRedisRespone(nAsyncSquenceId, nUserId, nEventId, strRepsonseJson)
+	if not IsString(strRepsonseJson) then
+		LOG_DEBUG("response data is nil");
+	end
+
+	LOG_DEBUG("|" .. strRepsonseJson .. "|")
+	local tbParam = G_AsyncManager:Pop(nAsyncSquenceId);
+
+	if nEventId == EVENT_ID.GLOBAL_CONFIG.GET_USER_GLOBAL_ID then
+		OnResponseGlobalConfigEvent(nEventId, strRepsonseJson);
+	elseif nEventId == EVENT_ID.GET_ASYN_DATA.LOGIC_GET_GAME_DATA then
+		OnResponseEnterGameEvent(nUserId, nEventId, strRepsonseJson);
+	else
+		if IsString(strRepsonseJson) and string.len(strRepsonseJson) > 0 then
+			local tbRetData = strRepsonseJson;
+			local strTableName = G_AsyncManager:GetSquenceIdToTableName(nAsyncSquenceId);
+			if IsString(strTableName) and strTableName == DATABASE_TABLE_NAME.GAME_DATA then
+				local tbGameData = json.decode(strRepsonseJson);
+				tbRetData = UserData:new(tbGameData);
+			end
+
+			table.insert(tbParam, tbRetData);
+		end
+
+		OnRedisCallback(nUserId, nEventId, tbParam);
+		G_AsyncManager:SetSquenceIdToTableNameNil(nAsyncSquenceId);
+	end
+end
+
+-- 响应多个数据redis, 只支持处理一次异步, 如果是多个异步, 需要单独处理
+function OnRedisMulDataRespone(nAsyncSquenceId, nUserId, nEventId, tbMulData)
+	
+	local tbParam = G_AsyncManager:Pop(nAsyncSquenceId);
+	local nHandlerId = nil;
+	local nSequenceId = nil;
+	table.insert(tbParam, tbMulData);
+
+	OnRedisCallback(nUserId, nEventId, tbParam);
+	G_AsyncManager:SetSquenceIdToTableNameNil(nAsyncSquenceId);
+end
+
 -- 响应进入游戏事件
 function OnResponseEnterGameEvent(nUserId, nEventId, strRepsonseJson)
-	if nEventId == EVENT_ID.GET_ASYN_DATA.LOGIC_GET_GAME_DATA then
-		LOG_DEBUG("ON GET GAME DATA BACK..........1")
-		LOG_DEBUG("|" .. strRepsonseJson .. "|")
-		if IsString(strRepsonseJson) and string.len(strRepsonseJson) > 0 then
-			local tbGameData = json.decode(strRepsonseJson)
-			G_UserManager:CacheUserObject(tbGameData)
-			local nErrorCode, objUser = G_UserManager:EnterGame(nUserId);
-			local tbRetInfo = objUser:GetGameData();
-			OnResponeClientEnterGame(nUserId, nErrorCode, {tbRetInfo})
-		else
-			LOG_DEBUG("User Is Nil");
-			OnResponeClientEnterGame(nUserId, ERROR_CODE.SYSTEM.USER_DATA_NIL, "")
-		end
+	if IsString(strRepsonseJson) and string.len(strRepsonseJson) > 0 then
+		local tbGameData = json.decode(strRepsonseJson)
+		G_UserManager:CacheUserObject(tbGameData)
+		local nErrorCode, objUser = G_UserManager:EnterGame(nUserId);
+		local tbRetInfo = objUser:GetGameData();
+		OnResponeClientEnterGame(nUserId, nErrorCode, {tbRetInfo})
+	else
+		LOG_DEBUG("User Is Nil");
+		OnResponeClientEnterGame(nUserId, ERROR_CODE.SYSTEM.USER_DATA_NIL, "")
 	end
 end

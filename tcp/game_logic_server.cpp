@@ -219,7 +219,7 @@ void GameLogicServer::OnDBResponse(KRESOOND_COMMON* pCommonResponse)
     char* szData = new char[nDataLen+1];
     memset(szData, 0, (size_t)(nDataLen + 1));
     memcpy(szData, pCommonResponse->data, (size_t)nDataLen);
-    lua_engine.RedisCallLua(pCommonResponse->uUserId, pCommonResponse->uEventType, szData);
+    lua_engine.RedisCallLua(pCommonResponse->uSqueneceId, pCommonResponse->uUserId, pCommonResponse->uEventType, szData);
     
     delete[] szData;
 }

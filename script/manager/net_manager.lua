@@ -84,6 +84,24 @@ function NetManager:SetHandlerId(nUserId, nHandlerId)
 	return bIsOk;
 end
 
+function NetManager:ReleaseHandler(nUserId)
+	local nHandlerId = self:GetHandlerId(nUserId);
+	if nHandlerId then
+		-- to do: 通知网关移除，或者在网关处添加心跳包功能
+		self:SetUserId(nHandlerId, nil);
+	end
+end
+
+function NetManager:ExistOldHanlder(nUserId)
+	local bExist = false;
+	local nHandlerId = self:GetHandlerId(nUserId);
+	if nHandlerId then
+		bExist = true;
+	end
+
+	return bExist;
+end
+
 function NetManager:GetHandlerId(nUserId)
 	return self.m_tbUserHanderIdMap[tostring(nUserId)];
 end

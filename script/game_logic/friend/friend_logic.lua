@@ -103,7 +103,7 @@ function FriendLogic:SearchUser(objUser, nUserId)
 	if not bIsCache then
 		-- 假设已经发送请求,留待数据回来再处理
 		LOG_DEBUG("SearchFriend User Info does not cache...")
-		G_GameDataRedis:MGetValue(nCurrentUserId, EVENT_ID.GET_ASYN_DATA.SEARCH_USER_DATA, {nUserId});
+		G_GameDataRedis:GetValue(nCurrentUserId, EVENT_ID.GET_ASYN_DATA.SEARCH_USER_DATA, nUserId);
 		nErrorCode = ERROR_CODE.SYSTEM.ASYN_EVENT;
 		return nErrorCode;
 	end
@@ -302,7 +302,7 @@ function FriendLogic:PassRequest(objUser, nInviter)
 	local bIsCache = G_UserManager:IsUserObjectCache(nInviter);
 	if not bIsCache then
 		local nInviteeUserId = objUser:GetUserId();
-		G_GameDataRedis:MGetValue(nInviteeUserId, EVENT_ID.GET_ASYN_DATA.GET_FRIEND_INVITER_DATA, {nInviter}, {nInviteeUserId});
+		G_GameDataRedis:GetValue(nInviteeUserId, EVENT_ID.GET_ASYN_DATA.GET_FRIEND_INVITER_DATA, nInviter, {nInviteeUserId});
 	else
 		local objInviterUser = G_UserManager:GetUserObject(nInviter);
 		self:UserAddFriend(objInviterUser, objUser:GetUserId());
@@ -360,7 +360,7 @@ function FriendLogic:AddFriend(objUser, nUserId)
 	if not bIsCache then
 		-- 假设已经发送请求,留待数据回来再处理
 		LOG_DEBUG("AddFriend User Info does not cache...")
-		G_GameDataRedis:MGetValue(nInviterUserId, EVENT_ID.GET_ASYN_DATA.ADD_FRIEND_GET_GAME_DATA, {nUserId}, {nInviterUserId});
+		G_GameDataRedis:GetValue(nInviterUserId, EVENT_ID.GET_ASYN_DATA.ADD_FRIEND_GET_GAME_DATA, nUserId, {nInviterUserId});
 		nErrorCode = ERROR_CODE.SYSTEM.ASYN_EVENT;
 		return nErrorCode;
 	end
