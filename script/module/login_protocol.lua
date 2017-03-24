@@ -70,7 +70,7 @@ function OnResponeClientLogin(nUserId, nErrorCode, tbRetInfo)
 end
 
 -- 响应redis
-function OnRedisRespone(nUserId, nEventId, strRepsonseJson)
+function OnRedisRespone(nAsyncSquenceId, nUserId, nEventId, strRepsonseJson)
 	if not IsString(strRepsonseJson) then
 		LOG_DEBUG("response data is nil");
 	end
@@ -78,7 +78,7 @@ function OnRedisRespone(nUserId, nEventId, strRepsonseJson)
 	LOG_DEBUG("LUA Redis Response：".."nEventId:" .. nEventId .. ", strRepsonseJson:" .. strRepsonseJson);
 	OnResponseGlobalConfigEvent(nEventId, strRepsonseJson);
 	OnResponseLoginEvent(nUserId, nEventId, strRepsonseJson);
-
+	G_AsyncManager:SetSquenceIdToTableNameNil(nAsyncSquenceId);
 end
 
 -- 登录流程事件
