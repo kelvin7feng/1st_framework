@@ -19,17 +19,16 @@ static int SendToGateway(lua_State* lua_state)
 {
     int nRetCode = 0;
     int nParam = lua_gettop(lua_state);
-    if(nParam != 6)
+    if(nParam != 5)
     {
-        std::cout << "count of param is not equal to 6..." << std::endl;
+        std::cout << "count of param is not equal to 5..." << std::endl;
         return 0;
     }
     
-    unsigned short uSequenceId = lua_tonumber(lua_state, nParam - 5);
-    unsigned int uEventType = lua_tonumber(lua_state, nParam - 4);
-    unsigned int uErrorCode = lua_tonumber(lua_state, nParam - 3);
-    unsigned int uHandlerId = lua_tonumber(lua_state, nParam - 2);
-    //unsigned int uParamSize = lua_tonumber(lua_state, nParam - 1);
+    unsigned short uSequenceId = lua_tonumber(lua_state, nParam - 4);
+    unsigned int uEventType = lua_tonumber(lua_state, nParam - 3);
+    unsigned int uErrorCode = lua_tonumber(lua_state, nParam - 2);
+    unsigned int uHandlerId = lua_tonumber(lua_state, nParam - 1);
     std::string szParam = lua_tostring(lua_state, nParam);
     
     Message msg;
@@ -51,17 +50,16 @@ static int SendToCenter(lua_State* lua_state)
 {
     int nRetCode = 0;
     int nParam = lua_gettop(lua_state);
-    if(nParam != 6)
+    if(nParam != 5)
     {
         std::cout << "count of param is not equal to 6..." << std::endl;
         return 0;
     }
     
-    unsigned short uSequenceId = lua_tonumber(lua_state, nParam - 5);
-    unsigned int uEventType = lua_tonumber(lua_state, nParam - 4);
-    unsigned int uErrorCode = lua_tonumber(lua_state, nParam - 3);
-    unsigned int uHandlerId = lua_tonumber(lua_state, nParam - 2);
-    //unsigned int uParamSize = lua_tonumber(lua_state, nParam - 1);
+    unsigned short uSequenceId = lua_tonumber(lua_state, nParam - 4);
+    unsigned int uEventType = lua_tonumber(lua_state, nParam - 3);
+    unsigned int uErrorCode = lua_tonumber(lua_state, nParam - 2);
+    unsigned int uHandlerId = lua_tonumber(lua_state, nParam - 1);
     std::string szParam = lua_tostring(lua_state, nParam);
     
     Message msg;
@@ -90,17 +88,16 @@ static int SendToLogicServer(lua_State* lua_state)
 {
     int nRetCode = 0;
     int nParam = lua_gettop(lua_state);
-    if(nParam != 6)
+    if(nParam != 5)
     {
         std::cout << "count of param is not equal to 6..." << std::endl;
         return 0;
     }
     
-    unsigned short uSequenceId = lua_tonumber(lua_state, nParam - 5);
-    unsigned int uEventType = lua_tonumber(lua_state, nParam - 4);
-    unsigned int uErrorCode = lua_tonumber(lua_state, nParam - 3);
-    unsigned int uHandlerId = lua_tonumber(lua_state, nParam - 2);
-    //unsigned int uParamSize = lua_tonumber(lua_state, nParam - 1);
+    unsigned short uSequenceId = lua_tonumber(lua_state, nParam - 4);
+    unsigned int uEventType = lua_tonumber(lua_state, nParam - 3);
+    unsigned int uErrorCode = lua_tonumber(lua_state, nParam - 2);
+    unsigned int uHandlerId = lua_tonumber(lua_state, nParam - 1);
     std::string szParam = lua_tostring(lua_state, nParam);
     
     Message msg;
