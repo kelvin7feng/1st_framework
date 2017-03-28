@@ -69,7 +69,7 @@ tcp/tcp_session.cpp)
 #执行文件链接库
 TARGET_LINK_LIBRARIES(gateway lua dl uv mysqlclient protobuf hiredis db_proxy common vm util proto_message tcp)
 #执行构建中心服
-ADD_EXECUTABLE(center ./gateway/main.cpp ./vm/lua_engine.cpp
+ADD_EXECUTABLE(center ./center/main.cpp ./vm/lua_engine.cpp
 db_proxy/db_client.cpp  db_proxy/db_client_manager.cpp
 db_proxy/mysql_client.cpp  db_proxy/redis_client.cpp common/db_buffer.cpp
 common/knetpacket.cpp  common/ktimer.cpp  common/net_buffer.cpp
