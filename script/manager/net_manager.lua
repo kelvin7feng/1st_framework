@@ -130,25 +130,33 @@ function NetManager:GetUserId(nHandlerId)
 	return self.m_tbHanderIdUserMap[tostring(nHandlerId)];
 end
 
-function NetManager:TransferToCenter(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam)
-	
-	if strRetParam and not IsString(strRetParam) then
-		strRetParam = json.encode(strRetParam);
+-- 发送数据到指定服务器
+function NetManager:SendToServer(nServerType, nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam)
+	if not IsNumber(nServerType) then
+		LOG_WARN("SendToServer nServerType is not number");
+		return ;
 	end
 
-	CNet.SendToCenter(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam or "");
+	if nServerType < SERVER_TYPE_DEF.CENTER or nServerType > SERVER_TYPE_DEF.GATEWAY then
+		LOG_WARN("SendToServer nServerType does not exist");
+		return ;
+	end
+
+	CNet.SendToServer(nServerType, nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam or "");
 end
 
-function NetManager:SendToCenter(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam)
+-- 逻辑服通过中心服转发到房间服
+function NetManager:SendToRoomServerFromLogic(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam)
 	
 	if strRetParam and not IsString(strRetParam) then
 		strRetParam = json.encode(strRetParam);
 	end
 
 	self:PopRequestFromSquence(nHandlerId);
-	CNet.SendToCenter(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam or "");
+	self:SendToServer(nServerType, nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam or "")
 end
 
+-- 逻辑服发送到网关
 function NetManager:SendToGateway(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam)
 	
 	if strRetParam and not IsString(strRetParam) then
@@ -156,9 +164,20 @@ function NetManager:SendToGateway(nSequenceId, nEventType, nErrorCode, nHandlerI
 	end
 
 	self:PopRequestFromSquence(nHandlerId);
-	CNet.SendToGateway(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam or "");
+	self:SendToServer(SERVER_TYPE_DEF.GATEWAY, nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam)
 end
 
+-- 逻辑服发送到网关
+function NetManager:SendToLogicServerFromLogin(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam)
+	
+	if strRetParam and not IsString(strRetParam) then
+		strRetParam = json.encode(strRetParam);
+	end
+
+	self:SendToServer(SERVER_TYPE_DEF.LOGIC, 0, EVENT_ID.LOGIN_SERVER.UPDATE_GLOBAL_USER_ID, ERROR_CODE.SYSTEM.OK, 0, strRetParam);
+end
+
+-- 中心服发送到逻辑服
 function NetManager:SendToLogicServer(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam)
 	
 	if strRetParam and not IsString(strRetParam) then
@@ -206,7 +225,7 @@ function NetManager:SendNoticeToUser(nEventType, nErrorCode, nUserId, strRetPara
 		strRetParam = json.encode(strRetParam);
 	end
 
-	CNet.SendToGateway(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam or "");
+	self:SendToServer(SERVER_TYPE_DEF.GATEWAY, nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam or "");
 
 end
 

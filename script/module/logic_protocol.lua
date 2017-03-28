@@ -21,31 +21,14 @@ function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 			nEventId = ASYNC_EVENT_MAP_TO_SOURCE_EVENT[nEventId];
 		end
 
-		if nErrorCode ~= ERROR_CODE.NET.LOGIN_TO_ROOM_SERVER then
-			G_NetManager:SendToGateway(nSequenceId, nEventId, nErrorCode, nHandlerId, tbRet);
+		if nErrorCode == ERROR_CODE.NET.LOGIN_TO_ROOM_SERVER then
+			G_NetManager:SendToRoomServerFromLogic(nSequenceId, nEventId, nErrorCode, nHandlerId, tbRet);
 		else
-			G_NetManager:SendToCenter(nSequenceId, nEventId, nErrorCode, nHandlerId, tbRet);
+			G_NetManager:SendToGateway(nSequenceId, nEventId, nErrorCode, nHandlerId, tbRet);
 		end
 	end
 
 	G_UserManager:Commit();
-
-	return 0;
-end
-
-function CenterRequest(nHandlerId, nEventId, nSequenceId, tbParam)
-
-	LOG_DEBUG("CenterRequest...")
-	LOG_DEBUG("nHandlerId:" .. nHandlerId);
-	if not IsTable(tbParam) then
-		LOG_ERROR("parameter of request is nil...")
-		return 0;
-	end
-	
-	local tbRet = {G_EventManager:DispatcherEvent(nEventId, tbParam)};
-	local nErrorCode = table.remove(tbRet,1);
-
-	G_NetManager:PopRequestFromSquence(nHandlerId);
 
 	return 0;
 end
@@ -104,7 +87,6 @@ function OnRedisRespone(nAsyncSquenceId, nUserId, nEventId, strRepsonseJson)
 		LOG_DEBUG("response data is nil");
 	end
 
-	LOG_DEBUG("|" .. strRepsonseJson .. "|")
 	local tbParam = G_AsyncManager:Pop(nAsyncSquenceId);
 
 	if nEventId == EVENT_ID.GLOBAL_CONFIG.GET_USER_GLOBAL_ID then
@@ -120,7 +102,9 @@ function OnRedisRespone(nAsyncSquenceId, nUserId, nEventId, strRepsonseJson)
 				tbRetData = UserData:new(tbGameData);
 			end
 
-			table.insert(tbParam, tbRetData);
+			if tbRetData then
+				table.insert(tbParam, tbRetData);
+			end
 		end
 
 		OnRedisCallback(nUserId, nEventId, tbParam);

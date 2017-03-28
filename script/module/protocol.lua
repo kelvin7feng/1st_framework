@@ -41,6 +41,23 @@ function OnClientRequest(nHandlerId, nEventId, nSequenceId, strJson)
 	return tonumber(bRet);
 end
 
+function CenterRequest(nHandlerId, nEventId, nSequenceId, tbParam)
+
+	LOG_DEBUG("CenterRequest...")
+	LOG_DEBUG("nHandlerId:" .. nHandlerId);
+	if not IsTable(tbParam) then
+		LOG_ERROR("parameter of request is nil...")
+		return 0;
+	end
+	
+	local tbRet = {G_EventManager:DispatcherEvent(nEventId, tbParam)};
+	local nErrorCode = table.remove(tbRet,1);
+
+	G_NetManager:PopRequestFromSquence(nHandlerId);
+
+	return 0;
+end
+
 -- 接收中心服请求逻辑调用入口
 function OnCenterRequest(nHandlerId, nEventId, nSequenceId, strJson)
 	local bRet = xpcall(

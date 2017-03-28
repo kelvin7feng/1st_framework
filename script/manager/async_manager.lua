@@ -33,7 +33,9 @@ end
 
 -- 置空
 function AsyncManager:SetSquenceIdToTableNameNil(nSquenceId)
-	self.m_tbSquenceIdToTableName[nSquenceId] = nil;
+	if self.m_tbSquenceIdToTableName[nSquenceId] then
+		self.m_tbSquenceIdToTableName[nSquenceId] = nil;
+	end
 end
 
 -- 设置参数

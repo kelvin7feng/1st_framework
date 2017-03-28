@@ -139,7 +139,8 @@ function UserInfoLogic:UpdateInviterId(objUser, nInviterId)
 	end
 
 	-- 检查邀请人Id是否合法
-	if nInviterId < DATABASE_TABLE_GLOBAL_DEFALUT[DATABASE_TABLE_GLOBAL_FIELD.USER_ID] or nInviterId > G_GlobalConfigManager:GetUserGlobalId() then
+	local bIsOk = G_UserInfoLogic:CheckUserIdLegal(nInviterId);
+	if not bIsOk then
 		LOG_WARN("UserInfoProtocol:UpdateInviterId nInviterId is out of range");
 		nErrorCode = ERROR_CODE.USER_BASE_INFO.INVITER_ID_IS_OUT_OF_RANGE;
 		return nErrorCode;

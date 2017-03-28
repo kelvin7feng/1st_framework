@@ -13,6 +13,11 @@ function EventManager:Register(strEventType, funcCallback, objCall)
 		return false;
 	end--]]
 
+	if not strEventType then
+		__TRACKBACK__("Register Event Failed: strEventType is nil");
+		return false;
+	end
+
 	-- 检查回调函数，可不检查回调函数的对象，可以兼容全局函数的使用
 	if not IsFunction(funcCallback) then
 		LOG_ERROR("Register Event Failed: funcCallback is nil");
