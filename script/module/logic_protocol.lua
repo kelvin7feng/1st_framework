@@ -66,6 +66,10 @@ end
 -- 处理数据库回调
 function OnRedisCallback(nUserId, nEventId, tbParam)
 	local nHandlerId = G_NetManager:GetHandlerId(nUserId);
+	if not nHandlerId then
+		return 0;
+	end
+	
 	local nSequenceId = G_NetManager:GetSquenceIdFromSquence(nHandlerId);
 
 	--LOG_DEBUG("nHandlerId :" .. nHandlerId)
@@ -102,7 +106,7 @@ function OnRedisRespone(nAsyncSquenceId, nUserId, nEventId, strRepsonseJson)
 				tbRetData = UserData:new(tbGameData);
 			end
 
-			if tbRetData then
+			if tbParam and tbRetData then
 				table.insert(tbParam, tbRetData);
 			end
 		end

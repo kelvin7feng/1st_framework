@@ -70,7 +70,7 @@ function FriendLogic:Chat(objUser, nChatType, strContent, nUserId)
 
 	-- 转发聊天内容
 	LOG_DEBUG("Transfer chatting content to friend...")
-	local tbRetData = {nChatType, self:GetClientFriendDataByObject(objUser), strContent};
+	local tbRetData = {nChatType, self:GetClientFriendDataByObject(objUser), strContent, nUserId};
 	if nChatType == CHAT_TYPE.FRIEND then
 		local bIsOnline = G_NetManager:UserIsOnline(nUserId);
 		if bIsOnline then
