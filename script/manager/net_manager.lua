@@ -27,8 +27,6 @@ function NetManager:UpdateHandlerIdAndUserId(nUserId, nHandlerId)
 	G_NetManager:SetHandlerId(nUserId, nHandlerId);
 	G_NetManager:SetUserId(nHandlerId, nUserId);
 
-	G_NetManager:SetCurrentHandlerId(nHandlerId);
-	G_UserManager:SetCurrentUserObject(nUserId);
 end
 
 function NetManager:OnUserDisconnect(nHandlerId)

@@ -16,6 +16,8 @@ function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 		return false;
 	end
 
+	G_UserManager:SetCurrentUserObject(nUserId);
+	G_NetManager:SetCurrentHandlerId(nHandlerId);
 	local tbRet = {G_EventManager:DispatcherEvent(nEventId, tbParam)};
 	local nErrorCode = table.remove(tbRet,1);
 	if nErrorCode ~= ERROR_CODE.SYSTEM.ASYN_EVENT then
