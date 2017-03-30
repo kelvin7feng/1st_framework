@@ -135,6 +135,7 @@ function OnResponseEnterGameEvent(nUserId, nEventId, strRepsonseJson)
 	if IsString(strRepsonseJson) and string.len(strRepsonseJson) > 0 then
 		local tbGameData = json.decode(strRepsonseJson)
 		G_UserManager:CacheUserObject(tbGameData)
+		G_UserManager:SetCurrentUserObject(nUserId);
 		local nErrorCode, objUser = G_UserManager:EnterGame(nUserId);
 		local tbRetInfo = objUser:GetGameData();
 		OnResponeClientEnterGame(nUserId, nErrorCode, {tbRetInfo})
