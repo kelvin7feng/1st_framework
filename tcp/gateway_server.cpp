@@ -10,7 +10,6 @@
 #include "document.h"
 #include "file_util.h"
 #include "net_buffer.hpp"
-#include "gateway_client.hpp"
 #include "gateway_server.hpp"
 
 using namespace rapidjson;
@@ -29,6 +28,25 @@ GatewayServer* GatewayServer::GetInstance()
 {
     static GatewayServer server;
     return &server;
+}
+
+GatewayClient* GatewayServer::GetGatewayClient(unsigned short uServerId)
+{
+    GatewayClient* pClient = NULL;
+    if(uServerId == LOGIN)
+    {
+        pClient = g_pLoginLogicClient;
+    }
+    else if(uServerId == LOGIC)
+    {
+        pClient = g_pGameLogicClient;
+    }
+    else if(uServerId == ROOM)
+    {
+        pClient = g_pRoomLogicClient;
+    }
+    
+    return pClient;
 }
 
 int GatewayServer::Init(uv_loop_t* loop)
@@ -172,6 +190,50 @@ void GatewayServer::OnNewConnection(uv_stream_t *server, int status)
     }
 }
 
+//玩家断线
+void GatewayServer::NotifyUserSocketDisconnect(unsigned int uHandlerId)
+{
+    unsigned int uServerType = LOGIC;
+    unsigned int uEventType = 4001;
+    
+    Message msg;
+    char* pBbuffer = new char[sizeof("[%d]")];
+    int nLen = sprintf(pBbuffer, "[%d]", uHandlerId);
+    msg.set_data(pBbuffer, nLen);
+    std::string szNetBody;
+    msg.SerializeToString(&szNetBody);
+    
+    NotifyLogicServer(uServerType, uEventType, szNetBody.c_str(), (unsigned int)szNetBody.length());
+    
+    //释放网关
+    id_map_to_handler_t& mapIdToHandler = GetIdToHandlerMap();
+    auto idToHandlerPos = mapIdToHandler.find(uHandlerId);
+    if(idToHandlerPos != mapIdToHandler.end())
+    {
+        mapIdToHandler.erase(uHandlerId);
+    }
+    
+    SAFE_DELETE_ARRAY(pBbuffer);
+}
+
+//通知逻辑服,由网关发起的请求
+void GatewayServer::NotifyLogicServer(unsigned int uServerId, unsigned int uEventType, const char* pBuffer, unsigned int uMsgSize)
+{
+    unsigned int uErrorCode = 0;
+    unsigned int uPacketLen = 0;
+    unsigned short uSequenceId = 0;
+    unsigned int uHandlerId = 0;
+    void* pvNetBuffer = CreateNetBuffer(uEventType, uErrorCode, uHandlerId, uServerId, uSequenceId, pBuffer, uMsgSize, &uPacketLen);
+    
+    GatewayClient* pClient = GetGatewayClient(uServerId);
+    if(pClient)
+    {
+        pClient->TransferToLogicServer((char*)pvNetBuffer, uPacketLen);
+    }
+    
+    SAFE_DELETE(pvNetBuffer);
+}
+
 //转发到客户端的回调
 void GatewayServer::OnTransferToClient(uv_write_t *req, int status){
     
@@ -214,6 +276,7 @@ void GatewayServer::TransferToClient(unsigned int uHandlerId, const char* pBuffe
         SAFE_FREE(pvBuffer);
     } else {
         //需要通过逻辑服去移除相关的缓存
+        NotifyUserSocketDisconnect(uHandlerId);
         cout << "client have been disconnected;" << endl;
     }
 }

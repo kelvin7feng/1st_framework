@@ -2,6 +2,20 @@ UserInfoLogic = class()
 
 function UserInfoLogic:ctor()
 	
+	G_EventManager:Register(EVENT_ID.SYSTEM.LOGOUT, self.Logout, self);
+end
+
+-- 玩家登出
+function UserInfoLogic:Logout()
+	local nHandlerId = G_NetManager:GetCurrentHandlerId();
+	if not IsNumber(nHandlerId) then
+		return 0;
+	end
+
+	G_NetManager:OnUserDisconnect(nHandlerId);
+	G_UserManager:ResetCurrentUserObject();
+
+	return ERROR_CODE.SYSTEM.OK;
 end
 
 -- 更新存款

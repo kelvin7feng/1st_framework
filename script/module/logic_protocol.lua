@@ -6,12 +6,16 @@ function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 		return OnClientEnterGame(nHandlerId, nEventId, nSequenceId, tbParam)
 	end
 
+	if nEventId == EVENT_ID.GATEWAY_EVENT.USER_DISCONNECT then
+		G_EventManager:DispatcherEvent(nEventId, tbParam);
+		return 0;
+	end
+
 	local nUserId = G_NetManager:GetUserId(nHandlerId);
 	if not nUserId then
 		return false;
 	end
 
-	G_UserManager:SetCurrentUserObject(nUserId);
 	local tbRet = {G_EventManager:DispatcherEvent(nEventId, tbParam)};
 	local nErrorCode = table.remove(tbRet,1);
 	if nErrorCode ~= ERROR_CODE.SYSTEM.ASYN_EVENT then
@@ -37,10 +41,8 @@ end
 function OnClientEnterGame(nHandlerId, nEventId, nSequenceId, tbParam)
 	local nUserId = tbParam[1];
 
-	local bExist = G_NetManager:ExistOldHanlder(nUserId);
-	if bExist then
-		G_NetManager:ReleaseHandler(nUserId);
-	end
+	-- 更新句柄和玩家Id
+	G_NetManager:UpdateHandlerIdAndUserId(nUserId, nHandlerId);
 
 	local nErrorCode = G_UserManager:CheckUserDataStatus(nHandlerId, nUserId);
 	if nErrorCode == ERROR_CODE.SYSTEM.USER_DATA_NIL then

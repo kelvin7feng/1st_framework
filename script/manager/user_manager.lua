@@ -12,7 +12,7 @@ end
 function UserManager:Commit()
 
 	local objUser = self:GetCurrentUserObject()
-	if objUser:IsDirty() then
+	if objUser and objUser:IsDirty() then
 		LOG_DEBUG("user data is dirty, commit change")
 		local nUserId = objUser:GetUserId()
 		self:SynchronizeToDB(nUserId)
@@ -40,6 +40,14 @@ end
 -- 注册成功事件
 function UserManager:OnRegister(tbParam)
 	LOG_DEBUG("User OnRegister Event...")
+end
+
+-- 释放玩家数据对象
+function UserManager:ReleaseUserObject(nUserId)
+	if self.m_tbUserDataPool[tostring(nUserId)] then
+		self.m_tbUserDataPool[tostring(nUserId)] = nil;
+		LOG_DEBUG("UserManager:ReleaseUserObject ...." .. nUserId)
+	end 
 end
 
 -- 缓存玩家数据对象
@@ -247,10 +255,6 @@ function UserManager:CheckUserDataStatus(nHandlerId, nUserId)
 		LOG_ERROR("Login Param of UserId is Error ");
 		return nErrorCode;
 	end
-
-	-- 映射玩家Id和Handler
-	G_NetManager:SetHandlerId(nUserId, nHandlerId);
-	G_NetManager:SetUserId(nHandlerId, nUserId);
 
 	-- 如果没有缓存，则需要从数据库里面读取出来，在数据回来后再处理
 	local objUser = self:GetUserObject(nUserId);

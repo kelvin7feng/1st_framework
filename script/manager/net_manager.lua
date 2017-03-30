@@ -5,6 +5,49 @@ function NetManager:ctor()
 	self.m_tbHanderIdUserMap = {};
 	self.m_tbRequestSquence = {};
 	self.m_nCurrentHandlerId = nil;
+
+	G_EventManager:Register(EVENT_ID.GATEWAY_EVENT.USER_DISCONNECT, self.OnUserDisconnect, self);
+end
+
+function NetManager:UpdateHandlerIdAndUserId(nUserId, nHandlerId)
+
+	local nTempHandlerId = nil;
+	local bExist = G_NetManager:ExistOldHanlder(nUserId);
+	if bExist then
+		nTempHandlerId = G_NetManager:GetHandlerId(nUserId);
+		G_NetManager:ReleaseHandler(nUserId);
+	end
+
+	-- 映射玩家Id和Handler
+	if IsNumber(nTempHandlerId) and nTempHandlerId ~= nHandlerId then
+		-- 把旧的给清空先
+		self:ReleaseUserId(nTempHandlerId);
+	end
+
+	G_NetManager:SetHandlerId(nUserId, nHandlerId);
+	G_NetManager:SetUserId(nHandlerId, nUserId);
+
+	G_NetManager:SetCurrentHandlerId(nHandlerId);
+	G_UserManager:SetCurrentUserObject(nUserId);
+end
+
+function NetManager:OnUserDisconnect(nHandlerId)
+
+	if not IsNumber(nHandlerId) then
+		LOG_ERROR("NetManager:OnUserDisconnect nHandlerId is nil");
+		return 0;
+	end
+
+	local nUserId = self:GetUserId(nHandlerId);
+	if not IsNumber(nUserId) then
+		LOG_ERROR("NetManager:OnUserDisconnect nUserId is nil");
+		return 0;
+	end
+
+	self:ReleaseUserId(nHandlerId);
+	self:ReleaseHandler(nUserId);
+	G_UserManager:ReleaseUserObject(nUserId);
+	return 0;
 end
 
 function NetManager:PushRequestToSquence(nHandlerId, nSequenceId, tbParam)
@@ -17,6 +60,11 @@ function NetManager:PushRequestToSquence(nHandlerId, nSequenceId, tbParam)
 end
 
 function NetManager:PopRequestFromSquence(nHandlerId)
+
+	if not nHandlerId then
+		__TRACKBACK__("PopRequestFromSquence nHandlerId is nil")
+		return nil;
+	end
 
 	local tbRequest = table.remove(self.m_tbRequestSquence[tostring(nHandlerId)], 1);
 	if table.maxn(self.m_tbRequestSquence[tostring(nHandlerId)]) == 0 then
@@ -97,8 +145,7 @@ end
 function NetManager:ReleaseHandler(nUserId)
 	local nHandlerId = self:GetHandlerId(nUserId);
 	if nHandlerId then
-		-- to do: 通知网关移除，或者在网关处添加心跳包功能
-		self:SetUserId(nHandlerId, nil);
+		self.m_tbUserHanderIdMap[tostring(nUserId)] = nil;	
 	end
 end
 
@@ -112,15 +159,19 @@ function NetManager:ExistOldHanlder(nUserId)
 	return bExist;
 end
 
+function NetManager:ReleaseUserId(nHandlerId)
+	self:SetUserId(nHandlerId)
+end
+
 function NetManager:GetHandlerId(nUserId)
 	return self.m_tbUserHanderIdMap[tostring(nUserId)];
 end
 
 function NetManager:SetUserId(nHandlerId, nUserId)
 	local bIsOk = false;
-	if nHandlerId > 0 then
+	if nHandlerId and nHandlerId > 0 then
 		bIsOk = true;
-		self.m_tbHanderIdUserMap[tostring(nHandlerId)] = nUserId;	
+		self.m_tbHanderIdUserMap[tostring(nHandlerId)] = nUserId;
 	end	
 	
 	return bIsOk;

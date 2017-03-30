@@ -19,6 +19,7 @@
 #include <uv.h>
 
 #include "tcp_client.hpp"
+#include "gateway_client.hpp"
 #include "tcp_base_server.hpp"
 
 #include "google.pb.h"
@@ -59,6 +60,19 @@ public:
     //转发到客户端的回调
     void OnTransferToClient(uv_write_t *req, int status);
     
+    //通知逻辑服游戏事件
+    void NotifyLogicServer(unsigned int uServerId, unsigned int uEventType, const char* pBuffer, unsigned int uMsgSize);
+    
+    //通知游戏逻辑服玩家断线
+    void NotifyUserSocketDisconnect(unsigned int uHandlerId);
+    
+private:
+    
+    GatewayClient* GetGatewayClient(unsigned short uServerId);
 };
+
+extern GatewayClient* g_pLoginLogicClient;
+extern GatewayClient* g_pGameLogicClient;
+extern GatewayClient* g_pRoomLogicClient;
 
 #endif /* gateway_server_hpp */
