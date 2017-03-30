@@ -48,6 +48,9 @@ end
 -- 登录函数
 function OnClientLogin(nHandlerId, nUserId)
 
+	-- 更新句柄和玩家Id
+	G_NetManager:UpdateHandlerIdAndUserId(nUserId, nHandlerId);
+	
 	local nErrorCode = G_UserManager:CheckUserDataStatus(nHandlerId, nUserId);
 	if nErrorCode == ERROR_CODE.SYSTEM.USER_DATA_NIL then
 		LOG_DEBUG("OnClientLogin User Info does not cache...")
