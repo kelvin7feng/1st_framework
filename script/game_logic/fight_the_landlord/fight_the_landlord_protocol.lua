@@ -14,7 +14,7 @@ function FightTheLandlordProtocol:ClientEnterRoom()
 
 	local nRetCode = G_FightTheLandlordLogic:CheckEnterRoom();
 	if nRetCode == ERROR_CODE.SYSTEM.OK then
-		nErrorCode = ERROR_CODE.NET.LOGIN_TO_ROOM_SERVER;
+		nErrorCode = ERROR_CODE.NET.LOGIC_TO_ROOM_SERVER;
 	else
 		nErrorCode = nRetCode;
 	end

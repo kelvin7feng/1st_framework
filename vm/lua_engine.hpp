@@ -33,6 +33,7 @@ public:
     void Close();
     lua_State* GetLuaState();
     int InitState(int server_type);
+    int UpdateTimer(double elapse);
     int CallLua(unsigned int uHandlerId, unsigned int uEventType, unsigned short uSequenceId, const char* pParam);
     int CallCenterRequestLua(unsigned int uHandlerId, unsigned int uEventType, unsigned short uSequenceId, const char* pParam);
     int RedisCallLua(const unsigned int uSquenceId, const unsigned int uUserId, const unsigned int uEventType, const std::string& request);

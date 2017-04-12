@@ -2,8 +2,8 @@
 function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 
 	if nEventId == EVENT_ID.CLIENT_LOGIN.ENTER_GAME then
-		LOG_DEBUG("OnClientEnterGame..........1")
-		return OnClientEnterGame(nHandlerId, nEventId, nSequenceId, tbParam)
+		LOG_DEBUG("OnClientEnterHall..........1")
+		return OnClientEnterHall(nHandlerId, nEventId, nSequenceId, tbParam)
 	end
 
 	if nEventId == EVENT_ID.GATEWAY_EVENT.USER_DISCONNECT then
@@ -27,7 +27,7 @@ function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 			nEventId = ASYNC_EVENT_MAP_TO_SOURCE_EVENT[nEventId];
 		end
 
-		if nErrorCode == ERROR_CODE.NET.LOGIN_TO_ROOM_SERVER then
+		if nErrorCode == ERROR_CODE.NET.LOGIC_TO_ROOM_SERVER then
 			G_NetManager:SendToRoomServerFromLogic(nSequenceId, nEventId, nErrorCode, nHandlerId, tbRet);
 		else
 			G_NetManager:SendToGateway(nSequenceId, nEventId, nErrorCode, nHandlerId, tbRet);
@@ -40,7 +40,7 @@ function ClientRequest(nHandlerId, nEventId, nSequenceId, tbParam)
 end
 
 -- 进入游戏，获取玩家信息
-function OnClientEnterGame(nHandlerId, nEventId, nSequenceId, tbParam)
+function OnClientEnterHall(nHandlerId, nEventId, nSequenceId, tbParam)
 	local nUserId = tbParam[1];
 
 	-- 更新句柄和玩家Id
@@ -48,22 +48,24 @@ function OnClientEnterGame(nHandlerId, nEventId, nSequenceId, tbParam)
 
 	local nErrorCode = G_UserManager:CheckUserDataStatus(nHandlerId, nUserId);
 	if nErrorCode == ERROR_CODE.SYSTEM.USER_DATA_NIL then
-		LOG_DEBUG("OnClientEnterGame User Info does not cache...")
+		LOG_DEBUG("OnClientEnterHall User Info does not cache...")
 		return G_GameDataRedis:GetValue(nUserId, EVENT_ID.GET_ASYN_DATA.LOGIC_GET_GAME_DATA, nUserId);
 	elseif nErrorCode == ERROR_CODE.SYSTEM.PARAMTER_ERROR then
-		LOG_DEBUG("OnClientEnterGame paramter error...")
+		LOG_DEBUG("OnClientEnterHall paramter error...")
 	elseif IsOkCode(nErrorCode) then
-		LOG_DEBUG("OnClientEnterGame ok...")
+		LOG_DEBUG("OnClientEnterHall ok...")
 		local nErrorCode,objUser = G_UserManager:EnterGame(nUserId);
 		local tbRetInfo = objUser:GetGameData();
-		OnResponeClientEnterGame(nUserId, nErrorCode, {tbRetInfo});
+		OnResponeClientEnterHall(nUserId, nErrorCode, {tbRetInfo});
 	end
 end
 
 -- 响应客户端登录请求
-function OnResponeClientEnterGame(nUserId, nErrorCode, tbRetInfo)
+function OnResponeClientEnterHall(nUserId, nErrorCode, tbRetInfo)
 	local nHandlerId = G_NetManager:GetHandlerId(nUserId);
 	local nSequenceId = G_NetManager:GetSquenceIdFromSquence(nHandlerId);
+
+	table.insert(tbRetInfo,G_ConfigManager:GetGameList())
 	G_NetManager:SendToGateway(nSequenceId, EVENT_ID.CLIENT_LOGIN.ENTER_GAME, nErrorCode, nHandlerId, tbRetInfo);
 end
 
@@ -100,7 +102,7 @@ function OnRedisRespone(nAsyncSquenceId, nUserId, nEventId, strRepsonseJson)
 	if nEventId == EVENT_ID.GLOBAL_CONFIG.GET_USER_GLOBAL_ID then
 		OnResponseGlobalConfigEvent(nEventId, strRepsonseJson);
 	elseif nEventId == EVENT_ID.GET_ASYN_DATA.LOGIC_GET_GAME_DATA then
-		OnResponseEnterGameEvent(nUserId, nEventId, strRepsonseJson);
+		OnResponseEnterHallEvent(nUserId, nEventId, strRepsonseJson);
 	else
 		if IsString(strRepsonseJson) and string.len(strRepsonseJson) > 0 then
 			local tbRetData = strRepsonseJson;
@@ -133,16 +135,16 @@ function OnRedisMulDataRespone(nAsyncSquenceId, nUserId, nEventId, tbMulData)
 end
 
 -- 响应进入游戏事件
-function OnResponseEnterGameEvent(nUserId, nEventId, strRepsonseJson)
+function OnResponseEnterHallEvent(nUserId, nEventId, strRepsonseJson)
 	if IsString(strRepsonseJson) and string.len(strRepsonseJson) > 0 then
 		local tbGameData = json.decode(strRepsonseJson)
 		G_UserManager:CacheUserObject(tbGameData)
 		G_UserManager:SetCurrentUserObject(nUserId);
 		local nErrorCode, objUser = G_UserManager:EnterGame(nUserId);
 		local tbRetInfo = objUser:GetGameData();
-		OnResponeClientEnterGame(nUserId, nErrorCode, {tbRetInfo})
+		OnResponeClientEnterHall(nUserId, nErrorCode, {tbRetInfo})
 	else
 		LOG_DEBUG("User Is Nil");
-		OnResponeClientEnterGame(nUserId, ERROR_CODE.SYSTEM.USER_DATA_NIL, "")
+		OnResponeClientEnterHall(nUserId, ERROR_CODE.SYSTEM.USER_DATA_NIL, "")
 	end
 end

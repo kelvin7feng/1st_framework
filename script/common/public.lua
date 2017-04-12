@@ -66,3 +66,16 @@ function CountTab(tb)
 
     return nCount;
 end
+
+--表复制
+function CopyTab(st)
+    local tab = {}
+    for k, v in pairs(st or {}) do
+        if type(v) ~= "table" then
+            tab[k] = v
+        else
+            tab[k] = CopyTab(v)
+        end
+    end
+    return tab
+end

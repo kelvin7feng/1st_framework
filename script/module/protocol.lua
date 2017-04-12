@@ -107,3 +107,8 @@ function OnResponseGlobalConfigEvent(nEventId, strRepsonseJson)
 		G_GlobalConfigManager:SetUserGlobalId(strRepsonseJson, bOnlyCache);
 	end
 end
+
+-- 定时器触发
+function UpdateTimer(elapse)
+	G_Timer:update(elapse);
+end

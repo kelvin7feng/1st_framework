@@ -6,3 +6,6 @@ require("math")
 require("public")
 require("table")
 require("type")
+
+local timer = require("timer")
+G_Timer = timer:new();

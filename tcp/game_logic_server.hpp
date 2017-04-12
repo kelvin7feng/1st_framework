@@ -69,12 +69,16 @@ public:
     //发送函数的回调
     void OnSendData(uv_write_t *pReq, int nStatus);
     
+    void UpdateLuaTimer();
+    
     uv_stream_t* m_pGatewayClient;
     
     uv_write_t m_write_req;
     
     uv_timer_t m_db_timer_req;
-
+    
+    uv_timer_t m_lua_timer;
+    
     bool _ProcessNetData(const char* pData, size_t uSize, unsigned int uServerFrom);
     
 private:
@@ -82,6 +86,8 @@ private:
     LuaEngine lua_engine;
     
     int totol_request;
+    
+    double m_lua_timer_span;
     
 };
 

@@ -22,9 +22,19 @@ static void OnUVTimer(uv_timer_t *handle) {
     g_pDBClientMgr->Activate();
 }
 
+static void OnLuaTimerUpdate(uv_timer_t *handle) {
+    GameLogicServer *server = GameLogicServer::GetInstance();
+    server->UpdateLuaTimer();
+}
+
+void GameLogicServer::UpdateLuaTimer()
+{
+    lua_engine.UpdateTimer(m_lua_timer_span/1000);
+}
+
 GameLogicServer::GameLogicServer()
 {
-    
+    m_lua_timer_span = 100;
 }
 
 GameLogicServer::~GameLogicServer()
@@ -85,6 +95,10 @@ int GameLogicServer::Init(uv_loop_t* loop)
     //数据管理定时器
     uv_timer_init(loop, &m_db_timer_req);
     uv_timer_start(&m_db_timer_req, OnUVTimer, 0, 100);
+    
+    //延迟一秒执行
+    uv_timer_init(loop, &m_lua_timer);
+    uv_timer_start(&m_lua_timer, OnLuaTimerUpdate, 1000, m_lua_timer_span);
     
     int nLogicServerType = json_doc["logic_server_type"].GetInt();
     lua_engine.InitState(nLogicServerType);

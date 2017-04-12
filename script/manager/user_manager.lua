@@ -55,6 +55,7 @@ function UserManager:CacheUserObject(tbGameData)
 	local nUserId = tbGameData[GAME_DATA_TABLE_NAME.BASE_INFO][GAME_DATA_FIELD_NAME.BaseInfo.USER_ID];
 	local objUser = UserData:new(tbGameData);
 	self.m_tbUserDataPool[tostring(nUserId)] = objUser;
+	return objUser;
 end
 
 -- 检查玩家数据对象是否被缓存
