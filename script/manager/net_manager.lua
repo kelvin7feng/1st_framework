@@ -226,6 +226,16 @@ function NetManager:SendToGatewayFromRoom(nSequenceId, nEventType, nErrorCode, n
 	self:SendToServer(SERVER_TYPE_DEF.GATEWAY, nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam)
 end
 
+-- 房间服转发到逻辑服
+function NetManager:SendToLogicServerFromRoom(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam)
+	
+	if strRetParam and not IsString(strRetParam) then
+		strRetParam = json.encode(strRetParam);
+	end
+
+	self:SendToServer(SERVER_TYPE_DEF.LOGIC, 0, nEventType, ERROR_CODE.SYSTEM.OK, 0, strRetParam);
+end
+
 -- 登录服转发到逻辑服
 function NetManager:SendToLogicServerFromLogin(nSequenceId, nEventType, nErrorCode, nHandlerId, strRetParam)
 	
@@ -233,7 +243,7 @@ function NetManager:SendToLogicServerFromLogin(nSequenceId, nEventType, nErrorCo
 		strRetParam = json.encode(strRetParam);
 	end
 
-	self:SendToServer(SERVER_TYPE_DEF.LOGIC, 0, EVENT_ID.LOGIN_SERVER.UPDATE_GLOBAL_USER_ID, ERROR_CODE.SYSTEM.OK, 0, strRetParam);
+	self:SendToServer(SERVER_TYPE_DEF.LOGIC, 0, nEventType, ERROR_CODE.SYSTEM.OK, 0, strRetParam);
 end
 
 -- 中心服发送到逻辑服

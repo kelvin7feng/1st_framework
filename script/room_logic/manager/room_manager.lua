@@ -177,4 +177,9 @@ function RoomManager:SendDataToUserOfTable(nTableId, nEventType, tbData)
 	end
 end
 
+-- 把数据发送给逻辑服
+function RoomManager:SendDataToLogic(nEventType, tbData)
+	G_NetManager:SendToLogicServerFromRoom(0, nEventType, 0, 0, tbData)
+end
+
 G_RoomManager = RoomManager:new()

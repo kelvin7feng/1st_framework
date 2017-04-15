@@ -7,6 +7,7 @@ function TableClass:ctor(nId)
 	self.m_bIsFull = false;
 	self.m_nTableId = nId;
 	self.m_tbSeatUser = {};
+	self.m_tbSeatMap = {};
 	self.m_tbTableConfig = nil;
 end
 

@@ -12,5 +12,7 @@ require("fight_the_landlord.fight_the_landlord_protocol")
 require("friend.friend_logic")
 require("friend.friend_protocol")
 
+require("service.room_service")
+
 require("manager.game_manager")
 require("manager.game_protocol")
